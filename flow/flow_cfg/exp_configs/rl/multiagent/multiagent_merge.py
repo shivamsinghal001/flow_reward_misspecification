@@ -67,20 +67,20 @@ inflow.add(
 	veh_type="human",
 	edge="inflow_highway",
 	vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-	departLane="free",
-	departSpeed=10)
+	depart_lane="free",
+	depart_speed=10)
 inflow.add(
 	veh_type="rl",
 	edge="inflow_highway",
 	vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-	departLane="free",
-	departSpeed=10)
+	depart_lane="free",
+	depart_speed=10)
 inflow.add(
 	veh_type="human",
 	edge="inflow_merge",
 	vehs_per_hour=400,
-	departLane="free",
-	departSpeed=7.5)
+	depart_lane="free",
+	depart_speed=7.5)
 
 flow_params = dict(
 	# name of the experiment

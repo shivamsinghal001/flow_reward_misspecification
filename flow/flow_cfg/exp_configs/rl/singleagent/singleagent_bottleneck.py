@@ -76,14 +76,14 @@ inflow.add(
     veh_type="human",
     edge="1",
     vehs_per_hour=flow_rate * (1 - AV_FRAC),
-    departLane="random",
-    departSpeed=10)
+    depart_lane="random",
+    depart_speed=10)
 inflow.add(
     veh_type="followerstopper",
     edge="1",
     vehs_per_hour=flow_rate * AV_FRAC,
-    departLane="random",
-    departSpeed=10)
+    depart_lane="random",
+    depart_speed=10)
 
 traffic_lights = TrafficLightParams()
 if not DISABLE_TB:
