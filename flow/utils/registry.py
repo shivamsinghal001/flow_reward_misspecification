@@ -16,7 +16,7 @@ from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
 
 
-def make_create_env(params, reward_specification=None, version=0, render=None):
+def make_create_env(params, reward_specification=None, reward_fun="true", version=0, render=None):
     """Create a parametrized flow environment compatible with OpenAI gym.
 
     This environment creation method allows for the specification of several
@@ -53,6 +53,8 @@ def make_create_env(params, reward_specification=None, version=0, render=None):
     
     reward_specification : dict, optional
         if not None, wrap the environment with a proxy reward given by reward_specification
+    reward_fun : str, optional
+        specifies whether the proxy reward function or true reward should be used
     version : int, optional
         environment version number
     render : bool, optional
@@ -117,42 +119,30 @@ def make_create_env(params, reward_specification=None, version=0, render=None):
         single_agent_envs = [env for env in dir(flow.envs)
                              if not env.startswith('__')]
 
-        if reward_specification is not None:
-            register(
-                id=env_name,
-                entry_point="flow.envs.reward_wrapper:ProxyRewardEnv",
-                kwargs={
-                    "module": params["env_name"].__module__,
-                    "name": params["env_name"].__name__, 
-                    "env_params": env_params,
-                    "sim_params": sim_params,
-                    "network": network,
-                    "simulator": params['simulator'],
-                    "reward_specification": reward_specification,
-                })
-        else:
-            if isinstance(params["env_name"], str):
-                if params['env_name'] in single_agent_envs:
-                    env_loc = 'flow.envs'
-                else:
-                    env_loc = 'flow.envs.multiagent'
-                entry_point = env_loc + ':{}'.format(params["env_name"])
-            else:
-                entry_point = params["env_name"].__module__ + ':' + params["env_name"].__name__
-            
-            # register the environment with OpenAI gym
-            register(
-                id=env_name,
-                entry_point=entry_point,
-                kwargs={
-                    "env_params": env_params,
-                    "sim_params": sim_params,
-                    "network": network,
-                    "simulator": params['simulator']
-                })
         
-        return gym.envs.make(env_name)
-
+        if isinstance(params["env_name"], str):
+            if params['env_name'] in single_agent_envs:
+                env_loc = 'flow.envs'
+            else:
+                env_loc = 'flow.envs.multiagent'
+            entry_point = env_loc + ':{}'.format(params["env_name"])
+        else:
+            entry_point = params["env_name"].__module__ + ':' + params["env_name"].__name__
+        
+        # register the environment with OpenAI gym
+        register(
+            id=env_name,
+            entry_point=entry_point,
+            kwargs={
+                "env_params": env_params,
+                "sim_params": sim_params,
+                "network": network,
+                "simulator": params['simulator']
+            })
+        
+        env = gym.envs.make(env_name)
+        return ProxyRewardEnv(env, reward_specification=reward_specification, reward_fun=reward_fun)
+        
     return create_env, env_name
 
 
