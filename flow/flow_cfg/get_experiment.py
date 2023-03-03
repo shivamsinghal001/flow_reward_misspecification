@@ -1,4 +1,4 @@
-from exp_configs.rl import singleagent, multiagent
+from .exp_configs.rl import singleagent, multiagent
 
 def get_exp(exp_tag):
     if exp_tag == "singleagent_traffic_light_grid":
