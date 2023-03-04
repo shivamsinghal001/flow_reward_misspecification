@@ -19,53 +19,106 @@ class ProxyRewardEnv(object):
         cls = getattr(importlib.import_module(module), mod_name)
         self.env = cls(env_params, sim_params, network, simulator)        
         
-        self.reward_fun = reward_fun
+        if reward_specification is not None:
+            self.use_new_spec = True
+            self.reward_fun = reward_fun
 
-        if self.reward_fun == "observed":
-            self.reward_specification = []
-            self.gaussian_noise = 0
-            self.disc_action_noise = 0
-            for name, eta in reward_specification:
+            self.true_reward_specification = []
+            self.true_disc_action_noise = 0
+            self.true_gaussian_noise = 0
+
+            self.obs_reward_specification = []
+            self.obs_disc_action_noise = 0
+            self.obs_gaussian_noise = 0
+
+            if reward_specification["true"] is not None:
+                self.use_original_true = False
+                for name, eta in reward_specification["true"]:
+                    if name == 'action_noise':
+                        assert self.true_gaussian_noise == 0 and self.true_disc_action_noise == 0
+                        self.true_gaussian_noise = eta
+                    elif name == 'disc_action_noise':
+                        assert self.true_disc_action_noise == 0 and self.true_gaussian_noise == 0
+                        self.true_disc_action_noise = eta
+                    else:
+                        assert name in REWARD_REGISTRY 
+                        self.true_reward_specification.append((REWARD_REGISTRY[name], eta))
+            else:
+                self.use_original_true = True  
+                self.original_rew_func = getattr(self.env, "compute_reward")  
+
+            for name, eta in reward_specification["observed"]:
                 if name == 'action_noise':
-                    assert self.gaussian_noise == 0 and self.disc_action_noise == 0
-                    self.gaussian_noise = eta
+                    assert self.obs_gaussian_noise == 0 and self.obs_disc_action_noise == 0
+                    self.obs_gaussian_noise = eta
                 elif name == 'disc_action_noise':
-                    assert self.disc_action_noise == 0 and self.gaussian_noise == 0
-                    self.disc_action_noise = eta
+                    assert self.obs_disc_action_noise == 0 and self.obs_gaussian_noise == 0
+                    self.obs_disc_action_noise = eta
                 else:
                     assert name in REWARD_REGISTRY 
-                    self.reward_specification.append((REWARD_REGISTRY[name], eta))
+                    self.obs_reward_specification.append((REWARD_REGISTRY[name], eta))
+            
+            if self.reward_fun == "observed":
+                def proxy_reward(rl_actions, **kwargs):
+                    return self._proxy(self.obs_reward_specification, rl_actions, **kwargs)
+                setattr(self.env, "compute_reward", proxy_reward)
+            elif not self.use_original_true:
+                def proxy_reward(rl_actions, **kwargs):
+                    return self._proxy(self.true_reward_specification, rl_actions, **kwargs)             
+                setattr(self.env, "compute_reward", proxy_reward)
+        else:
+            self.use_new_spec = False
 
-            def proxy_reward(rl_actions, **kwargs):
-                vel = np.array(self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
-                if any(vel < -100) or kwargs["fail"]:
-                    return 0
-                rew = 0 
-                for fn, eta in self.reward_specification:
-                    rew += eta * fn(self.env, rl_actions)
-                return rew 
-
-            setattr(self.env, "compute_reward", proxy_reward)
-
+    def _proxy(self, reward_specification, rl_actions, **kwargs):
+        vel = np.array(self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
+        if any(vel < -100) or kwargs["fail"]:
+            return 0
+        rew = 0 
+        for fn, eta in reward_specification:
+            rew += eta * fn(self.env, rl_actions)
+        return rew 
+        
     def __getattr__(self, attr):
         return self.env.__getattribute__(attr)
 
     def step(self, rl_actions):
         next_observation, reward, done, infos = self.env.step(rl_actions)
-        infos["observed_reward"] = reward
+        if self.use_new_spec:
+            if self.reward_fun == "observed":
+                infos["observed_reward"] = reward
+                if not self.use_original_true:
+                    infos["true_reward"] = self._proxy(self.true_reward_specification, rl_actions)
+                else:
+                    infos["true_reward"] = self.original_rew_func(rl_actions)
+            else:
+                infos["observed_reward"] = self._proxy(self.obs_reward_specification, rl_actions)
+                infos["true_reward"] = reward
+        else:
+            infos["observed_reward"] = infos["true_reward"] = reward
         return next_observation, reward, done, infos
 
     def _apply_rl_actions(self, rl_actions):
-        if self.reward_fun == "observed":
-            if self.disc_action_noise != 0:
-                # round to the noise level
-                self.env._apply_rl_actions(
-                    np.round(rl_actions / self.disc_action_noise) * self.disc_action_noise
-                )
-            else:
-                self.env._apply_rl_actions(
-                    rl_actions + np.random.normal(scale=self.gaussian_noise, size=len(rl_actions))
-                )
+        if self.use_new_spec:
+            if self.reward_fun == "observed":
+                if self.obs_disc_action_noise != 0:
+                    # round to the noise level
+                    self.env._apply_rl_actions(
+                        np.round(rl_actions / self.obs_disc_action_noise) * self.obs_disc_action_noise
+                    )
+                else:
+                    self.env._apply_rl_actions(
+                        rl_actions + np.random.normal(scale=self.obs_gaussian_noise, size=len(rl_actions))
+                    )
+            elif not self.use_original_true:
+                if self.true_disc_action_noise != 0:
+                    # round to the noise level
+                    self.env._apply_rl_actions(
+                        np.round(rl_actions / self.true_disc_action_noise) * self.true_disc_action_noise
+                    )
+                else:
+                    self.env._apply_rl_actions(
+                        rl_actions + np.random.normal(scale=self.true_gaussian_noise, size=len(rl_actions))
+                    )
         else:
             self.env._apply_rl_actions(rl_actions)
 
