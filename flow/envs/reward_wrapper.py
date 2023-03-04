@@ -15,8 +15,10 @@ class ProxyRewardEnv(object):
     *args: environment args
     **kwargs: envrionment kwargs
     """
-    def __init__(self, env, reward_specification, reward_fun):
-        self.env = env
+    def __init__(self, module, mod_name, env_params, sim_params, network, simulator,  reward_specification, reward_fun):
+        cls = getattr(importlib.import_module(module), mod_name)
+        self.env = cls(env_params, sim_params, network, simulator)        
+        
         self.reward_fun = reward_fun
 
         if self.reward_fun == "observed":
