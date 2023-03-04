@@ -87,11 +87,11 @@ class ProxyRewardEnv(object):
             if self.reward_fun == "observed":
                 infos["observed_reward"] = reward
                 if not self.use_original_true:
-                    infos["true_reward"] = self._proxy(self.true_reward_specification, rl_actions)
+                    infos["true_reward"] = self._proxy(self.true_reward_specification, rl_actions, fail=infos["crash"])
                 else:
-                    infos["true_reward"] = self.original_rew_func(rl_actions)
+                    infos["true_reward"] = self.original_rew_func(rl_actions, fail=infos["crash"])
             else:
-                infos["observed_reward"] = self._proxy(self.obs_reward_specification, rl_actions)
+                infos["observed_reward"] = self._proxy(self.obs_reward_specification, rl_actions, fail=infos["crash"])
                 infos["true_reward"] = reward
         else:
             infos["observed_reward"] = infos["true_reward"] = reward
