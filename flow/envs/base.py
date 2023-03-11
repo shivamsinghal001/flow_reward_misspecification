@@ -194,6 +194,8 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.setup_initial_state()
 
         # use pyglet to render the simulation
+        print("IN INIT")
+        print(self.sim_params.render)
         if self.sim_params.render in ['gray', 'dgray', 'rgb', 'drgb']:
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
