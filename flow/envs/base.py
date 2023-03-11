@@ -435,6 +435,7 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # Now that we've passed the possibly fake init steps some rl libraries
         # do, we can feel free to actually render things
+        print(self.should_render)
         if self.should_render:
             self.sim_params.render = True
             # got to restart the simulation to make it actually display anything
