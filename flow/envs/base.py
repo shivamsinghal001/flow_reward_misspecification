@@ -375,8 +375,8 @@ class Env(gym.Env, metaclass=ABCMeta):
             self.k.update(reset=False)
 
             # update the colors of vehicles
-            if self.sim_params.render:
-                self.k.vehicle.update_vehicle_colors()
+#             if self.sim_params.render:
+#                 self.k.vehicle.update_vehicle_colors()
 
             # crash encodes whether the simulator experienced a collision
             crash = self.k.simulation.check_collision()
@@ -527,8 +527,8 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.k.update(reset=True)
 
         # update the colors of vehicles
-        if self.sim_params.render:
-            self.k.vehicle.update_vehicle_colors()
+#         if self.sim_params.render:
+#             self.k.vehicle.update_vehicle_colors()
 
         if self.simulator == 'traci':
             initial_ids = self.k.kernel_api.vehicle.getIDList()
