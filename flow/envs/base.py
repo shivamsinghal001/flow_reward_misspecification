@@ -196,7 +196,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         # use pyglet to render the simulation
         print("IN INIT")
         print(self.sim_params.render)
-        if self.sim_params.render in ['gray', 'dgray', 'rgb', 'drgb']:
+        if self.should_render in ['gray', 'dgray', 'rgb', 'drgb']:
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
             pxpm = self.sim_params.pxpm
@@ -213,7 +213,7 @@ class Env(gym.Env, metaclass=ABCMeta):
             # instantiate a pyglet renderer
             self.renderer = Renderer(
                 network,
-                self.sim_params.render,
+                self.should_render,
                 save_render,
                 sight_radius=sight_radius,
                 pxpm=pxpm,
@@ -221,7 +221,7 @@ class Env(gym.Env, metaclass=ABCMeta):
 
             # render a frame
             self.render(reset=True)
-        elif self.sim_params.render in [True, False]:
+        elif self.should_render in [True, False]:
             # default to sumo-gui (if True) or sumo (if False)
             if (self.sim_params.render is True) and self.sim_params.save_render:
                 self.path = os.path.expanduser('~')+'/flow_rendering/' + self.network.name
