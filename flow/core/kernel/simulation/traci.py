@@ -181,8 +181,7 @@ class TraCISimulation(KernelSimulation):
                 # port number the sumo instance will be run on
                 port = sim_params.port
 
-                sumo_binary = "sumo-gui" if sim_params.render is True \
-                    else "sumo"
+                sumo_binary = "sumo"
 
                 # command used to start sumo
                 sumo_call = [
