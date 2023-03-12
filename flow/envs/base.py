@@ -3,6 +3,7 @@
 from xvfbwrapper import Xvfb
 vdisplay = Xvfb()
 vdisplay.start()
+print("STARTED")
 
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
