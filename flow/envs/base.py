@@ -197,8 +197,6 @@ class Env(gym.Env, metaclass=ABCMeta):
         # use pyglet to render the simulation
         if self.should_render in ['gray', 'dgray', 'rgb', 'drgb']:
             print("HERE IN INIT")
-            vdisplay = Xvfb()
-            vdisplay.start()
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
             pxpm = self.sim_params.pxpm
