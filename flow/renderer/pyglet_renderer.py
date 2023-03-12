@@ -1,6 +1,5 @@
 """Contains the pyglet renderer class."""
 
-from xvfbwrapper import Xvfb
 import pyglet
 import matplotlib.cm as cm
 import matplotlib.colors as colors
@@ -107,7 +106,6 @@ class PygletRenderer(object):
             Specify opacity of the alpha channel.
             1.0 is fully opaque; 0.0 is fully transparent.
         """
-        print(mode)
         print('IN THE RENDER')
         self.mode = mode
         if self.mode not in [True, False, "rgb", "drgb", "gray", "dgray"]:
@@ -124,8 +122,6 @@ class PygletRenderer(object):
         self.show_radius = show_radius
         self.alpha = alpha
         
-        vdisplay = Xvfb(tempdir=self.path)
-        vdisplay.start()
         pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
         pyglet.gl.glBlendFunc(
             pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
