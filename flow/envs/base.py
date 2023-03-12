@@ -1,5 +1,9 @@
 """Base environment class. This is the parent of all other environments."""
 
+from xvfbwrapper import Xvfb
+vdisplay = Xvfb()
+vdisplay.start()
+
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 import os
