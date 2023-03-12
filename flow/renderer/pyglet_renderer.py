@@ -1,6 +1,8 @@
 """Contains the pyglet renderer class."""
 
 import pyglet
+pyglet.options["headless"] = True
+
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 import numpy as np
