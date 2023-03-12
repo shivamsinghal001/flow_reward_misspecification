@@ -1,10 +1,6 @@
 """Base environment class. This is the parent of all other environments."""
 
 from xvfbwrapper import Xvfb
-vdisplay = Xvfb()
-vdisplay.start()
-print("STARTED")
-
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 import os
@@ -199,9 +195,9 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.setup_initial_state()
 
         # use pyglet to render the simulation
-        print("IN INIT")
-        print(self.sim_params.render)
         if self.should_render in ['gray', 'dgray', 'rgb', 'drgb']:
+            vdisplay = Xvfb()
+            vdisplay.start()
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
             pxpm = self.sim_params.pxpm
