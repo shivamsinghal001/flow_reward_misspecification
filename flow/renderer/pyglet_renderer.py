@@ -122,7 +122,7 @@ class PygletRenderer(object):
         self.show_radius = show_radius
         self.alpha = alpha
         
-        vdisplay = Xvfb()
+        vdisplay = Xvfb(tempdir=self.path)
         vdisplay.start()
         pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
         pyglet.gl.glBlendFunc(
