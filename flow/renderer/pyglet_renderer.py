@@ -106,7 +106,6 @@ class PygletRenderer(object):
             Specify opacity of the alpha channel.
             1.0 is fully opaque; 0.0 is fully transparent.
         """
-        print('IN THE RENDER')
         self.mode = mode
         if self.mode not in [True, False, "rgb", "drgb", "gray", "dgray"]:
             raise ValueError("Mode %s is not supported!" % self.mode)
