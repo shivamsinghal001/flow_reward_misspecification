@@ -13,8 +13,6 @@ import copy
 import warnings
 HOME = expanduser("~")
 
-os.environ["PYOPENGL_PLATFORM"] = "osmesa"
-
 class PygletRenderer(object):
     """Pyglet Renderer class.
 
