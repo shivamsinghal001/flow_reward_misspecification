@@ -1,6 +1,5 @@
 """Base environment class. This is the parent of all other environments."""
 
-from xvfbwrapper import Xvfb
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 import os
@@ -196,7 +195,6 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # use pyglet to render the simulation
         if self.should_render in ['gray', 'dgray', 'rgb', 'drgb']:
-            print("HERE IN INIT")
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
             pxpm = self.sim_params.pxpm
