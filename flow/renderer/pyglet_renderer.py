@@ -1,9 +1,6 @@
 """Contains the pyglet renderer class."""
 
 from xvfbwrapper import Xvfb
-vdisplay = Xvfb()
-vdisplay.start()
-
 import pyglet
 import matplotlib.cm as cm
 import matplotlib.colors as colors
@@ -124,6 +121,9 @@ class PygletRenderer(object):
         self.pxpm = pxpm  # Pixel per meter
         self.show_radius = show_radius
         self.alpha = alpha
+        
+        vdisplay = Xvfb()
+        vdisplay.start()
         pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
         pyglet.gl.glBlendFunc(
             pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
