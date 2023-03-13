@@ -57,14 +57,15 @@ vehicles.add(
         speed_mode="obey_safe_speed",
     ),
     num_vehicles=0,
-    color='green')
+    color='blue')
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),
-    num_vehicles=0)
+    num_vehicles=0,
+    color="orange")
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
