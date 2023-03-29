@@ -395,7 +395,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.state = np.asarray(states).T
 
         # collect observation new state associated with action
-        next_observation = np.copy(states)
+        next_observation = np.copy(states).astype(np.float32)
 
         # test if the environment should terminate due to a collision or the
         # time horizon being met
@@ -551,7 +551,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.state = np.asarray(states).T
 
         # observation associated with the reset (no warm-up steps)
-        observation = np.copy(states)
+        observation = np.copy(states).astype(np.float32)
 
         # perform (optional) warm-up steps before training
         for _ in range(self.env_params.warmup_steps):
