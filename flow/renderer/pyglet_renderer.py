@@ -71,7 +71,7 @@ class PygletRenderer(object):
 
     def __init__(self, network, mode,
                  save_render=False,
-                 path=HOME+"/flow_rendering",
+                 path=None,
                  sight_radius=50,
                  show_radius=False,
                  pxpm=2,
@@ -110,6 +110,9 @@ class PygletRenderer(object):
         if self.mode not in [True, False, "rgb", "drgb", "gray", "dgray"]:
             raise ValueError("Mode %s is not supported!" % self.mode)
         self.save_render = save_render
+        if path is None:
+            path = HOME
+        path = path + "/flow_rendering"
         self.path = path + '/' + time.strftime("%Y-%m-%d-%H%M%S")
         if self.save_render:
             if not os.path.exists(path):

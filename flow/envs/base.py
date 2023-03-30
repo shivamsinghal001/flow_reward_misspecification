@@ -105,7 +105,8 @@ class Env(gym.Env, metaclass=ABCMeta):
                  sim_params,
                  network=None,
                  simulator='traci',
-                 scenario=None):
+                 scenario=None,
+                 path=None):
         """Initialize the environment class.
 
         Parameters
@@ -215,7 +216,8 @@ class Env(gym.Env, metaclass=ABCMeta):
                 save_render,
                 sight_radius=sight_radius,
                 pxpm=pxpm,
-                show_radius=show_radius)
+                show_radius=show_radius,
+                path=path)
 
             # render a frame
             self.render(reset=True)
