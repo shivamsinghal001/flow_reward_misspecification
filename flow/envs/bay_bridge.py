@@ -61,8 +61,8 @@ class BayBridgeEnv(Env):
         vehicles collide into one another.
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci'):
-        super().__init__(env_params, sim_params, network, simulator)
+    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+        super().__init__(env_params, sim_params, network, simulator, path=path)
         self.edge_dict = defaultdict(list)
         self.cars_waiting_for_toll = dict()
         self.cars_before_ramp = dict()

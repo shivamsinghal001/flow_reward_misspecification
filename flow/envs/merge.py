@@ -70,7 +70,7 @@ class MergePOEnv(Env):
 		vehicles collide into one another.
 	"""
 
-	def __init__(self, env_params, sim_params, network, simulator='traci'):
+	def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
 		for p in ADDITIONAL_ENV_PARAMS.keys():
 			if p not in env_params.additional_params:
 				raise KeyError(
@@ -94,7 +94,7 @@ class MergePOEnv(Env):
 		self.leader = []
 		self.follower = []
 
-		super().__init__(env_params, sim_params, network, simulator)
+		super().__init__(env_params, sim_params, network, simulator, path=path)
 
 	@property
 	def action_space(self):
