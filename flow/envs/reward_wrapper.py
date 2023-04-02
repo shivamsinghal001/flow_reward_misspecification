@@ -13,14 +13,19 @@ class ProxyRewardEnv(gym.Wrapper):
     env: the Flow environment object that will be wrapped with a proxy
     reward_specification: a dict of reward_pairs with str keys corresponding to reward type and float values corresponding to the weight of that reward. 
                             The proxy reward is a linear combination of all the reward functions specified. 
+    reward_fun: which reward function to use, observed or true
+    path: where to save the flow rendering
+    reward_scale: Optional, by how much to scale the rewards
     *args: environment args
     **kwargs: envrionment kwargs
     """
-    def __init__(self, module, mod_name, env_params, sim_params, network, simulator,  reward_specification, reward_fun, path):        
+    def __init__(self, module, mod_name, env_params, sim_params, network, simulator,  reward_specification, reward_fun, path, reward_scale=1):        
         cls = getattr(importlib.import_module(module), mod_name)
         self.env = cls(env_params, sim_params, network, simulator, path=path)        
         super().__init__(self.env)
 
+        self.reward_scale = reward_scale
+        
         if reward_specification is not None:
             self.use_new_spec = True
             self.reward_fun = reward_fun
@@ -66,6 +71,7 @@ class ProxyRewardEnv(gym.Wrapper):
 
     def step(self, rl_actions):
         next_observation, reward, done, infos = self.env.step(rl_actions)
+        reward *= self.reward_scale
         if self.use_new_spec:
             if self.reward_fun == "observed":
                 infos["observed_reward"] = reward
