@@ -16,7 +16,7 @@ from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
 
 
-def make_create_env(params, reward_specification=None, reward_fun="true", path=None, version=0, render=None):
+def make_create_env(params, reward_specification=None, reward_fun="true", path=None, reward_scale=1, version=0, render=None):
     """Create a parametrized flow environment compatible with OpenAI gym.
 
     This environment creation method allows for the specification of several
@@ -57,6 +57,8 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
         specifies whether the proxy reward function or true reward should be used
     path : str, optional
         path for saving rendered video
+    reward_scale : int, optional
+        by how much to scale rewards
     version : int, optional
         environment version number
     render : bool, optional
@@ -128,7 +130,8 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
                     "simulator": params['simulator'],
                     "reward_specification": reward_specification,
                     "reward_fun": reward_fun,
-                    "path": path
+                    "path": path,
+                    "reward_scale": reward_scale
                 })
         
         return gym.envs.make(env_name)
