@@ -8,7 +8,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
 from flow.core.params import TrafficLightParams
 from flow.core.params import VehicleParams
 from flow.controllers import RLController, ContinuousRouter, \
-    SimLaneChangeController
+    SimLaneChangeController, SimCarFollowingController
 from flow.envs import BottleneckDesiredVelocityEnv, BottleneckAccelEnv
 from flow.networks import BottleneckNetwork
 
