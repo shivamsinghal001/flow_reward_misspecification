@@ -39,7 +39,7 @@ class RLController(BaseController):
             car_following_params)
         
         if acc_controller is not None:
-            self.acc_controller = acc_controller(veh_id, car_following_params, **acc_controller_params)
+            self.acc_controller = acc_controller(veh_id=veh_id, car_following_params=car_following_params, **acc_controller_params)
 
     def get_accel(self, env):
         """Pass, as this is never called; required to override abstractmethod."""
