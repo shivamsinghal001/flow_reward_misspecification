@@ -7,14 +7,20 @@ def get_exp(exp_tag):
         return singleagent.singleagent_ring
     elif exp_tag == "singleagent_merge_bus":
         return singleagent.singleagent_merge_bus
+    elif exp_tag == "singleagent_merge_bus_baseline":
+        return singleagent.singleagent_merge_bus_baseline
     elif exp_tag == "singleagent_merge_accel":
         return singleagent.singleagent_merge_accel
     elif exp_tag == "singleagent_merge":
         return singleagent.singleagent_merge
+    elif exp_tag == "singleagent_merge_baseline":
+        return singleagent.singleagent_merge_baseline
     elif exp_tag == "singleagent_figure_eight":
         return singleagent.singleagent_figure_eight
     elif exp_tag == "singleagent_bottleneck":
         return singleagent.singleagent_bottleneck
+    elif exp_tag == "singleagent_bottleneck_baseline":
+        return singleagent.singleagent_bottleneck_baseline
     elif exp_tag == "multiagent_traffic_light_grid":
         return multiagent.multiagent_traffic_light_grid
     elif exp_tag == "multiagent_ring":
