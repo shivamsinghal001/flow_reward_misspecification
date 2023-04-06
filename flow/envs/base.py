@@ -368,7 +368,7 @@ class Env(gym.Env, metaclass=ABCMeta):
 
             acc_controller_actions = []
             for veh_id in self.k.vehicle.get_rl_ids():
-                policies.append(self.k.vehicle.get_acc_controller(
+                acc_controller_actions.append(self.k.vehicle.get_acc_controller(
                         veh_id).get_controller_accel(self))
             infos["acc_controller_actions"] = acc_controller_actions
 
