@@ -366,10 +366,15 @@ class Env(gym.Env, metaclass=ABCMeta):
 
             self.k.vehicle.choose_routes(routing_ids, routing_actions)
 
-            acc_controller_actions = []
+            # acc_controller_actions = []
             for veh_id in self.k.vehicle.get_rl_ids():
-                acc_controller_actions.append(self.k.vehicle.get_acc_controller(
-                        veh_id).get_controller_accel(self))
+                if hasattr(self.k.vehicle.get_acc_controller(veh_id), "get_controller_accel"):
+                    acc_controller_actions.append(self.k.vehicle.get_acc_controller(
+                            veh_id).get_controller_accel(self))
+
+            if self.get_additional_rl_control_info() is not None:
+                acc_controller_actions = self.get_additional_rl_control_info()
+
             infos["acc_controller_actions"] = acc_controller_actions
 
             self.apply_rl_actions(rl_actions)
@@ -421,6 +426,11 @@ class Env(gym.Env, metaclass=ABCMeta):
             reward = self.compute_reward(rl_actions, fail=crash)
 
         return next_observation, reward, done, infos
+
+    def get_additional_rl_control_info(self):
+        """get actions from acc controller for baseline
+        """
+        return None
 
     def reset(self):
         """Reset the environment.

@@ -110,6 +110,19 @@ class MergePOEnv(Env):
 		"""See class definition."""
 		return Box(low=-np.inf, high=np.inf, shape=(5 * self.num_rl, ), dtype=np.float32)
 
+	def get_additional_rl_control_info(self):
+		acc_controller_actions = []
+		for i, rl_id in enumerate(self.rl_veh):
+			if rl_id not in self.k.vehicle.get_rl_ids():
+				acc_controller_actions.append(0)
+			else:
+				acc_controller_actions.append(self.k.vehicle.get_acc_controller(rl_id).get_controller_accel(self))
+		
+		for i in range(self.num_rl - len(acc_controller_actions)):
+			acc_controller_actions.append(0)
+			
+		return acc_controller_actions
+	
 	def _apply_rl_actions(self, rl_actions):
 		"""See class definition."""
 		for i, rl_id in enumerate(self.rl_veh):

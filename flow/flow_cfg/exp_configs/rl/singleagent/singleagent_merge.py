@@ -51,7 +51,7 @@ vehicles.add(
     num_vehicles=5)
 vehicles.add(
     veh_id="rl1",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(RLController, {"acc_controller" : IDMController}),
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),

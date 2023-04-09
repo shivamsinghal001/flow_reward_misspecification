@@ -8,7 +8,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
 from flow.core.params import TrafficLightParams
 from flow.core.params import VehicleParams
 from flow.controllers import RLController, ContinuousRouter, \
-    SimLaneChangeController
+    SimLaneChangeController, SimCarFollowingController
 from flow.envs import BottleneckDesiredVelocityEnv, BottleneckAccelEnv
 from flow.networks import BottleneckNetwork
 
@@ -39,7 +39,7 @@ vehicles.add(
     num_vehicles=1 * SCALING)
 vehicles.add(
     veh_id="followerstopper",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(RLController, {"acc_controller" : SimCarFollowingController}),
     lane_change_controller=(SimLaneChangeController, {}),
     routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(

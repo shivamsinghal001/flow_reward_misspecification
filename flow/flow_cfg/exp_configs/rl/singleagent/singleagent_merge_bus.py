@@ -53,7 +53,7 @@ vehicles.add(
     color="blue")
 vehicles.add(
     veh_id="bus",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(RLController, {"acc_controller" : IDMController}),
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),
@@ -61,7 +61,7 @@ vehicles.add(
     color='orange')
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(RLController, {"acc_controller" : IDMController}),
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),
