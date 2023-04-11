@@ -94,7 +94,7 @@ class MergePOEnv(Env):
 		self.leader = []
 		self.follower = []
 
-		super().__init__(env_params, sim_params, network, simulator, path=path is_baseline=is_baseline)
+		super().__init__(env_params, sim_params, network, simulator, path=path, is_baseline=is_baseline)
 
 	@property
 	def action_space(self):
