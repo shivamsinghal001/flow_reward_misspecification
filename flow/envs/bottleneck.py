@@ -191,14 +191,14 @@ class BottleneckEnv(Env):
         array.
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator='traci', path=None, is_baseline=False):
         """Initialize the BottleneckEnv class."""
         for p in ADDITIONAL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
                 raise KeyError(
                     'Environment parameter "{}" not supplied'.format(p))
 
-        super().__init__(env_params, sim_params, network, simulator, path=path)
+        super().__init__(env_params, sim_params, network, simulator, path=path, is_baseline=is_baseline)
         env_add_params = self.env_params.additional_params
         # tells how scaled the number of lanes are
         self.scaling = network.net_params.additional_params.get("scaling", 1)
@@ -520,14 +520,14 @@ class BottleneckAccelEnv(BottleneckEnv):
         A rollout is terminated once the time horizon is reached.
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator='traci', path=None, is_baseline=False):
         """Initialize BottleneckAccelEnv."""
         for p in ADDITIONAL_RL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
                 raise KeyError(
                     'Environment parameter "{}" not supplied'.format(p))
 
-        super().__init__(env_params, sim_params, network, simulator, path=path)
+        super().__init__(env_params, sim_params, network, simulator, path=path, is_baseline=is_baseline)
         self.add_rl_if_exit = env_params.get_additional_param("add_rl_if_exit")
         self.num_rl = deepcopy(self.initial_vehicles.num_rl_vehicles)
         self.rl_id_list = deepcopy(self.initial_vehicles.get_rl_ids())
@@ -747,9 +747,9 @@ class BottleneckDesiredVelocityEnv(BottleneckEnv):
         for RL vehicles making forward progress
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator='traci', path=None, is_baseline=False):
         """Initialize BottleneckDesiredVelocityEnv."""
-        super().__init__(env_params, sim_params, network, simulator, path=path)
+        super().__init__(env_params, sim_params, network, simulator, path=path, is_baseline=is_baseline)
         for p in ADDITIONAL_VSL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
                 raise KeyError(

@@ -106,7 +106,8 @@ class Env(gym.Env, metaclass=ABCMeta):
                  network=None,
                  simulator='traci',
                  scenario=None,
-                 path=None):
+                 path=None,
+                 is_baseline=False):
         """Initialize the environment class.
 
         Parameters
@@ -149,6 +150,8 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.initial_state = {}
         self.state = None
         self.obs_var_labels = []
+
+        self.is_baseline = is_baseline
 
         # simulation step size
         self.sim_step = sim_params.sim_step
@@ -377,7 +380,10 @@ class Env(gym.Env, metaclass=ABCMeta):
 
             infos["acc_controller_actions"] = acc_controller_actions
 
-            self.apply_rl_actions(rl_actions)
+            if self.is_baseline:
+                self.apply_rl_actions(acc_controller_actions)
+            else:
+                self.apply_rl_actions(rl_actions)
 
             self.additional_command()
 

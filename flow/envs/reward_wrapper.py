@@ -19,9 +19,9 @@ class ProxyRewardEnv(gym.Wrapper):
     *args: environment args
     **kwargs: envrionment kwargs
     """
-    def __init__(self, module, mod_name, env_params, sim_params, network, simulator,  reward_specification, reward_fun, path, reward_scale=1):        
+    def __init__(self, module, mod_name, env_params, sim_params, network, simulator,  reward_specification, reward_fun, path, reward_scale=1, is_baseline=False):        
         cls = getattr(importlib.import_module(module), mod_name)
-        self.env = cls(env_params, sim_params, network, simulator, path=path)        
+        self.env = cls(env_params, sim_params, network, simulator, path=path, is_baseline=is_baseline)        
         super().__init__(self.env)
 
         self.reward_scale = reward_scale
