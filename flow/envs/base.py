@@ -378,6 +378,12 @@ class Env(gym.Env, metaclass=ABCMeta):
             if self.get_additional_rl_control_info() is not None:
                 acc_controller_actions = self.get_additional_rl_control_info()
 
+            assert isinstance(self.action_space, Box)
+            acc_controller_actions = np.clip(
+                acc_controller_actions,
+                self.action_space.low,
+                self.action_space.high,
+            )
             infos["acc_controller_actions"] = acc_controller_actions
 
             if self.is_baseline:
