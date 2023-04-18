@@ -7,6 +7,7 @@ import atexit
 import time
 import traceback
 import numpy as np
+import logging
 import random
 import shutil
 import subprocess
@@ -25,6 +26,9 @@ import sumolib
 from flow.core.util import ensure_dir
 from flow.core.kernel import Kernel
 from flow.utils.exceptions import FatalFlowError
+
+
+logger = logging.getLogger(__name__)
 
 
 class Env(gym.Env, metaclass=ABCMeta):
@@ -378,7 +382,9 @@ class Env(gym.Env, metaclass=ABCMeta):
             if self.get_additional_rl_control_info() is not None:
                 acc_controller_actions = self.get_additional_rl_control_info()
 
-            if acc_controller_actions:
+            if any(action is None for action in acc_controller_actions):
+                logger.warning("some acc_controller_actions are None")
+            else:
                 assert isinstance(self.action_space, Box)
                 acc_controller_actions = np.clip(
                     acc_controller_actions,
