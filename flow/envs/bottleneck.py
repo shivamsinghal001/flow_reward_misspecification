@@ -951,6 +951,31 @@ class BottleneckDesiredVelocityEnv(BottleneckEnv):
         return np.concatenate((num_vehicles_list, num_rl_vehicles_list,
                                mean_speed_norm, mean_rl_speed, [outflow]))
 
+    def get_additional_rl_control_info(self):
+        acc_controller_actions = np.zeros(self.action_space.shape)
+        for rl_id in self.k.vehicle.get_rl_ids():
+            edge = self.k.vehicle.get_edge(rl_id)
+            lane = self.k.vehicle.get_lane(rl_id)
+            if edge:
+                # If in outer lanes, on a controlled edge, in a controlled lane
+                if edge[0] != ':' and edge in self.controlled_edges:
+                    pos = self.k.vehicle.get_position(rl_id)
+                    acc_index = 0
+                    if not self.symmetric:
+                        num_lanes = self.k.network.num_lanes(edge)
+                        # find what segment we fall into
+                        bucket = np.searchsorted(self.slices[edge], pos) - 1
+                        acc_index = int(lane) + bucket * num_lanes + self.action_index[edge]
+                    else:
+                        # find what segment we fall into
+                        bucket = np.searchsorted(self.slices[edge], pos) - 1
+                        acc_index = bucket + self.action_index[edge]
+                    if hasattr(self.k.vehicle.get_acc_controller(rl_id), "get_controller_accel"):
+                        action = (self.k.vehicle.get_acc_controller(
+                            rl_id).get_controller_accel(self))
+                        acc_controller_actions[acc_index] = action
+        return acc_controller_actions.tolist()
+    
     def _apply_rl_actions(self, rl_actions):
         """
         RL actions are split up into 3 levels.

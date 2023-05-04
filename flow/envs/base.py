@@ -373,11 +373,14 @@ class Env(gym.Env, metaclass=ABCMeta):
 
             self.k.vehicle.choose_routes(routing_ids, routing_actions)
 
-            acc_controller_actions = []
-            for veh_id in self.k.vehicle.get_rl_ids():
-                if hasattr(self.k.vehicle.get_acc_controller(veh_id), "get_controller_accel"):
-                    acc_controller_actions.append(self.k.vehicle.get_acc_controller(
-                            veh_id).get_controller_accel(self))
+            if self.get_additional_rl_control_info() is not None:
+                acc_controller_actions = self.get_additional_rl_control_info()
+            else:
+                acc_controller_actions = []
+                for veh_id in self.k.vehicle.get_rl_ids():
+                    if hasattr(self.k.vehicle.get_acc_controller(veh_id), "get_controller_accel"):
+                        acc_controller_actions.append(self.k.vehicle.get_acc_controller(
+                                veh_id).get_controller_accel(self))
 
             if self.get_additional_rl_control_info() is not None:
                 acc_controller_actions = self.get_additional_rl_control_info()

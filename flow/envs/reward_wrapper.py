@@ -13,7 +13,7 @@ class ProxyRewardEnv(gym.Wrapper):
     env: the Flow environment object that will be wrapped with a proxy
     reward_specification: a dict of reward_pairs with str keys corresponding to reward type and float values corresponding to the weight of that reward. 
                             The proxy reward is a linear combination of all the reward functions specified. 
-    reward_fun: which reward function to use, observed or true
+    reward_fun: which reward function to use, proxy or true
     path: where to save the flow rendering
     reward_scale: Optional, by how much to scale the rewards
     *args: environment args
@@ -31,7 +31,7 @@ class ProxyRewardEnv(gym.Wrapper):
             self.reward_fun = reward_fun
 
             self.true_reward_specification = []
-            self.obs_reward_specification = []
+            self.proxy_reward_specification = []
 
             if reward_specification["true"] is not None:
                 self.use_original_true = False
@@ -42,13 +42,13 @@ class ProxyRewardEnv(gym.Wrapper):
                 self.use_original_true = True  
                 self.original_rew_func = getattr(self.env, "compute_reward")  
 
-            for name, eta in reward_specification["observed"]:
+            for name, eta in reward_specification["proxy"]:
                 assert name in REWARD_REGISTRY 
-                self.obs_reward_specification.append((REWARD_REGISTRY[name], eta))
+                self.proxy_reward_specification.append((REWARD_REGISTRY[name], eta))
             
-            if self.reward_fun == "observed":
+            if self.reward_fun == "proxy":
                 def proxy_reward(rl_actions, **kwargs):
-                    return self._proxy(self.obs_reward_specification, rl_actions, **kwargs)
+                    return self._proxy(self.proxy_reward_specification, rl_actions, **kwargs)
                 setattr(self.env, "compute_reward", proxy_reward)
             elif not self.use_original_true:
                 def proxy_reward(rl_actions, **kwargs):
@@ -73,16 +73,16 @@ class ProxyRewardEnv(gym.Wrapper):
         next_observation, reward, done, infos = self.env.step(rl_actions)
         reward *= self.reward_scale
         if self.use_new_spec:
-            if self.reward_fun == "observed":
-                infos["observed_reward"] = reward
+            if self.reward_fun == "proxy":
+                infos["proxy_reward"] = reward
                 if not self.use_original_true:
                     infos["true_reward"] = self._proxy(self.true_reward_specification, rl_actions, fail=infos["crash"])
                 else:
                     infos["true_reward"] = self.original_rew_func(rl_actions, fail=infos["crash"])
             else:
-                infos["observed_reward"] = self._proxy(self.obs_reward_specification, rl_actions, fail=infos["crash"])
+                infos["proxy_reward"] = self._proxy(self.proxy_reward_specification, rl_actions, fail=infos["crash"])
                 infos["true_reward"] = reward
         else:
-            infos["observed_reward"] = infos["true_reward"] = reward
+            infos["proxy_reward"] = infos["true_reward"] = reward
         return next_observation, reward, done, infos
 
