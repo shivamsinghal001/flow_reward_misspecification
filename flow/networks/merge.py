@@ -63,19 +63,20 @@ class MergeNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Initialize a merge network."""
         for p in ADDITIONAL_NET_PARAMS.keys():
             if p not in net_params.additional_params:
                 raise KeyError('Network parameter "{}" not supplied'.format(p))
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_nodes(self, net_params):
         """See parent class."""
@@ -85,36 +86,19 @@ class MergeNetwork(Network):
         postmerge = net_params.additional_params["post_merge_length"]
 
         nodes = [
-            {
-                "id": "inflow_highway",
-                "x": -INFLOW_EDGE_LEN,
-                "y": 0
-            },
-            {
-                "id": "left",
-                "y": 0,
-                "x": 0
-            },
-            {
-                "id": "center",
-                "y": 0,
-                "x": premerge,
-                "radius": 10
-            },
-            {
-                "id": "right",
-                "y": 0,
-                "x": premerge + postmerge
-            },
+            {"id": "inflow_highway", "x": -INFLOW_EDGE_LEN, "y": 0},
+            {"id": "left", "y": 0, "x": 0},
+            {"id": "center", "y": 0, "x": premerge, "radius": 10},
+            {"id": "right", "y": 0, "x": premerge + postmerge},
             {
                 "id": "inflow_merge",
                 "x": premerge - (merge + INFLOW_EDGE_LEN) * cos(angle),
-                "y": -(merge + INFLOW_EDGE_LEN) * sin(angle)
+                "y": -(merge + INFLOW_EDGE_LEN) * sin(angle),
             },
             {
                 "id": "bottom",
                 "x": premerge - merge * cos(angle),
-                "y": -merge * sin(angle)
+                "y": -merge * sin(angle),
             },
         ]
 
@@ -126,37 +110,43 @@ class MergeNetwork(Network):
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
 
-        edges = [{
-            "id": "inflow_highway",
-            "type": "highwayType",
-            "from": "inflow_highway",
-            "to": "left",
-            "length": INFLOW_EDGE_LEN
-        }, {
-            "id": "left",
-            "type": "highwayType",
-            "from": "left",
-            "to": "center",
-            "length": premerge
-        }, {
-            "id": "inflow_merge",
-            "type": "mergeType",
-            "from": "inflow_merge",
-            "to": "bottom",
-            "length": INFLOW_EDGE_LEN
-        }, {
-            "id": "bottom",
-            "type": "mergeType",
-            "from": "bottom",
-            "to": "center",
-            "length": merge
-        }, {
-            "id": "center",
-            "type": "highwayType",
-            "from": "center",
-            "to": "right",
-            "length": postmerge
-        }]
+        edges = [
+            {
+                "id": "inflow_highway",
+                "type": "highwayType",
+                "from": "inflow_highway",
+                "to": "left",
+                "length": INFLOW_EDGE_LEN,
+            },
+            {
+                "id": "left",
+                "type": "highwayType",
+                "from": "left",
+                "to": "center",
+                "length": premerge,
+            },
+            {
+                "id": "inflow_merge",
+                "type": "mergeType",
+                "from": "inflow_merge",
+                "to": "bottom",
+                "length": INFLOW_EDGE_LEN,
+            },
+            {
+                "id": "bottom",
+                "type": "mergeType",
+                "from": "bottom",
+                "to": "center",
+                "length": merge,
+            },
+            {
+                "id": "center",
+                "type": "highwayType",
+                "from": "center",
+                "to": "right",
+                "length": postmerge,
+            },
+        ]
 
         return edges
 
@@ -166,15 +156,10 @@ class MergeNetwork(Network):
         m_lanes = net_params.additional_params["merge_lanes"]
         speed = net_params.additional_params["speed_limit"]
 
-        types = [{
-            "id": "highwayType",
-            "numLanes": h_lanes,
-            "speed": speed
-        }, {
-            "id": "mergeType",
-            "numLanes": m_lanes,
-            "speed": speed
-        }]
+        types = [
+            {"id": "highwayType", "numLanes": h_lanes, "speed": speed},
+            {"id": "mergeType", "numLanes": m_lanes, "speed": speed},
+        ]
 
         return types
 
@@ -185,7 +170,7 @@ class MergeNetwork(Network):
             "left": ["left", "center"],
             "center": ["center"],
             "inflow_merge": ["inflow_merge", "bottom", "center"],
-            "bottom": ["bottom", "center"]
+            "bottom": ["bottom", "center"],
         }
 
         return rts
@@ -195,12 +180,13 @@ class MergeNetwork(Network):
         premerge = self.net_params.additional_params["pre_merge_length"]
         postmerge = self.net_params.additional_params["post_merge_length"]
 
-        edgestarts = [("inflow_highway", 0), ("left", INFLOW_EDGE_LEN + 0.1),
-                      ("center", INFLOW_EDGE_LEN + premerge + 22.6),
-                      ("inflow_merge",
-                       INFLOW_EDGE_LEN + premerge + postmerge + 22.6),
-                      ("bottom",
-                       2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.7)]
+        edgestarts = [
+            ("inflow_highway", 0),
+            ("left", INFLOW_EDGE_LEN + 0.1),
+            ("center", INFLOW_EDGE_LEN + premerge + 22.6),
+            ("inflow_merge", INFLOW_EDGE_LEN + premerge + postmerge + 22.6),
+            ("bottom", 2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.7),
+        ]
 
         return edgestarts
 
@@ -210,9 +196,9 @@ class MergeNetwork(Network):
         postmerge = self.net_params.additional_params["post_merge_length"]
 
         internal_edgestarts = [
-            (":left", INFLOW_EDGE_LEN), (":center",
-                                         INFLOW_EDGE_LEN + premerge + 0.1),
-            (":bottom", 2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.6)
+            (":left", INFLOW_EDGE_LEN),
+            (":center", INFLOW_EDGE_LEN + premerge + 0.1),
+            (":bottom", 2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.6),
         ]
 
         return internal_edgestarts

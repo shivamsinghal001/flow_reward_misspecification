@@ -44,13 +44,15 @@ class BaseController(metaclass=ABCMeta):
         variance of the gaussian from which to sample a noisy acceleration
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 delay=0,
-                 fail_safe=None,
-                 display_warnings=True,
-                 noise=0):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        delay=0,
+        fail_safe=None,
+        display_warnings=True,
+        noise=0,
+    ):
         """Instantiate the base class for acceleration behavior."""
         self.veh_id = veh_id
 
@@ -67,13 +69,15 @@ class BaseController(metaclass=ABCMeta):
             failsafe_list = fail_safe
         else:
             failsafe_list = None
-            raise ValueError("fail_safe should be string or list of strings. Setting fail_safe to None\n")
+            raise ValueError(
+                "fail_safe should be string or list of strings. Setting fail_safe to None\n"
+            )
 
         failsafe_map = {
-            'instantaneous': self.get_safe_action_instantaneous,
-            'safe_velocity': self.get_safe_velocity_action,
-            'feasible_accel': lambda _, accel: self.get_feasible_action(accel),
-            'obey_speed_limit': self.get_obey_speed_limit_action
+            "instantaneous": self.get_safe_action_instantaneous,
+            "safe_velocity": self.get_safe_velocity_action,
+            "feasible_accel": lambda _, accel: self.get_feasible_action(accel),
+            "obey_speed_limit": self.get_obey_speed_limit_action,
         }
         self.failsafes = []
         if failsafe_list:
@@ -81,13 +85,15 @@ class BaseController(metaclass=ABCMeta):
                 if check in failsafe_map:
                     self.failsafes.append(failsafe_map.get(check))
                 else:
-                    raise ValueError('Skipping {}, as it is not a valid failsafe.'.format(check))
+                    raise ValueError(
+                        "Skipping {}, as it is not a valid failsafe.".format(check)
+                    )
 
         self.display_warnings = display_warnings
 
-        self.max_accel = car_following_params.controller_params['accel']
+        self.max_accel = car_following_params.controller_params["accel"]
         # max deaccel should always be a positive
-        self.max_deaccel = abs(car_following_params.controller_params['decel'])
+        self.max_deaccel = abs(car_following_params.controller_params["decel"])
 
         self.car_following_params = car_following_params
 
@@ -148,7 +154,9 @@ class BaseController(metaclass=ABCMeta):
         for failsafe in self.failsafes:
             accel_no_noise_with_failsafe = failsafe(env, accel_no_noise_with_failsafe)
 
-        env.k.vehicle.update_accel(self.veh_id, accel_no_noise_with_failsafe, noise=False, failsafe=True)
+        env.k.vehicle.update_accel(
+            self.veh_id, accel_no_noise_with_failsafe, noise=False, failsafe=True
+        )
 
         # add noise to the accelerations, if requested
         if self.accel_noise > 0:
@@ -200,8 +208,7 @@ class BaseController(metaclass=ABCMeta):
         if next_vel > 0:
             # the second and third terms cover (conservatively) the extra
             # distance the vehicle will cover before it fully decelerates
-            if h < sim_step * next_vel + this_vel * 1e-3 + \
-                    0.5 * this_vel * sim_step:
+            if h < sim_step * next_vel + this_vel * 1e-3 + 0.5 * this_vel * sim_step:
                 # if the vehicle will crash into the vehicle ahead of it in the
                 # next time step (assuming the vehicle ahead of it is not
                 # moving), then stop immediately
@@ -210,7 +217,8 @@ class BaseController(metaclass=ABCMeta):
                         "=====================================\n"
                         "Vehicle {} is about to crash. Instantaneous acceleration "
                         "clipping applied.\n"
-                        "=====================================".format(self.veh_id))
+                        "=====================================".format(self.veh_id)
+                    )
 
                 return -this_vel / sim_step
             else:
@@ -295,7 +303,8 @@ class BaseController(metaclass=ABCMeta):
                     "=====================================\n"
                     "Speed of vehicle {} is greater than safe speed. Safe velocity "
                     "clipping applied.\n"
-                    "=====================================".format(self.veh_id))
+                    "=====================================".format(self.veh_id)
+                )
 
         return v_safe
 
@@ -333,7 +342,8 @@ class BaseController(metaclass=ABCMeta):
                         "=====================================\n"
                         "Speed of vehicle {} is greater than speed limit. Obey "
                         "speed limit clipping applied.\n"
-                        "=====================================".format(self.veh_id))
+                        "=====================================".format(self.veh_id)
+                    )
                 return (edge_speed_limit - this_vel) / sim_step
             else:
                 return -this_vel / sim_step
@@ -366,7 +376,8 @@ class BaseController(metaclass=ABCMeta):
                     "=====================================\n"
                     "Acceleration of vehicle {} is greater than the max "
                     "acceleration. Feasible acceleration clipping applied.\n"
-                    "=====================================".format(self.veh_id))
+                    "=====================================".format(self.veh_id)
+                )
 
         if action < -self.max_deaccel:
             action = -self.max_deaccel
@@ -376,6 +387,7 @@ class BaseController(metaclass=ABCMeta):
                     "=====================================\n"
                     "Deceleration of vehicle {} is greater than the max "
                     "deceleration. Feasible acceleration clipping applied.\n"
-                    "=====================================".format(self.veh_id))
+                    "=====================================".format(self.veh_id)
+                )
 
         return action

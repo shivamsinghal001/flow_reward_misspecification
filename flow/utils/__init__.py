@@ -2,4 +2,4 @@
 
 from flow.utils.exceptions import FatalFlowError
 
-__all__ = ['FatalFlowError']
+__all__ = ["FatalFlowError"]

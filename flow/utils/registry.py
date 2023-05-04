@@ -10,13 +10,22 @@ from gym.envs.registration import register
 from copy import deepcopy
 
 import flow.envs
-from flow.envs.reward_wrapper import ProxyRewardEnv 
+from flow.envs.reward_wrapper import ProxyRewardEnv
 
 from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
 
 
-def make_create_env(params, reward_specification=None, reward_fun="true", path=None, is_baseline=False, reward_scale=1, version=0, render=None):
+def make_create_env(
+    params,
+    reward_specification=None,
+    reward_fun="true",
+    path=None,
+    is_baseline=False,
+    reward_scale=1,
+    version=0,
+    render=None,
+):
     """Create a parametrized flow environment compatible with OpenAI gym.
 
     This environment creation method allows for the specification of several
@@ -50,7 +59,7 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
            upon initialization/reset (see flow.core.params.InitialConfig)
          - tls (optional): traffic lights to be introduced to specific nodes
            (see flow.core.params.TrafficLightParams)
-    
+
     reward_specification : dict, optional
         if not None, wrap the environment with a proxy reward given by reward_specification
     reward_fun : str, optional
@@ -77,8 +86,10 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
     exp_tag = params["exp_tag"]
 
     if isinstance(params["env_name"], str):
-        print("""Passing of strings for env_name will be deprecated.
-        Please pass the Env instance instead.""")
+        print(
+            """Passing of strings for env_name will be deprecated.
+        Please pass the Env instance instead."""
+        )
         base_env_name = params["env_name"]
     else:
         base_env_name = params["env_name"].__name__
@@ -93,21 +104,23 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
     env_name += str(np.random.randint(2**31))
 
     if isinstance(params["network"], str):
-        print("""Passing of strings for network will be deprecated.
-        Please pass the Network instance instead.""")
+        print(
+            """Passing of strings for network will be deprecated.
+        Please pass the Network instance instead."""
+        )
         module = __import__("flow.networks", fromlist=[params["network"]])
         network_class = getattr(module, params["network"])
     else:
         network_class = params["network"]
 
-    env_params = params['env']
-    net_params = params['net']
-    initial_config = params.get('initial', InitialConfig())
+    env_params = params["env"]
+    net_params = params["net"]
+    initial_config = params.get("initial", InitialConfig())
     traffic_lights = params.get("tls", TrafficLightParams())
 
     def create_env(*_):
-        sim_params = deepcopy(params['sim'])
-        vehicles = deepcopy(params['veh'])
+        sim_params = deepcopy(params["sim"])
+        vehicles = deepcopy(params["veh"])
 
         network = network_class(
             name=exp_tag,
@@ -119,26 +132,27 @@ def make_create_env(params, reward_specification=None, reward_fun="true", path=N
 
         # accept new render type if not set to None
         sim_params.render = render or sim_params.render
-        
+
         register(
-                id=env_name,
-                entry_point="flow.envs.reward_wrapper:ProxyRewardEnv",
-                kwargs={
-                    "module": params["env_name"].__module__,
-                    "mod_name": params["env_name"].__name__, 
-                    "env_params": env_params,
-                    "sim_params": sim_params,
-                    "network": network,
-                    "simulator": params['simulator'],
-                    "reward_specification": reward_specification,
-                    "reward_fun": reward_fun,
-                    "path": path,
-                    "is_baseline": is_baseline,
-                    "reward_scale": reward_scale
-                })
-        
+            id=env_name,
+            entry_point="flow.envs.reward_wrapper:ProxyRewardEnv",
+            kwargs={
+                "module": params["env_name"].__module__,
+                "mod_name": params["env_name"].__name__,
+                "env_params": env_params,
+                "sim_params": sim_params,
+                "network": network,
+                "simulator": params["simulator"],
+                "reward_specification": reward_specification,
+                "reward_fun": reward_fun,
+                "path": path,
+                "is_baseline": is_baseline,
+                "reward_scale": reward_scale,
+            },
+        )
+
         return gym.envs.make(env_name)
-        
+
     return create_env, env_name
 
 

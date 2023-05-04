@@ -56,7 +56,7 @@ class I210MultiEnv(MultiEnv):
         vehicles collide into one another.
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator="traci", path=None):
         super().__init__(env_params, sim_params, network, simulator, path=path)
         self.lead_obs = env_params.additional_params.get("lead_obs")
 
@@ -66,10 +66,7 @@ class I210MultiEnv(MultiEnv):
         # speed, speed of leader, headway
         if self.lead_obs:
             return Box(
-                low=-float('inf'),
-                high=float('inf'),
-                shape=(3,),
-                dtype=np.float32
+                low=-float("inf"), high=float("inf"), shape=(3,), dtype=np.float32
             )
         # speed, dist to ego vehicle, binary value which is 1 if the vehicle is
         # an AV
@@ -81,20 +78,21 @@ class I210MultiEnv(MultiEnv):
             self_obs = 2
 
             return Box(
-                low=-float('inf'),
-                high=float('inf'),
+                low=-float("inf"),
+                high=float("inf"),
                 shape=(leading_obs + follow_obs + self_obs,),
-                dtype=np.float32
+                dtype=np.float32,
             )
 
     @property
     def action_space(self):
         """See class definition."""
         return Box(
-            low=-np.abs(self.env_params.additional_params['max_decel']),
-            high=self.env_params.additional_params['max_accel'],
+            low=-np.abs(self.env_params.additional_params["max_decel"]),
+            high=self.env_params.additional_params["max_accel"],
             shape=(1,),  # (4,),
-            dtype=np.float32)
+            dtype=np.float32,
+        )
 
     def _apply_rl_actions(self, rl_actions):
         """See class definition."""
@@ -121,11 +119,20 @@ class I210MultiEnv(MultiEnv):
                 lead_speed = self.k.vehicle.get_speed(self.k.vehicle.get_leader(rl_id))
                 if lead_speed == -1001:
                     lead_speed = 0
-                veh_info.update({rl_id: np.array([speed / 50.0, headway / 1000.0, lead_speed / 50.0])})
+                veh_info.update(
+                    {
+                        rl_id: np.array(
+                            [speed / 50.0, headway / 1000.0, lead_speed / 50.0]
+                        )
+                    }
+                )
         else:
-            veh_info = {rl_id: np.concatenate((self.state_util(rl_id),
-                                               self.veh_statistics(rl_id)))
-                        for rl_id in self.k.vehicle.get_rl_ids()}
+            veh_info = {
+                rl_id: np.concatenate(
+                    (self.state_util(rl_id), self.veh_statistics(rl_id))
+                )
+                for rl_id in self.k.vehicle.get_rl_ids()
+            }
         return veh_info
 
     def compute_reward(self, rl_actions, **kwargs):
@@ -141,23 +148,24 @@ class I210MultiEnv(MultiEnv):
             if self.env_params.evaluate:
                 # reward is speed of vehicle if we are in evaluation mode
                 reward = self.k.vehicle.get_speed(rl_id)
-            elif kwargs['fail']:
+            elif kwargs["fail"]:
                 # reward is 0 if a collision occurred
                 reward = 0
             else:
                 # reward high system-level velocities
-                cost1 = average_velocity(self, fail=kwargs['fail'])
+                cost1 = average_velocity(self, fail=kwargs["fail"])
 
                 # penalize small time headways
                 cost2 = 0
                 t_min = 1  # smallest acceptable time headway
 
                 lead_id = self.k.vehicle.get_leader(rl_id)
-                if lead_id not in ["", None] \
-                        and self.k.vehicle.get_speed(rl_id) > 0:
+                if lead_id not in ["", None] and self.k.vehicle.get_speed(rl_id) > 0:
                     t_headway = max(
-                        self.k.vehicle.get_headway(rl_id) /
-                        self.k.vehicle.get_speed(rl_id), 0)
+                        self.k.vehicle.get_headway(rl_id)
+                        / self.k.vehicle.get_speed(rl_id),
+                        0,
+                    )
                     cost2 += min((t_headway - t_min) / t_min, 0)
 
                 # weights for cost1, cost2, and cost3, respectively
@@ -214,9 +222,16 @@ class I210MultiEnv(MultiEnv):
         lane_tailways = np.asarray(lane_tailways) / 1000
         lane_leader_speed = np.asarray(lane_leader_speed) / 100
         lane_follower_speed = np.asarray(lane_follower_speed) / 100
-        return np.concatenate((lane_headways, lane_tailways, lane_leader_speed,
-                               lane_follower_speed, is_leader_rl,
-                               is_follow_rl))
+        return np.concatenate(
+            (
+                lane_headways,
+                lane_tailways,
+                lane_leader_speed,
+                lane_follower_speed,
+                is_leader_rl,
+                is_follow_rl,
+            )
+        )
 
     def veh_statistics(self, rl_id):
         """Return speed, edge information, and x, y about the vehicle itself."""

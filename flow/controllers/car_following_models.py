@@ -46,18 +46,20 @@ class CFMController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 k_d=1,
-                 k_v=1,
-                 k_c=1,
-                 d_des=1,
-                 v_des=8,
-                 time_delay=0.0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        k_d=1,
+        k_v=1,
+        k_c=1,
+        d_des=1,
+        v_des=8,
+        time_delay=0.0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate a CFM controller."""
         BaseController.__init__(
             self,
@@ -87,8 +89,11 @@ class CFMController(BaseController):
 
         d_l = env.k.vehicle.get_headway(self.veh_id)
 
-        return self.k_d*(d_l - self.d_des) + self.k_v*(lead_vel - this_vel) + \
-            self.k_c*(self.v_des - this_vel)
+        return (
+            self.k_d * (d_l - self.d_des)
+            + self.k_v * (lead_vel - this_vel)
+            + self.k_c * (self.v_des - this_vel)
+        )
 
 
 class BCMController(BaseController):
@@ -125,18 +130,20 @@ class BCMController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 k_d=1,
-                 k_v=1,
-                 k_c=1,
-                 d_des=1,
-                 v_des=8,
-                 time_delay=0.0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        k_d=1,
+        k_v=1,
+        k_c=1,
+        d_des=1,
+        v_des=8,
+        time_delay=0.0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate a Bilateral car-following model controller."""
         BaseController.__init__(
             self,
@@ -177,9 +184,11 @@ class BCMController(BaseController):
         headway = env.k.vehicle.get_headway(self.veh_id)
         footway = env.k.vehicle.get_headway(trail_id)
 
-        return self.k_d * (headway - footway) + \
-            self.k_v * ((lead_vel - this_vel) - (this_vel - trail_vel)) + \
-            self.k_c * (self.v_des - this_vel)
+        return (
+            self.k_d * (headway - footway)
+            + self.k_v * ((lead_vel - this_vel) - (this_vel - trail_vel))
+            + self.k_c * (self.v_des - this_vel)
+        )
 
 
 class LACController(BaseController):
@@ -208,18 +217,20 @@ class LACController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 k_1=0.3,
-                 k_2=0.4,
-                 h=1,
-                 tau=0.1,
-                 a=0,
-                 time_delay=0.0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        k_1=0.3,
+        k_2=0.4,
+        h=1,
+        tau=0.1,
+        a=0,
+        time_delay=0.0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate a Linear Adaptive Cruise controller."""
         BaseController.__init__(
             self,
@@ -247,9 +258,9 @@ class LACController(BaseController):
         L = env.k.vehicle.get_length(self.veh_id)
         ex = headway - L - self.h * this_vel
         ev = lead_vel - this_vel
-        u = self.k_1*ex + self.k_2*ev
-        a_dot = -(self.a/self.tau) + (u/self.tau)
-        self.a = a_dot*env.sim_step + self.a
+        u = self.k_1 * ex + self.k_2 * ev
+        a_dot = -(self.a / self.tau) + (u / self.tau)
+        self.a = a_dot * env.sim_step + self.a
 
         return self.a
 
@@ -288,18 +299,20 @@ class OVMController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 alpha=1,
-                 beta=1,
-                 h_st=2,
-                 h_go=15,
-                 v_max=30,
-                 time_delay=0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        alpha=1,
+        beta=1,
+        h_st=2,
+        h_go=15,
+        v_max=30,
+        time_delay=0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate an Optimal Vehicle Model controller."""
         BaseController.__init__(
             self,
@@ -332,8 +345,11 @@ class OVMController(BaseController):
         if h <= self.h_st:
             v_h = 0
         elif self.h_st < h < self.h_go:
-            v_h = self.v_max / 2 * (1 - math.cos(math.pi * (h - self.h_st) /
-                                                 (self.h_go - self.h_st)))
+            v_h = (
+                self.v_max
+                / 2
+                * (1 - math.cos(math.pi * (h - self.h_st) / (self.h_go - self.h_st)))
+            )
         else:
             v_h = self.v_max
 
@@ -368,16 +384,18 @@ class LinearOVM(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 v_max=30,
-                 adaptation=0.65,
-                 h_st=5,
-                 time_delay=0.0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        v_max=30,
+        adaptation=0.65,
+        h_st=5,
+        time_delay=0.0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate a Linear OVM controller."""
         BaseController.__init__(
             self,
@@ -449,19 +467,21 @@ class IDMController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 v0=30,
-                 T=1,
-                 a=1,
-                 b=1.5,
-                 delta=4,
-                 s0=2,
-                 time_delay=0.0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True,
-                 car_following_params=None):
+    def __init__(
+        self,
+        veh_id,
+        v0=30,
+        T=1,
+        a=1,
+        b=1.5,
+        delta=4,
+        s0=2,
+        time_delay=0.0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+        car_following_params=None,
+    ):
         """Instantiate an IDM controller."""
         BaseController.__init__(
             self,
@@ -489,15 +509,15 @@ class IDMController(BaseController):
         if abs(h) < 1e-3:
             h = 1e-3
 
-        if lead_id is None or lead_id == '':  # no car ahead
+        if lead_id is None or lead_id == "":  # no car ahead
             s_star = 0
         else:
             lead_vel = env.k.vehicle.get_speed(lead_id)
             s_star = self.s0 + max(
-                0, v * self.T + v * (v - lead_vel) /
-                (2 * np.sqrt(self.a * self.b)))
+                0, v * self.T + v * (v - lead_vel) / (2 * np.sqrt(self.a * self.b))
+            )
 
-        return self.a * (1 - (v / self.v0)**self.delta - (s_star / h)**2)
+        return self.a * (1 - (v / self.v0) ** self.delta - (s_star / h) ** 2)
 
 
 class SimCarFollowingController(BaseController):
@@ -553,19 +573,21 @@ class GippsController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params=None,
-                 v0=30,
-                 acc=1.5,
-                 b=-1,
-                 b_l=-1,
-                 s0=2,
-                 tau=1,
-                 delay=0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params=None,
+        v0=30,
+        acc=1.5,
+        b=-1,
+        b_l=-1,
+        s0=2,
+        tau=1,
+        delay=0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate a Gipps' controller."""
         BaseController.__init__(
             self,
@@ -588,18 +610,27 @@ class GippsController(BaseController):
         """See parent class."""
         v = env.k.vehicle.get_speed(self.veh_id)
         h = env.k.vehicle.get_headway(self.veh_id)
-        v_l = env.k.vehicle.get_speed(
-            env.k.vehicle.get_leader(self.veh_id))
+        v_l = env.k.vehicle.get_speed(env.k.vehicle.get_leader(self.veh_id))
 
         # get velocity dynamics
-        v_acc = v + (2.5 * self.acc * self.tau * (
-                1 - (v / self.v_desired)) * np.sqrt(0.025 + (v / self.v_desired)))
-        v_safe = (self.tau * self.b) + np.sqrt(((self.tau**2) * (self.b**2)) - (
-                self.b * ((2 * (h-self.s0)) - (self.tau * v) - ((v_l**2) / self.b_l))))
+        v_acc = v + (
+            2.5
+            * self.acc
+            * self.tau
+            * (1 - (v / self.v_desired))
+            * np.sqrt(0.025 + (v / self.v_desired))
+        )
+        v_safe = (self.tau * self.b) + np.sqrt(
+            ((self.tau**2) * (self.b**2))
+            - (
+                self.b
+                * ((2 * (h - self.s0)) - (self.tau * v) - ((v_l**2) / self.b_l))
+            )
+        )
 
         v_next = min(v_acc, v_safe, self.v_desired)
 
-        return (v_next-v)/env.sim_step
+        return (v_next - v) / env.sim_step
 
 
 class BandoFTLController(BaseController):
@@ -636,19 +667,21 @@ class BandoFTLController(BaseController):
         to no failsafe (None)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 alpha=.5,
-                 beta=20,
-                 h_st=2,
-                 h_go=10,
-                 v_max=32,
-                 want_max_accel=False,
-                 time_delay=0,
-                 noise=0,
-                 fail_safe=None,
-                 display_warnings=True):
+    def __init__(
+        self,
+        veh_id,
+        car_following_params,
+        alpha=0.5,
+        beta=20,
+        h_st=2,
+        h_go=10,
+        v_max=32,
+        want_max_accel=False,
+        time_delay=0,
+        noise=0,
+        fail_safe=None,
+        display_warnings=True,
+    ):
         """Instantiate an Bando controller."""
         BaseController.__init__(
             self,
@@ -681,7 +714,9 @@ class BandoFTLController(BaseController):
 
     def accel_func(self, v, v_l, s):
         """Compute the acceleration function."""
-        v_h = self.v_max * ((np.tanh(s/self.h_st-2)+np.tanh(2))/(1+np.tanh(2)))
+        v_h = self.v_max * (
+            (np.tanh(s / self.h_st - 2) + np.tanh(2)) / (1 + np.tanh(2))
+        )
         s_dot = v_l - v
-        u = self.alpha * (v_h - v) + self.beta * s_dot/(s**2)
+        u = self.alpha * (v_h - v) + self.beta * s_dot / (s**2)
         return u

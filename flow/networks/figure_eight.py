@@ -15,7 +15,7 @@ ADDITIONAL_NET_PARAMS = {
     # speed limit for all edges
     "speed_limit": 30,
     # resolution of the curved portions
-    "resolution": 40
+    "resolution": 40,
 }
 
 
@@ -56,19 +56,21 @@ class FigureEightNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Initialize a figure 8 network."""
         for p in ADDITIONAL_NET_PARAMS.keys():
             if p not in net_params.additional_params:
                 raise KeyError('Network parameter "{}" not supplied'.format(p))
 
         ring_radius = net_params.additional_params["radius_ring"]
-        self.ring_edgelen = ring_radius * np.pi / 2.
+        self.ring_edgelen = ring_radius * np.pi / 2.0
         self.intersection_len = 2 * ring_radius
         self.junction_len = 2.9 + 3.3 * net_params.additional_params["lanes"]
         self.inner_space_len = 0.28
@@ -78,40 +80,25 @@ class FigureEightNetwork(Network):
         #     6 * self.ring_edgelen + 2 * self.intersection_len + \
         #     2 * self.junction_len + 10 * self.inner_space_len
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_nodes(self, net_params):
         """See parent class."""
         r = net_params.additional_params["radius_ring"]
 
-        nodes = [{
-            "id": "center",
-            "x": 0,
-            "y": 0,
-            "radius": (2.9 + 3.3 * net_params.additional_params["lanes"])/2,
-            "type": "priority"
-        }, {
-            "id": "right",
-            "x": r,
-            "y": 0,
-            "type": "priority"
-        }, {
-            "id": "top",
-            "x": 0,
-            "y": r,
-            "type": "priority"
-        }, {
-            "id": "left",
-            "x": -r,
-            "y": 0,
-            "type": "priority"
-        }, {
-            "id": "bottom",
-            "x": 0,
-            "y": -r,
-            "type": "priority"
-        }]
+        nodes = [
+            {
+                "id": "center",
+                "x": 0,
+                "y": 0,
+                "radius": (2.9 + 3.3 * net_params.additional_params["lanes"]) / 2,
+                "type": "priority",
+            },
+            {"id": "right", "x": r, "y": 0, "type": "priority"},
+            {"id": "top", "x": 0, "y": r, "type": "priority"},
+            {"id": "left", "x": -r, "y": 0, "type": "priority"},
+            {"id": "bottom", "x": 0, "y": -r, "type": "priority"},
+        ]
 
         return nodes
 
@@ -119,58 +106,70 @@ class FigureEightNetwork(Network):
         """See parent class."""
         r = net_params.additional_params["radius_ring"]
         resolution = net_params.additional_params["resolution"]
-        ring_edgelen = 3 * r * pi / 2.
+        ring_edgelen = 3 * r * pi / 2.0
         intersection_edgelen = 2 * r
 
         # intersection edges
-        edges = [{
-            "id": "bottom",
-            "type": "edgeType",
-            "priority": "78",
-            "from": "bottom",
-            "to": "center",
-            "length": intersection_edgelen / 2
-        }, {
-            "id": "top",
-            "type": "edgeType",
-            "priority": 78,
-            "from": "center",
-            "to": "top",
-            "length": intersection_edgelen / 2
-        }, {
-            "id": "right",
-            "type": "edgeType",
-            "priority": 46,
-            "from": "right",
-            "to": "center",
-            "length": intersection_edgelen / 2
-        }, {
-            "id": "left",
-            "type": "edgeType",
-            "priority": 46,
-            "from": "center",
-            "to": "left",
-            "length": intersection_edgelen / 2
-        }]
+        edges = [
+            {
+                "id": "bottom",
+                "type": "edgeType",
+                "priority": "78",
+                "from": "bottom",
+                "to": "center",
+                "length": intersection_edgelen / 2,
+            },
+            {
+                "id": "top",
+                "type": "edgeType",
+                "priority": 78,
+                "from": "center",
+                "to": "top",
+                "length": intersection_edgelen / 2,
+            },
+            {
+                "id": "right",
+                "type": "edgeType",
+                "priority": 46,
+                "from": "right",
+                "to": "center",
+                "length": intersection_edgelen / 2,
+            },
+            {
+                "id": "left",
+                "type": "edgeType",
+                "priority": 46,
+                "from": "center",
+                "to": "left",
+                "length": intersection_edgelen / 2,
+            },
+        ]
 
         # ring edges
-        edges += [{
-            "id": "upper_ring",
-            "type": "edgeType",
-            "from": "top",
-            "to": "right",
-            "length": ring_edgelen,
-            "shape": [(r * (1 - cos(t)), r * (1 + sin(t)))
-                      for t in linspace(0, 3 * pi / 2, resolution)]
-        }, {
-            "id": "lower_ring",
-            "type": "edgeType",
-            "from": "left",
-            "to": "bottom",
-            "length": ring_edgelen,
-            "shape": [(-r + r * cos(t), -r + r * sin(t))
-                      for t in linspace(pi / 2, 2 * pi, resolution)]
-        }]
+        edges += [
+            {
+                "id": "upper_ring",
+                "type": "edgeType",
+                "from": "top",
+                "to": "right",
+                "length": ring_edgelen,
+                "shape": [
+                    (r * (1 - cos(t)), r * (1 + sin(t)))
+                    for t in linspace(0, 3 * pi / 2, resolution)
+                ],
+            },
+            {
+                "id": "lower_ring",
+                "type": "edgeType",
+                "from": "left",
+                "to": "bottom",
+                "length": ring_edgelen,
+                "shape": [
+                    (-r + r * cos(t), -r + r * sin(t))
+                    for t in linspace(pi / 2, 2 * pi, resolution)
+                ],
+            },
+        ]
 
         return edges
 
@@ -178,29 +177,33 @@ class FigureEightNetwork(Network):
         """See parent class."""
         lanes = net_params.additional_params["lanes"]
         speed_limit = net_params.additional_params["speed_limit"]
-        types = [{
-            "id": "edgeType",
-            "numLanes": lanes,
-            "speed": speed_limit
-        }]
+        types = [{"id": "edgeType", "numLanes": lanes, "speed": speed_limit}]
 
         return types
 
     def specify_routes(self, net_params):
         """See parent class."""
         rts = {
-            "bottom":
-                ["bottom", "top", "upper_ring", "right", "left", "lower_ring"],
-            "top":
-                ["top", "upper_ring", "right", "left", "lower_ring", "bottom"],
-            "upper_ring":
-                ["upper_ring", "right", "left", "lower_ring", "bottom", "top"],
-            "left":
-                ["left", "lower_ring", "bottom", "top", "upper_ring", "right"],
-            "right":
-                ["right", "left", "lower_ring", "bottom", "top", "upper_ring"],
-            "lower_ring":
-                ["lower_ring", "bottom", "top", "upper_ring", "right", "left"],
+            "bottom": ["bottom", "top", "upper_ring", "right", "left", "lower_ring"],
+            "top": ["top", "upper_ring", "right", "left", "lower_ring", "bottom"],
+            "upper_ring": [
+                "upper_ring",
+                "right",
+                "left",
+                "lower_ring",
+                "bottom",
+                "top",
+            ],
+            "left": ["left", "lower_ring", "bottom", "top", "upper_ring", "right"],
+            "right": ["right", "left", "lower_ring", "bottom", "top", "upper_ring"],
+            "lower_ring": [
+                "lower_ring",
+                "bottom",
+                "top",
+                "upper_ring",
+                "right",
+                "left",
+            ],
         }
 
         return rts
@@ -211,14 +214,12 @@ class FigureEightNetwork(Network):
         conn_dict = {}
         conn = []
         for i in range(lanes):
-            conn += [{"from": "bottom",
-                      "to": "top",
-                      "fromLane": str(i),
-                      "toLane": str(i)}]
-            conn += [{"from": "right",
-                      "to": "left",
-                      "fromLane": str(i),
-                      "toLane": str(i)}]
+            conn += [
+                {"from": "bottom", "to": "top", "fromLane": str(i), "toLane": str(i)}
+            ]
+            conn += [
+                {"from": "right", "to": "left", "fromLane": str(i), "toLane": str(i)}
+            ]
         conn_dict["center"] = conn
         return conn_dict
 
@@ -226,16 +227,36 @@ class FigureEightNetwork(Network):
         """See base class."""
         edgestarts = [
             ("bottom", self.inner_space_len),
-            ("top", self.intersection_len / 2 + self.junction_len +
-             self.inner_space_len),
-            ("upper_ring", self.intersection_len + self.junction_len +
-             2 * self.inner_space_len),
-            ("right", self.intersection_len + 3 * self.ring_edgelen
-             + self.junction_len + 3 * self.inner_space_len),
-            ("left", 3 / 2 * self.intersection_len + 3 * self.ring_edgelen
-             + 2 * self.junction_len + 3 * self.inner_space_len),
-            ("lower_ring", 2 * self.intersection_len + 3 * self.ring_edgelen
-             + 2 * self.junction_len + 4 * self.inner_space_len)]
+            (
+                "top",
+                self.intersection_len / 2 + self.junction_len + self.inner_space_len,
+            ),
+            (
+                "upper_ring",
+                self.intersection_len + self.junction_len + 2 * self.inner_space_len,
+            ),
+            (
+                "right",
+                self.intersection_len
+                + 3 * self.ring_edgelen
+                + self.junction_len
+                + 3 * self.inner_space_len,
+            ),
+            (
+                "left",
+                3 / 2 * self.intersection_len
+                + 3 * self.ring_edgelen
+                + 2 * self.junction_len
+                + 3 * self.inner_space_len,
+            ),
+            (
+                "lower_ring",
+                2 * self.intersection_len
+                + 3 * self.ring_edgelen
+                + 2 * self.junction_len
+                + 4 * self.inner_space_len,
+            ),
+        ]
 
         return edgestarts
 
@@ -243,21 +264,35 @@ class FigureEightNetwork(Network):
         """See base class."""
         internal_edgestarts = [
             (":bottom", 0),
-            (":center_{}".format(self.net_params.additional_params['lanes']),
-             self.intersection_len / 2 + self.inner_space_len),
-            (":top", self.intersection_len + self.junction_len +
-             self.inner_space_len),
-            (":right", self.intersection_len + 3 * self.ring_edgelen
-             + self.junction_len + 2 * self.inner_space_len),
-            (":center_0", 3 / 2 * self.intersection_len + 3 * self.ring_edgelen
-             + self.junction_len + 3 * self.inner_space_len),
-            (":left", 2 * self.intersection_len + 3 * self.ring_edgelen
-             + 2 * self.junction_len + 3 * self.inner_space_len),
+            (
+                ":center_{}".format(self.net_params.additional_params["lanes"]),
+                self.intersection_len / 2 + self.inner_space_len,
+            ),
+            (":top", self.intersection_len + self.junction_len + self.inner_space_len),
+            (
+                ":right",
+                self.intersection_len
+                + 3 * self.ring_edgelen
+                + self.junction_len
+                + 2 * self.inner_space_len,
+            ),
+            (
+                ":center_0",
+                3 / 2 * self.intersection_len
+                + 3 * self.ring_edgelen
+                + self.junction_len
+                + 3 * self.inner_space_len,
+            ),
+            (
+                ":left",
+                2 * self.intersection_len
+                + 3 * self.ring_edgelen
+                + 2 * self.junction_len
+                + 3 * self.inner_space_len,
+            ),
             # for aimsun
-            ('bottom_to_top',
-             self.intersection_len / 2 + self.inner_space_len),
-            ('right_to_left',
-             + self.junction_len + 3 * self.inner_space_len),
+            ("bottom_to_top", self.intersection_len / 2 + self.inner_space_len),
+            ("right_to_left", +self.junction_len + 3 * self.inner_space_len),
         ]
 
         return internal_edgestarts

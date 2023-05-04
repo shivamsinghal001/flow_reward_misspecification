@@ -1,6 +1,12 @@
 """Traffic Light Grid example."""
-from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
-    InFlows, SumoCarFollowingParams
+from flow.core.params import (
+    SumoParams,
+    EnvParams,
+    InitialConfig,
+    NetParams,
+    InFlows,
+    SumoCarFollowingParams,
+)
 from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, GridRouter
 from flow.envs import TrafficLightGridPOEnv
@@ -34,13 +40,13 @@ def gen_edges(col_num, row_num):
     """
     edges = []
     for i in range(col_num):
-        edges += ['left' + str(row_num) + '_' + str(i)]
-        edges += ['right' + '0' + '_' + str(i)]
+        edges += ["left" + str(row_num) + "_" + str(i)]
+        edges += ["right" + "0" + "_" + str(i)]
 
     # build the left and then the right edges
     for i in range(row_num):
-        edges += ['bot' + str(i) + '_' + '0']
-        edges += ['top' + str(i) + '_' + str(col_num)]
+        edges += ["bot" + str(i) + "_" + "0"]
+        edges += ["top" + str(i) + "_" + str(col_num)]
 
     return edges
 
@@ -66,21 +72,21 @@ def get_inflow_params(col_num, row_num, additional_net_params):
         network-specific parameters used to generate the network
     """
     initial = InitialConfig(
-        spacing='custom', lanes_distribution=float('inf'), shuffle=True)
+        spacing="custom", lanes_distribution=float("inf"), shuffle=True
+    )
 
     inflow = InFlows()
     outer_edges = gen_edges(col_num, row_num)
     for i in range(len(outer_edges)):
         inflow.add(
-            veh_type='idm',
+            veh_type="idm",
             edge=outer_edges[i],
             probability=0.25,
-            depart_lane='free',
-            depart_speed=10)
+            depart_lane="free",
+            depart_speed=10,
+        )
 
-    net = NetParams(
-        inflows=inflow,
-        additional_params=additional_net_params)
+    net = NetParams(inflows=inflow, additional_params=additional_net_params)
 
     return initial, net
 
@@ -107,9 +113,8 @@ def get_non_flow_params(enter_speed, add_net_params):
     flow.core.params.NetParams
         network-specific parameters used to generate the network
     """
-    additional_init_params = {'enter_speed': enter_speed}
-    initial = InitialConfig(
-        spacing='custom', additional_params=additional_init_params)
+    additional_init_params = {"enter_speed": enter_speed}
+    initial = InitialConfig(spacing="custom", additional_params=additional_init_params)
     net = NetParams(additional_params=add_net_params)
 
     return initial, net
@@ -125,8 +130,9 @@ NUM_CARS_LEFT = 1
 NUM_CARS_RIGHT = 1
 NUM_CARS_TOP = 1
 NUM_CARS_BOT = 1
-tot_cars = (NUM_CARS_LEFT + NUM_CARS_RIGHT) * N_COLUMNS \
-           + (NUM_CARS_BOT + NUM_CARS_TOP) * N_ROWS
+tot_cars = (NUM_CARS_LEFT + NUM_CARS_RIGHT) * N_COLUMNS + (
+    NUM_CARS_BOT + NUM_CARS_TOP
+) * N_ROWS
 
 grid_array = {
     "short_length": SHORT_LENGTH,
@@ -137,27 +143,27 @@ grid_array = {
     "cars_left": NUM_CARS_LEFT,
     "cars_right": NUM_CARS_RIGHT,
     "cars_top": NUM_CARS_TOP,
-    "cars_bot": NUM_CARS_BOT
+    "cars_bot": NUM_CARS_BOT,
 }
 
 additional_env_params = {
-        'target_velocity': 50,
-        'switch_time': 3.0,
-        'num_observed': 2,
-        'discrete': False,
-        'tl_type': 'controlled'
-    }
+    "target_velocity": 50,
+    "switch_time": 3.0,
+    "num_observed": 2,
+    "discrete": False,
+    "tl_type": "controlled",
+}
 
 additional_net_params = {
-    'speed_limit': 35,
-    'grid_array': grid_array,
-    'horizontal_lanes': 1,
-    'vertical_lanes': 1
+    "speed_limit": 35,
+    "grid_array": grid_array,
+    "horizontal_lanes": 1,
+    "vertical_lanes": 1,
 }
 
 vehicles = VehicleParams()
 vehicles.add(
-    veh_id='idm',
+    veh_id="idm",
     acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         minGap=2.5,
@@ -166,56 +172,44 @@ vehicles.add(
         speed_mode="all_checks",
     ),
     routing_controller=(GridRouter, {}),
-    num_vehicles=tot_cars)
+    num_vehicles=tot_cars,
+)
 
 # collect the initialization and network-specific parameters based on the
 # choice to use inflows or not
 if USE_INFLOWS:
     initial_config, net_params = get_inflow_params(
-        col_num=N_COLUMNS,
-        row_num=N_ROWS,
-        additional_net_params=additional_net_params)
+        col_num=N_COLUMNS, row_num=N_ROWS, additional_net_params=additional_net_params
+    )
 else:
     initial_config, net_params = get_non_flow_params(
-        enter_speed=V_ENTER,
-        add_net_params=additional_net_params)
+        enter_speed=V_ENTER, add_net_params=additional_net_params
+    )
 
 
 flow_params = dict(
     # name of the experiment
-    exp_tag='traffic_light_grid',
-
+    exp_tag="traffic_light_grid",
     # name of the flow environment the experiment is running on
     env_name=TrafficLightGridPOEnv,
-
     # name of the network class the experiment is running on
     network=TrafficLightGridNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
-    sim=SumoParams(
-        sim_step=1,
-        render=False,
-        restart_instance=True
-    ),
-
+    sim=SumoParams(sim_step=1, render=False, restart_instance=True),
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
         additional_params=additional_env_params,
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component). This is
     # filled in by the setup_exps method below.
     net=net_params,
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig). This is filled in by the
     # setup_exps method below.

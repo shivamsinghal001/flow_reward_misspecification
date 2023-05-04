@@ -9,7 +9,7 @@ ADDITIONAL_NET_PARAMS = {
     # the factor multiplying number of lanes.
     "scaling": 1,
     # edge speed limit
-    'speed_limit': 23
+    "speed_limit": 23,
 }
 
 
@@ -45,76 +45,41 @@ class BottleneckNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Instantiate the network class."""
         for p in ADDITIONAL_NET_PARAMS.keys():
             if p not in net_params.additional_params:
                 raise KeyError('Network parameter "{}" not supplied'.format(p))
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_nodes(self, net_params):
         """See parent class."""
         nodes = [
-            {
-                "id": "1",
-                "x": 0,
-                "y": 0
-            },  # pre-toll
-            {
-                "id": "2",
-                "x": 100,
-                "y": 0
-            },  # toll
-            {
-                "id": "3",
-                "x": 410,
-                "y": 0
-            },  # light
-            {
-                "id": "4",
-                "x": 550,
-                "y": 0,
-                "type": "zipper",
-                "radius": 20
-            },  # merge1
-            {
-                "id": "5",
-                "x": 830,
-                "y": 0,
-                "type": "zipper",
-                "radius": 20
-            },  # merge2
-            {
-                "id": "6",
-                "x": 985,
-                "y": 0
-            },
+            {"id": "1", "x": 0, "y": 0},  # pre-toll
+            {"id": "2", "x": 100, "y": 0},  # toll
+            {"id": "3", "x": 410, "y": 0},  # light
+            {"id": "4", "x": 550, "y": 0, "type": "zipper", "radius": 20},  # merge1
+            {"id": "5", "x": 830, "y": 0, "type": "zipper", "radius": 20},  # merge2
+            {"id": "6", "x": 985, "y": 0},
             # fake nodes used for visualization
-            {
-                "id": "fake1",
-                "x": 0,
-                "y": 1
-            },
-            {
-                "id": "fake2",
-                "x": 0,
-                "y": 2
-            }
+            {"id": "fake1", "x": 0, "y": 1},
+            {"id": "fake2", "x": 0, "y": 2},
         ]  # post-merge2
         return nodes
 
     def specify_edges(self, net_params):
         """See parent class."""
         scaling = net_params.additional_params.get("scaling", 1)
-        speed = net_params.additional_params['speed_limit']
-        assert (isinstance(scaling, int)), "Scaling must be an int"
+        speed = net_params.additional_params["speed_limit"]
+        assert isinstance(scaling, int), "Scaling must be an int"
 
         edges = [
             {
@@ -124,7 +89,7 @@ class BottleneckNetwork(Network):
                 "length": 100,
                 "spreadType": "center",
                 "numLanes": 4 * scaling,
-                "speed": speed
+                "speed": speed,
             },
             {
                 "id": "2",
@@ -133,7 +98,7 @@ class BottleneckNetwork(Network):
                 "length": 310,
                 "spreadType": "center",
                 "numLanes": 4 * scaling,
-                "speed": speed
+                "speed": speed,
             },
             {
                 "id": "3",
@@ -142,7 +107,7 @@ class BottleneckNetwork(Network):
                 "length": 140,
                 "spreadType": "center",
                 "numLanes": 4 * scaling,
-                "speed": speed
+                "speed": speed,
             },
             {
                 "id": "4",
@@ -151,7 +116,7 @@ class BottleneckNetwork(Network):
                 "length": 280,
                 "spreadType": "center",
                 "numLanes": 2 * scaling,
-                "speed": speed
+                "speed": speed,
             },
             {
                 "id": "5",
@@ -160,7 +125,7 @@ class BottleneckNetwork(Network):
                 "length": 155,
                 "spreadType": "center",
                 "numLanes": scaling,
-                "speed": speed
+                "speed": speed,
             },
             # fake edge used for visualization
             {
@@ -170,8 +135,8 @@ class BottleneckNetwork(Network):
                 "length": 1,
                 "spreadType": "center",
                 "numLanes": scaling,
-                "speed": speed
-            }
+                "speed": speed,
+            },
         ]
 
         return edges
@@ -182,41 +147,39 @@ class BottleneckNetwork(Network):
         conn_dic = {}
         conn = []
         for i in range(4 * scaling):
-            conn += [{
-                "from": "3",
-                "to": "4",
-                "fromLane": i,
-                "toLane": int(np.floor(i / 2))
-            }]
+            conn += [
+                {"from": "3", "to": "4", "fromLane": i, "toLane": int(np.floor(i / 2))}
+            ]
         conn_dic["4"] = conn
         conn = []
         for i in range(2 * scaling):
-            conn += [{
-                "from": "4",
-                "to": "5",
-                "fromLane": i,
-                "toLane": int(np.floor(i / 2))
-            }]
+            conn += [
+                {"from": "4", "to": "5", "fromLane": i, "toLane": int(np.floor(i / 2))}
+            ]
         conn_dic["5"] = conn
         return conn_dic
 
     def specify_centroids(self, net_params):
         """See parent class."""
         centroids = []
-        centroids += [{
-            "id": "1",
-            "from": None,
-            "to": "1",
-            "x": -30,
-            "y": 0,
-        }]
-        centroids += [{
-            "id": "1",
-            "from": "5",
-            "to": None,
-            "x": 985 + 30,
-            "y": 0,
-        }]
+        centroids += [
+            {
+                "id": "1",
+                "from": None,
+                "to": "1",
+                "x": -30,
+                "y": 0,
+            }
+        ]
+        centroids += [
+            {
+                "id": "1",
+                "from": "5",
+                "to": None,
+                "x": 985 + 30,
+                "y": 0,
+            }
+        ]
         return centroids
 
     def specify_routes(self, net_params):
@@ -226,7 +189,7 @@ class BottleneckNetwork(Network):
             "2": ["2", "3", "4", "5"],
             "3": ["3", "4", "5"],
             "4": ["4", "5"],
-            "5": ["5"]
+            "5": ["5"],
         }
 
         return rts

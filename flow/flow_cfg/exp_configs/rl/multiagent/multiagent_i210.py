@@ -41,12 +41,14 @@ edges_distribution.remove("ghost0")
 
 # SET UP PARAMETERS FOR THE ENVIRONMENT
 additional_env_params = ADDITIONAL_ENV_PARAMS.copy()
-additional_env_params.update({
-    'max_accel': 1,
-    'max_decel': 1,
-    # configure the observation space. Look at the I210MultiEnv class for more info.
-    'lead_obs': True,
-})
+additional_env_params.update(
+    {
+        "max_accel": 1,
+        "max_decel": 1,
+        # configure the observation space. Look at the I210MultiEnv class for more info.
+        "lead_obs": True,
+    }
+)
 
 # CREATE VEHICLE TYPES AND INFLOWS
 # no vehicles in the network
@@ -56,7 +58,7 @@ vehicles.add(
     num_vehicles=0,
     lane_change_params=SumoLaneChangeParams(
         lane_change_mode="strategic",
-    )
+    ),
 )
 vehicles.add(
     "av",
@@ -75,7 +77,8 @@ inflow.add(
     vehs_per_hour=8378 * pen_rate,
     # probability=1.0,
     depart_lane="random",
-    depart_speed=20)
+    depart_speed=20,
+)
 # on ramp
 # inflow.add(
 #     veh_type="human",
@@ -98,7 +101,8 @@ inflow.add(
     vehs_per_hour=int(8378 * pen_rate),
     # probability=1.0,
     departLane="random",
-    departSpeed=20)
+    departSpeed=20,
+)
 # # on ramp
 # inflow.add(
 #     veh_type="av",
@@ -114,52 +118,38 @@ inflow.add(
 #     departSpeed=20)
 
 NET_TEMPLATE = os.path.join(
-    config.PROJECT_PATH,
-    "examples/exp_configs/templates/sumo/test2.net.xml")
+    config.PROJECT_PATH, "examples/exp_configs/templates/sumo/test2.net.xml"
+)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag='I_210_subnetwork',
-
+    exp_tag="I_210_subnetwork",
     # name of the flow environment the experiment is running on
     env_name=I210MultiEnv,
-
     # name of the network class the experiment is running on
     network=I210SubNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # simulation-related parameters
     sim=SumoParams(
-        sim_step=0.8,
-        render=False,
-        color_by_speed=True,
-        restart_instance=True
+        sim_step=0.8, render=False, color_by_speed=True, restart_instance=True
     ),
-
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
         sims_per_step=1,
         additional_params=additional_env_params,
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
         inflows=inflow,
         template=NET_TEMPLATE,
-        additional_params={
-            "on_ramp": False,
-            "ghost_edge": False
-        }
+        additional_params={"on_ramp": False, "ghost_edge": False},
     ),
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
@@ -179,11 +169,11 @@ test_env = create_env()
 obs_space = test_env.observation_space
 act_space = test_env.action_space
 
-POLICY_GRAPHS = {'av': (PPOTFPolicy, obs_space, act_space, {})}
+POLICY_GRAPHS = {"av": (PPOTFPolicy, obs_space, act_space, {})}
 
-POLICIES_TO_TRAIN = ['av']
+POLICIES_TO_TRAIN = ["av"]
 
 
 def policy_mapping_fn(_):
     """Map a policy in RLlib."""
-    return 'av'
+    return "av"

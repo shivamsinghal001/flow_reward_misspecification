@@ -24,8 +24,8 @@ def merge_baseline(num_runs, render=True):
         flow.core.experiment.Experiment
             class needed to run simulations
     """
-    sim_params = flow_params['sim']
-    env_params = flow_params['env']
+    sim_params = flow_params["sim"]
+    env_params = flow_params["env"]
 
     # modify the rendering to match what is requested
     sim_params.render = render
@@ -33,18 +33,18 @@ def merge_baseline(num_runs, render=True):
     # set the evaluation flag to True
     env_params.evaluate = True
 
-    flow_params['env'].horizon = env_params.horizon
+    flow_params["env"].horizon = env_params.horizon
     exp = Experiment(flow_params)
 
     results = exp.run(num_runs)
-    avg_speed = np.mean(results['returns'])
+    avg_speed = np.mean(results["returns"])
 
     return avg_speed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runs = 2  # number of simulations to average over
     res = merge_baseline(num_runs=runs, render=False)
 
-    print('---------')
-    print('The average speed across {} runs is {}'.format(runs, res))
+    print("---------")
+    print("The average speed across {} runs is {}".format(runs, res))

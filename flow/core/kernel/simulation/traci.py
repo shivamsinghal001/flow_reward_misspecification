@@ -76,16 +76,18 @@ class TraCISimulation(KernelSimulation):
 
         # subscribe some simulation parameters needed to check for entering,
         # exiting, and colliding vehicles
-        self.kernel_api.simulation.subscribe([
-            tc.VAR_DEPARTED_VEHICLES_IDS,
-            tc.VAR_ARRIVED_VEHICLES_IDS,
-            tc.VAR_TELEPORT_STARTING_VEHICLES_IDS,
-            tc.VAR_TIME_STEP,
-            tc.VAR_DELTA_T,
-            tc.VAR_LOADED_VEHICLES_NUMBER,
-            tc.VAR_DEPARTED_VEHICLES_NUMBER,
-            tc.VAR_ARRIVED_VEHICLES_NUMBER
-        ])
+        self.kernel_api.simulation.subscribe(
+            [
+                tc.VAR_DEPARTED_VEHICLES_IDS,
+                tc.VAR_ARRIVED_VEHICLES_IDS,
+                tc.VAR_TELEPORT_STARTING_VEHICLES_IDS,
+                tc.VAR_TIME_STEP,
+                tc.VAR_DELTA_T,
+                tc.VAR_LOADED_VEHICLES_NUMBER,
+                tc.VAR_DEPARTED_VEHICLES_NUMBER,
+                tc.VAR_ARRIVED_VEHICLES_NUMBER,
+            ]
+        )
 
     def simulation_step(self):
         """See parent class."""
@@ -115,32 +117,36 @@ class TraCISimulation(KernelSimulation):
                     self.stored_data[veh_id][t] = dict()
 
                 # Add the speed, position, and lane data.
-                self.stored_data[veh_id][t].update({
-                    "speed": kv.get_speed(veh_id),
-                    "lane_number": kv.get_lane(veh_id),
-                    "edge_id": kv.get_edge(veh_id),
-                    "relative_position": kv.get_position(veh_id),
-                    "x": position[0],
-                    "y": position[1],
-                    "headway": kv.get_headway(veh_id),
-                    "leader_id": kv.get_leader(veh_id),
-                    "follower_id": kv.get_follower(veh_id),
-                    "leader_rel_speed":
-                        kv.get_speed(kv.get_leader(veh_id))
+                self.stored_data[veh_id][t].update(
+                    {
+                        "speed": kv.get_speed(veh_id),
+                        "lane_number": kv.get_lane(veh_id),
+                        "edge_id": kv.get_edge(veh_id),
+                        "relative_position": kv.get_position(veh_id),
+                        "x": position[0],
+                        "y": position[1],
+                        "headway": kv.get_headway(veh_id),
+                        "leader_id": kv.get_leader(veh_id),
+                        "follower_id": kv.get_follower(veh_id),
+                        "leader_rel_speed": kv.get_speed(kv.get_leader(veh_id))
                         - kv.get_speed(veh_id),
-                    "target_accel_with_noise_with_failsafe":
-                        kv.get_accel(veh_id, noise=True, failsafe=True),
-                    "target_accel_no_noise_no_failsafe":
-                        kv.get_accel(veh_id, noise=False, failsafe=False),
-                    "target_accel_with_noise_no_failsafe":
-                        kv.get_accel(veh_id, noise=True, failsafe=False),
-                    "target_accel_no_noise_with_failsafe":
-                        kv.get_accel(veh_id, noise=False, failsafe=True),
-                    "realized_accel":
-                        kv.get_realized_accel(veh_id),
-                    "road_grade": kv.get_road_grade(veh_id),
-                    "distance": kv.get_distance(veh_id),
-                })
+                        "target_accel_with_noise_with_failsafe": kv.get_accel(
+                            veh_id, noise=True, failsafe=True
+                        ),
+                        "target_accel_no_noise_no_failsafe": kv.get_accel(
+                            veh_id, noise=False, failsafe=False
+                        ),
+                        "target_accel_with_noise_no_failsafe": kv.get_accel(
+                            veh_id, noise=True, failsafe=False
+                        ),
+                        "target_accel_no_noise_with_failsafe": kv.get_accel(
+                            veh_id, noise=False, failsafe=True
+                        ),
+                        "realized_accel": kv.get_realized_accel(veh_id),
+                        "road_grade": kv.get_road_grade(veh_id),
+                        "distance": kv.get_distance(veh_id),
+                    }
+                )
 
     def close(self):
         """See parent class."""
@@ -185,10 +191,15 @@ class TraCISimulation(KernelSimulation):
 
                 # command used to start sumo
                 sumo_call = [
-                    sumo_binary, "-c", network.cfg,
-                    "--remote-port", str(sim_params.port),
-                    "--num-clients", str(sim_params.num_clients),
-                    "--step-length", str(sim_params.sim_step)
+                    sumo_binary,
+                    "-c",
+                    network.cfg,
+                    "--remote-port",
+                    str(sim_params.port),
+                    "--num-clients",
+                    str(sim_params.num_clients),
+                    "--step-length",
+                    str(sim_params.sim_step),
                 ]
 
                 # use a ballistic integration step (if request)
@@ -228,16 +239,14 @@ class TraCISimulation(KernelSimulation):
                 logging.info(" Starting SUMO on port " + str(port))
                 logging.debug(" Cfg file: " + str(network.cfg))
                 if sim_params.num_clients > 1:
-                    logging.info(" Num clients are" +
-                                 str(sim_params.num_clients))
+                    logging.info(" Num clients are" + str(sim_params.num_clients))
                 logging.debug(" Emission file: " + str(self.emission_path))
                 logging.debug(" Step length: " + str(sim_params.sim_step))
 
                 # Opening the I/O thread to SUMO
                 self.sumo_proc = subprocess.Popen(
-                    sumo_call,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL)
+                    sumo_call, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
 
                 # wait a small period of time for the subprocess to activate
                 # before trying to connect with traci
@@ -283,7 +292,8 @@ class TraCISimulation(KernelSimulation):
 
         # Get a csv name for the emission file.
         name = "{}-{}_emission.csv".format(
-            self.master_kernel.network.network.name, run_id)
+            self.master_kernel.network.network.name, run_id
+        )
 
         # The name of all stored data-points (excluding id and time)
         stored_ids = [
@@ -312,14 +322,14 @@ class TraCISimulation(KernelSimulation):
 
         for veh_id in self.stored_data.keys():
             for t in self.stored_data[veh_id].keys():
-                final_data['time'].append(t)
-                final_data['id'].append(veh_id)
+                final_data["time"].append(t)
+                final_data["id"].append(veh_id)
                 for key in stored_ids:
                     final_data[key].append(self.stored_data[veh_id][t][key])
 
         with open(os.path.join(self.emission_path, name), "w") as f:
             print(os.path.join(self.emission_path, name), self.emission_path)
-            writer = csv.writer(f, delimiter=',')
+            writer = csv.writer(f, delimiter=",")
             writer.writerow(final_data.keys())
             writer.writerows(zip(*final_data.values()))
 

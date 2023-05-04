@@ -16,11 +16,27 @@ RED = (255, 0, 0)
 
 # this is used when identifying if a specific object is tracked
 INFOS_ATTR_BY_INDEX = [
-    'CurrentPos', 'distance2End', 'xCurrentPos', 'yCurrentPos', 'zCurrentPos',
-    'xCurrentPosBack', 'yCurrentPosBack', 'zCurrentPosBack', 'CurrentSpeed',
-    'TotalDistance', 'SectionEntranceT', 'CurrentStopTime', 'stopped',
-    'idSection', 'segment', 'numberLane', 'idJunction', 'idSectionFrom',
-    'idLaneFrom', 'idSectionTo', 'idLaneTo'
+    "CurrentPos",
+    "distance2End",
+    "xCurrentPos",
+    "yCurrentPos",
+    "zCurrentPos",
+    "xCurrentPosBack",
+    "yCurrentPosBack",
+    "zCurrentPosBack",
+    "CurrentSpeed",
+    "TotalDistance",
+    "SectionEntranceT",
+    "CurrentStopTime",
+    "stopped",
+    "idSection",
+    "segment",
+    "numberLane",
+    "idJunction",
+    "idSectionFrom",
+    "idLaneFrom",
+    "idSectionTo",
+    "idLaneTo",
 ]
 
 
@@ -30,9 +46,7 @@ class AimsunKernelVehicle(KernelVehicle):
     Extends KernelVehicle.
     """
 
-    def __init__(self,
-                 master_kernel,
-                 sim_params):
+    def __init__(self, master_kernel, sim_params):
         """See parent class."""
         KernelVehicle.__init__(self, master_kernel, sim_params)
 
@@ -89,12 +103,22 @@ class AimsunKernelVehicle(KernelVehicle):
         # TotalDistance, SectionEntranceT, CurrentStopTime, stopped,
         # idSection, segment, numberLane, idJunction, idSectionFrom,
         # idLaneFrom, idSectionTo, idLaneTo
-        self.tracked_info_bitmap = self.make_bitmap_for_tracking({
-            'CurrentPos', 'distance2End',
-            'xCurrentPos', 'yCurrentPos', 'xCurrentPosBack', 'yCurrentPosBack',
-            'CurrentSpeed', 'numberLane',
-            'idSection', 'idJunction', 'idSectionFrom', 'idSectionTo'
-        })
+        self.tracked_info_bitmap = self.make_bitmap_for_tracking(
+            {
+                "CurrentPos",
+                "distance2End",
+                "xCurrentPos",
+                "yCurrentPos",
+                "xCurrentPosBack",
+                "yCurrentPosBack",
+                "CurrentSpeed",
+                "numberLane",
+                "idSection",
+                "idJunction",
+                "idSectionFrom",
+                "idSectionTo",
+            }
+        )
         # FIXME lots of these used in simulation/aimsun.py, used when
         # we want to store the values in an emission file (necessary?)
 
@@ -116,14 +140,14 @@ class AimsunKernelVehicle(KernelVehicle):
 
         self.__vehicles.clear()
         for typ in vehicles.initial:
-            for i in range(typ['num_vehicles']):
-                veh_id = '{}_{}'.format(typ['veh_id'], i)
+            for i in range(typ["num_vehicles"]):
+                veh_id = "{}_{}".format(typ["veh_id"], i)
                 self.__vehicles[veh_id] = dict()
-                self.__vehicles[veh_id]['type'] = typ['veh_id']
-                self.__vehicles[veh_id]['type_name'] = typ['veh_id']  # FIXME
-                self.__vehicles[veh_id]['initial_speed'] = typ['initial_speed']
+                self.__vehicles[veh_id]["type"] = typ["veh_id"]
+                self.__vehicles[veh_id]["type_name"] = typ["veh_id"]  # FIXME
+                self.__vehicles[veh_id]["initial_speed"] = typ["initial_speed"]
                 self.num_vehicles += 1
-                if typ['acceleration_controller'][0] == RLController:
+                if typ["acceleration_controller"][0] == RLController:
                     self.num_rl_vehicles += 1
 
         # for tracked_type in self.tracked_vehicle_types:
@@ -153,7 +177,7 @@ class AimsunKernelVehicle(KernelVehicle):
         bitmap = ""
 
         for attr in INFOS_ATTR_BY_INDEX:
-            bitmap += '1' if attr in infos else '0'
+            bitmap += "1" if attr in infos else "0"
 
         return bitmap
 
@@ -199,55 +223,66 @@ class AimsunKernelVehicle(KernelVehicle):
             aimsun_id = self._id_flow2aimsun[veh_id]
 
             # update the vehicle's tracking information
-            self.__vehicles[veh_id]['tracking_info'] = \
-                self.kernel_api.get_vehicle_tracking_info(
-                    aimsun_id, self.tracked_info_bitmap
-                )
+            self.__vehicles[veh_id][
+                "tracking_info"
+            ] = self.kernel_api.get_vehicle_tracking_info(
+                aimsun_id, self.tracked_info_bitmap
+            )
 
             # get the leader, follower, and headway for each tracked vehicle
             lead_id_aimsun = self.kernel_api.get_vehicle_leader(aimsun_id)
             if lead_id_aimsun < -1:
-                self.__vehicles[veh_id]['leader'] = None
-                self.__vehicles[veh_id]['headway'] = 1000
+                self.__vehicles[veh_id]["leader"] = None
+                self.__vehicles[veh_id]["headway"] = 1000
             else:
-                inf_veh = self.__vehicles[veh_id]['tracking_info']
+                inf_veh = self.__vehicles[veh_id]["tracking_info"]
 
                 if lead_id_aimsun in self._id_aimsun2flow:
                     lead_id = self._id_aimsun2flow[lead_id_aimsun]
-                    inf_veh_leader = self.__vehicles[lead_id]['tracking_info']
-                    leader_length = self.__vehicles[lead_id]['static_info'].\
-                        length
-                    self.__vehicles[veh_id]['leader'] = lead_id
-                    self.__vehicles[lead_id]['follower'] = veh_id
+                    inf_veh_leader = self.__vehicles[lead_id]["tracking_info"]
+                    leader_length = self.__vehicles[lead_id]["static_info"].length
+                    self.__vehicles[veh_id]["leader"] = lead_id
+                    self.__vehicles[lead_id]["follower"] = veh_id
                 else:
                     # TODO can be hardcoded when we won't change it anymore
-                    tracked_info_leader = self.make_bitmap_for_tracking({
-                        'CurrentPos', 'distance2End',
-                        'idSection', 'idJunction',
-                        'idSectionFrom', 'idSectionTo'
-                    })
+                    tracked_info_leader = self.make_bitmap_for_tracking(
+                        {
+                            "CurrentPos",
+                            "distance2End",
+                            "idSection",
+                            "idJunction",
+                            "idSectionFrom",
+                            "idSectionTo",
+                        }
+                    )
 
                     inf_veh_leader = self.kernel_api.get_vehicle_tracking_info(
                         lead_id_aimsun, tracked_info_leader, tracked=False
                     )
-                    leader_length = self.kernel_api.\
-                        get_vehicle_length(lead_id_aimsun)
-                    self.__vehicles[veh_id]['leader'] = -1
+                    leader_length = self.kernel_api.get_vehicle_length(lead_id_aimsun)
+                    self.__vehicles[veh_id]["leader"] = -1
 
                 # FIXME can be simplified
                 if inf_veh.idSection != -1:  # vehicle is in a section
                     next_section = self.kernel_api.get_next_section(
-                        aimsun_id, inf_veh.idSection)
+                        aimsun_id, inf_veh.idSection
+                    )
                     # leader is in a section
                     if inf_veh_leader.idSection != -1:
                         # veh in section and leader in same section
                         if inf_veh.idSection == inf_veh_leader.idSection:
-                            gap = inf_veh_leader.CurrentPos\
-                                - inf_veh.CurrentPos - leader_length
+                            gap = (
+                                inf_veh_leader.CurrentPos
+                                - inf_veh.CurrentPos
+                                - leader_length
+                            )
                         # veh in section and leader in next section
                         elif inf_veh_leader.idSection == next_section:
-                            gap = inf_veh.distance2End\
-                                + inf_veh_leader.CurrentPos - leader_length
+                            gap = (
+                                inf_veh.distance2End
+                                + inf_veh_leader.CurrentPos
+                                - leader_length
+                            )
                             # TODO need to add junction length (we have
                             # turning id -> get its length)
                         # veh in section and leader several sections ahead
@@ -257,8 +292,11 @@ class AimsunKernelVehicle(KernelVehicle):
                     else:
                         # veh in section and leader in next junction
                         if inf_veh_leader.idSectionFrom == inf_veh.idSection:
-                            gap = inf_veh.distance2End\
-                                + inf_veh_leader.CurrentPos - leader_length
+                            gap = (
+                                inf_veh.distance2End
+                                + inf_veh_leader.CurrentPos
+                                - leader_length
+                            )
                         # veh in section and leader several junctions ahead
                         else:
                             # TODO
@@ -267,8 +305,11 @@ class AimsunKernelVehicle(KernelVehicle):
                     if inf_veh_leader.idSection == -1:
                         # veh in junction and leader in same junction
                         if inf_veh.idJunction == inf_veh_leader.idJunction:
-                            gap = inf_veh_leader.CurrentPos\
-                                - inf_veh.CurrentPos - leader_length
+                            gap = (
+                                inf_veh_leader.CurrentPos
+                                - inf_veh.CurrentPos
+                                - leader_length
+                            )
                         # veh in junction and leader in next junction
                         # veh in junction and leader several junctions ahead
                         else:
@@ -277,14 +318,17 @@ class AimsunKernelVehicle(KernelVehicle):
                     else:
                         # veh in junction and leader in next section
                         if inf_veh_leader.idSection == inf_veh.idSectionTo:
-                            gap = inf_veh.distance2End\
-                                + inf_veh_leader.CurrentPos - leader_length
+                            gap = (
+                                inf_veh.distance2End
+                                + inf_veh_leader.CurrentPos
+                                - leader_length
+                            )
                         # veh in junction and leader several sections ahead
                         else:
                             # TODO
                             gap = 1004
 
-                self.__vehicles[veh_id]['headway'] = gap
+                self.__vehicles[veh_id]["headway"] = gap
 
         # end = time.time()
         # if len(self.__ids) > 0:
@@ -308,7 +352,7 @@ class AimsunKernelVehicle(KernelVehicle):
             if type_id not in self.num_type:
                 self.num_type[type_id] = 0
                 self.total_num_type[type_id] = 0
-            veh_id = '{}_{}'.format(type_id, self.total_num_type[type_id])
+            veh_id = "{}_{}".format(type_id, self.total_num_type[type_id])
             self.num_type[type_id] += 1
             self.total_num_type[type_id] += 1
             self.__ids.append(veh_id)
@@ -324,31 +368,28 @@ class AimsunKernelVehicle(KernelVehicle):
         self.__vehicles[veh_id]["type_name"] = type_id
 
         # store an empty tracking info object
-        self.__vehicles[veh_id]['tracking_info'] = InfVeh()
+        self.__vehicles[veh_id]["tracking_info"] = InfVeh()
 
         if type_id in self.type_parameters:
             # specify the acceleration controller class
-            accel_controller = \
-                self.type_parameters[type_id]["acceleration_controller"]
-            car_following_params = \
-                self.type_parameters[type_id]["car_following_params"]
-            self.__vehicles[veh_id]["acc_controller"] = \
-                accel_controller[0](veh_id,
-                                    car_following_params=car_following_params,
-                                    **accel_controller[1])
+            accel_controller = self.type_parameters[type_id]["acceleration_controller"]
+            car_following_params = self.type_parameters[type_id]["car_following_params"]
+            self.__vehicles[veh_id]["acc_controller"] = accel_controller[0](
+                veh_id, car_following_params=car_following_params, **accel_controller[1]
+            )
 
             # specify the lane-changing controller class
-            lc_controller = \
-                self.type_parameters[type_id]["lane_change_controller"]
-            self.__vehicles[veh_id]["lane_changer"] = \
-                lc_controller[0](veh_id=veh_id, **lc_controller[1])
+            lc_controller = self.type_parameters[type_id]["lane_change_controller"]
+            self.__vehicles[veh_id]["lane_changer"] = lc_controller[0](
+                veh_id=veh_id, **lc_controller[1]
+            )
 
             # specify the routing controller class
             rt_controller = self.type_parameters[type_id]["routing_controller"]
             if rt_controller is not None:
-                self.__vehicles[veh_id]["router"] = \
-                    rt_controller[0](veh_id=veh_id,
-                                     router_params=rt_controller[1])
+                self.__vehicles[veh_id]["router"] = rt_controller[0](
+                    veh_id=veh_id, router_params=rt_controller[1]
+                )
             else:
                 self.__vehicles[veh_id]["router"] = None
 
@@ -390,11 +431,13 @@ class AimsunKernelVehicle(KernelVehicle):
             type_id=type_id,
             pos=pos,
             speed=speed,
-            next_section=next_section)
+            next_section=next_section,
+        )
 
-        self.__vehicles[veh_id]['static_info'] =\
-            self.kernel_api.get_vehicle_static_info(aimsun_id)
-        self.__vehicles[veh_id]['tracking_info'] = InfVeh()
+        self.__vehicles[veh_id][
+            "static_info"
+        ] = self.kernel_api.get_vehicle_static_info(aimsun_id)
+        self.__vehicles[veh_id]["tracking_info"] = InfVeh()
 
         # set the Aimsun/Flow vehicle ID converters
         self._id_aimsun2flow[aimsun_id] = veh_id
@@ -417,7 +460,7 @@ class AimsunKernelVehicle(KernelVehicle):
         veh_id = self._id_aimsun2flow[aimsun_id]
         self.kernel_api.remove_vehicle(aimsun_id)
 
-        type_id = self.__vehicles[veh_id]['type_name']
+        type_id = self.__vehicles[veh_id]["type_name"]
         self.num_type[type_id] -= 1
 
         # remove from the vehicles kernel
@@ -488,7 +531,8 @@ class AimsunKernelVehicle(KernelVehicle):
         if any(d not in [-2, -1, 0, 1] for d in direction):
             raise ValueError(
                 "Direction values for lane changes may only be: -2, -1, 0, \
-                or 1.")
+                or 1."
+            )
 
         for i, veh_id in enumerate(veh_id):
             # check for no lane change
@@ -501,7 +545,8 @@ class AimsunKernelVehicle(KernelVehicle):
             this_edge = self.get_edge(veh_id)
             target_lane = min(
                 max(this_lane + direction[i], 0),
-                self.master_kernel.network.num_lanes(this_edge) - 1)
+                self.master_kernel.network.num_lanes(this_edge) - 1,
+            )
 
             # perform the requested lane action action in Aimsun
             if target_lane != this_lane:
@@ -509,8 +554,7 @@ class AimsunKernelVehicle(KernelVehicle):
                 self.kernel_api.apply_lane_change(aimsun_id, int(target_lane))
 
                 if veh_id in self.get_rl_ids():
-                    self.prev_last_lc[veh_id] = \
-                        self.__vehicles[veh_id]["last_lc"]
+                    self.prev_last_lc[veh_id] = self.__vehicles[veh_id]["last_lc"]
 
     def choose_routes(self, veh_id, route_choices):
         """Update the route choice of vehicles in the network.
@@ -625,14 +669,14 @@ class AimsunKernelVehicle(KernelVehicle):
         """See parent class."""
         if len(self._num_departed) == 0:
             return 0
-        num_inflow = self._num_departed[-int(time_span / self.sim_step):]
+        num_inflow = self._num_departed[-int(time_span / self.sim_step) :]
         return 3600 * sum(num_inflow) / (len(num_inflow) * self.sim_step)
 
     def get_outflow_rate(self, time_span):
         """See parent class."""
         if len(self._num_arrived) == 0:
             return 0
-        num_outflow = self._num_arrived[-int(time_span / self.sim_step):]
+        num_outflow = self._num_arrived[-int(time_span / self.sim_step) :]
         return 3600 * sum(num_outflow) / (len(num_outflow) * self.sim_step)
 
     def get_num_arrived(self):
@@ -672,7 +716,7 @@ class AimsunKernelVehicle(KernelVehicle):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_type(veh) for veh in veh_id]
-        return self.__vehicles.get(veh_id, {}).get('type_name', "")
+        return self.__vehicles.get(veh_id, {}).get("type_name", "")
 
     def get_initial_speed(self, veh_id):
         """See parent class."""
@@ -682,7 +726,7 @@ class AimsunKernelVehicle(KernelVehicle):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_speed(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['tracking_info'].CurrentSpeed / 3.6
+        return self.__vehicles[veh_id]["tracking_info"].CurrentSpeed / 3.6
 
     def get_default_speed(self, veh_id, error=-1001):
         """See parent class."""
@@ -692,7 +736,7 @@ class AimsunKernelVehicle(KernelVehicle):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_position(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['tracking_info'].CurrentPos
+        return self.__vehicles[veh_id]["tracking_info"].CurrentPos
 
     def get_position_world(self, veh_id, error=-1001):
         """Return the position of the vehicle relative to its current edge.
@@ -715,23 +759,25 @@ class AimsunKernelVehicle(KernelVehicle):
         """
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_position_world(veh, error) for veh in veh_id]
-        x_pos = self.__vehicles[veh_id]['tracking_info'].xCurrentPos
-        y_pos = self.__vehicles[veh_id]['tracking_info'].yCurrentPos
-        z_pos = self.__vehicles[veh_id]['tracking_info'].zCurrentPos
+        x_pos = self.__vehicles[veh_id]["tracking_info"].xCurrentPos
+        y_pos = self.__vehicles[veh_id]["tracking_info"].yCurrentPos
+        z_pos = self.__vehicles[veh_id]["tracking_info"].zCurrentPos
         return [x_pos, y_pos, z_pos]
 
     def get_edge(self, veh_id, error=""):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_edge(veh, error) for veh in veh_id]
-        edge_aimsun_id = self.__vehicles[veh_id]['tracking_info'].idSection
+        edge_aimsun_id = self.__vehicles[veh_id]["tracking_info"].idSection
         if edge_aimsun_id < 0:
             # TODO: add from and to lanes in junctions
             from_edge = self.master_kernel.network.flow_edge_name(
-                self.__vehicles[veh_id]['tracking_info'].idSectionFrom)
+                self.__vehicles[veh_id]["tracking_info"].idSectionFrom
+            )
             to_edge = self.master_kernel.network.flow_edge_name(
-                self.__vehicles[veh_id]['tracking_info'].idSectionTo)
-            return '{}_to_{}'.format(from_edge, to_edge)
+                self.__vehicles[veh_id]["tracking_info"].idSectionTo
+            )
+            return "{}_to_{}".format(from_edge, to_edge)
         else:
             return self.master_kernel.network.flow_edge_name(edge_aimsun_id)
 
@@ -756,17 +802,17 @@ class AimsunKernelVehicle(KernelVehicle):
         if veh_id not in self.__vehicles:
             return error
         else:
-            x2 = self.__vehicles[veh_id]['tracking_info'].xCurrentPos
-            y2 = self.__vehicles[veh_id]['tracking_info'].yCurrentPos
-            x1 = self.__vehicles[veh_id]['tracking_info'].xCurrentPosBack
-            y1 = self.__vehicles[veh_id]['tracking_info'].yCurrentPosBack
-            return np.arctan2(y2-y1, x2-x1)
+            x2 = self.__vehicles[veh_id]["tracking_info"].xCurrentPos
+            y2 = self.__vehicles[veh_id]["tracking_info"].yCurrentPos
+            x1 = self.__vehicles[veh_id]["tracking_info"].xCurrentPosBack
+            y1 = self.__vehicles[veh_id]["tracking_info"].yCurrentPosBack
+            return np.arctan2(y2 - y1, x2 - x1)
 
     def get_lane(self, veh_id, error=-1001):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_lane(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['tracking_info'].numberLane
+        return self.__vehicles[veh_id]["tracking_info"].numberLane
 
     def get_route(self, veh_id, error=None):
         """See parent class."""
@@ -783,25 +829,25 @@ class AimsunKernelVehicle(KernelVehicle):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_length(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['static_info'].length
+        return self.__vehicles[veh_id]["static_info"].length
 
     def get_leader(self, veh_id, error=""):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_leader(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['leader'] or error
+        return self.__vehicles[veh_id]["leader"] or error
 
     def get_follower(self, veh_id, error=""):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_follower(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['follower']
+        return self.__vehicles[veh_id]["follower"]
 
     def get_headway(self, veh_id, error=-1001):
         """See parent class."""
         if isinstance(veh_id, (list, np.ndarray)):
             return [self.get_headway(veh, error) for veh in veh_id]
-        return self.__vehicles[veh_id]['headway']
+        return self.__vehicles[veh_id]["headway"]
 
     def get_last_lc(self, veh_id, error=-1001):
         """See parent class."""
@@ -825,8 +871,9 @@ class AimsunKernelVehicle(KernelVehicle):
 
     def get_x_by_id(self, veh_id):
         """See parent class."""
-        return self.master_kernel.network.get_x(self.get_edge(veh_id),
-                                                self.get_position(veh_id))
+        return self.master_kernel.network.get_x(
+            self.get_edge(veh_id), self.get_position(veh_id)
+        )
 
     def set_lane_headways(self, veh_id, lane_headways):
         """See parent class."""

@@ -24,24 +24,31 @@ def parse_args(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Parse argument used when running a Flow simulation.",
-        epilog="python trpo_runner.py BENCHMARK_NAME")
+        epilog="python trpo_runner.py BENCHMARK_NAME",
+    )
 
     # required input parameters
     parser.add_argument(
-        'benchmark_name', type=str,
-        help='Name of the experiment configuration file, as located in '
-             'flow/benchmarks.')
+        "benchmark_name",
+        type=str,
+        help="Name of the experiment configuration file, as located in "
+        "flow/benchmarks.",
+    )
 
     # optional input parameters
+    parser.add_argument("--num_cpus", type=int, default=1, help="How many CPUs to use.")
     parser.add_argument(
-        '--num_cpus', type=int, default=1,
-        help='How many CPUs to use.')
+        "--num_steps",
+        type=int,
+        default=9000000,
+        help="How many total steps to perform learning over.",
+    )
     parser.add_argument(
-        '--num_steps', type=int, default=9000000,
-        help='How many total steps to perform learning over.')
-    parser.add_argument(
-        '--rollout_size', type=int, default=30000,
-        help='How many steps are in a training batch.')
+        "--rollout_size",
+        type=int,
+        default=30000,
+        help="How many steps are in a training batch.",
+    )
 
     return parser.parse_known_args(args)[0]
 
@@ -67,14 +74,12 @@ def run_model(params, rollout_size=50, num_steps=50):
     env = DummyVecEnv([lambda: constructor])
 
     model = TRPO(
-        'MlpPolicy',
+        "MlpPolicy",
         env,
         verbose=2,
         timesteps_per_batch=rollout_size,
         gamma=0.999,
-        policy_kwargs={
-            "net_arch": [100, 50, 25]
-        },
+        policy_kwargs={"net_arch": [100, 50, 25]},
     )
     model.learn(total_timesteps=num_steps)
 
@@ -93,31 +98,31 @@ def save_model(model, params, save_path):
     save_path : str
         path to saved model and experiment configuration files
     """
-    print('Saving the trained model!')
+    print("Saving the trained model!")
 
     # save the trained model
     model.save(os.path.join(save_path, "model"))
 
     # dump the flow params
-    with open(os.path.join(save_path, 'flow_params.json'), 'w') as outfile:
-        json.dump(
-            params, outfile, cls=FlowParamsEncoder, sort_keys=True, indent=4)
+    with open(os.path.join(save_path, "flow_params.json"), "w") as outfile:
+        json.dump(params, outfile, cls=FlowParamsEncoder, sort_keys=True, indent=4)
 
 
 if __name__ == "__main__":
     flags = parse_args(sys.argv[1:])
 
     # Import the benchmark and fetch its flow_params
-    module = __import__("flow.benchmarks.{}".format(flags.benchmark_name),
-                        fromlist=["flow_params"])
+    module = __import__(
+        "flow.benchmarks.{}".format(flags.benchmark_name), fromlist=["flow_params"]
+    )
     flow_params = module.flow_params
 
     # Path to the saved files
-    exp_tag = flow_params['exp_tag']
-    result_name = '{}/{}'.format(exp_tag, strftime("%Y-%m-%d-%H:%M:%S"))
+    exp_tag = flow_params["exp_tag"]
+    result_name = "{}/{}".format(exp_tag, strftime("%Y-%m-%d-%H:%M:%S"))
 
     # Define the save path and ensure that the required directories exist.
-    dir_path = os.path.realpath(os.path.expanduser('~/baseline_results'))
+    dir_path = os.path.realpath(os.path.expanduser("~/baseline_results"))
     ensure_dir(dir_path)
     path = os.path.join(dir_path, result_name)
 

@@ -6,8 +6,7 @@ import sys
 import os
 import flow.config as config
 
-SITEPACKAGES = os.path.join(config.AIMSUN_SITEPACKAGES,
-                            "lib/python2.7/site-packages")
+SITEPACKAGES = os.path.join(config.AIMSUN_SITEPACKAGES, "lib/python2.7/site-packages")
 sys.path.append(SITEPACKAGES)
 
 from flow.core.params import InFlows
@@ -18,27 +17,26 @@ import json
 import numpy as np
 
 
-sys.path.append(os.path.join(config.AIMSUN_NEXT_PATH,
-                             'programming/Aimsun Next API/AAPIPython/Micro'))
+sys.path.append(
+    os.path.join(
+        config.AIMSUN_NEXT_PATH, "programming/Aimsun Next API/AAPIPython/Micro"
+    )
+)
 
 
 # Load an empty template
 gui = GKGUISystem.getGUISystem().getActiveGui()
-gui.newDoc(os.path.join(config.PROJECT_PATH,
-                        "flow/utils/aimsun/Aimsun_Flow.ang"),
-           "EPSG:32601")
+gui.newDoc(
+    os.path.join(config.PROJECT_PATH, "flow/utils/aimsun/Aimsun_Flow.ang"), "EPSG:32601"
+)
 model = gui.getActiveModel()
 
 # HACK: Store port in author
 port_string = sys.argv[1]
 model.setAuthor(port_string)
 
-def generate_net(nodes,
-                 edges,
-                 connections,
-                 inflows,
-                 veh_types,
-                 traffic_lights):
+
+def generate_net(nodes, edges, connections, inflows, veh_types, traffic_lights):
     """Generate a network in the Aimsun template.
 
     Parameters
@@ -79,8 +77,7 @@ def generate_net(nodes,
             model.getCommander().addCommand(cmd)
             section = cmd.createdObject()
             section.setName(edge["id"])
-            edge_aimsun = model.getCatalog().findByName(
-                edge["id"], type_section)
+            edge_aimsun = model.getCatalog().findByName(edge["id"], type_section)
             edge_aimsun.setSpeed(edge["speed"] * 3.6)
         else:
             first_node, last_node = get_edge_nodes(edge, nodes)
@@ -90,59 +87,68 @@ def generate_net(nodes,
 
             # offset edge ends if there is a radius in the node
             if "radius" in first_node:
-                first_node_offset[0] = first_node["radius"] * \
-                    np.cos(theta*np.pi/180)
-                first_node_offset[1] = first_node["radius"] * \
-                    np.sin(theta*np.pi/180)
+                first_node_offset[0] = first_node["radius"] * np.cos(
+                    theta * np.pi / 180
+                )
+                first_node_offset[1] = first_node["radius"] * np.sin(
+                    theta * np.pi / 180
+                )
             if "radius" in last_node:
-                last_node_offset[0] = - last_node["radius"] * \
-                    np.cos(theta*np.pi/180)
-                last_node_offset[1] = - last_node["radius"] * \
-                    np.sin(theta*np.pi/180)
+                last_node_offset[0] = -last_node["radius"] * np.cos(theta * np.pi / 180)
+                last_node_offset[1] = -last_node["radius"] * np.sin(theta * np.pi / 180)
 
             # offset edge ends if there are multiple edges between nodes
             # find the edges that share the first node
-            edges_shared_node = [edg for edg in edges
-                                 if first_node["id"] == edg["to"] or
-                                 last_node["id"] == edg["from"]]
+            edges_shared_node = [
+                edg
+                for edg in edges
+                if first_node["id"] == edg["to"] or last_node["id"] == edg["from"]
+            ]
             for new_edge in edges_shared_node:
                 new_first_node, new_last_node = get_edge_nodes(new_edge, nodes)
                 new_theta = get_edge_angle(new_first_node, new_last_node)
                 if new_theta == theta - 180 or new_theta == theta + 180:
-                    first_node_offset[0] += lane_width * 0.5 *\
-                        np.sin(theta * np.pi / 180)
-                    first_node_offset[1] -= lane_width * 0.5 * \
-                        np.cos(theta * np.pi / 180)
-                    last_node_offset[0] += lane_width * 0.5 *\
-                        np.sin(theta * np.pi / 180)
-                    last_node_offset[1] -= lane_width * 0.5 *\
-                        np.cos(theta * np.pi / 180)
+                    first_node_offset[0] += (
+                        lane_width * 0.5 * np.sin(theta * np.pi / 180)
+                    )
+                    first_node_offset[1] -= (
+                        lane_width * 0.5 * np.cos(theta * np.pi / 180)
+                    )
+                    last_node_offset[0] += (
+                        lane_width * 0.5 * np.sin(theta * np.pi / 180)
+                    )
+                    last_node_offset[1] -= (
+                        lane_width * 0.5 * np.cos(theta * np.pi / 180)
+                    )
                     break
 
             new_point = GKPoint()
-            new_point.set(first_node['x'] + first_node_offset[0],
-                          first_node['y'] + first_node_offset[1],
-                          0)
+            new_point.set(
+                first_node["x"] + first_node_offset[0],
+                first_node["y"] + first_node_offset[1],
+                0,
+            )
             points.append(new_point)
             new_point = GKPoint()
-            new_point.set(last_node['x'] + last_node_offset[0],
-                          last_node['y'] + last_node_offset[1],
-                          0)
+            new_point.set(
+                last_node["x"] + last_node_offset[0],
+                last_node["y"] + last_node_offset[1],
+                0,
+            )
             points.append(new_point)
             cmd = model.createNewCmd(type_section)
             cmd.setPoints(edge["numLanes"], lane_width, points)
             model.getCommander().addCommand(cmd)
             section = cmd.createdObject()
             section.setName(edge["id"])
-            edge_aimsun = model.getCatalog().findByName(
-                edge["id"], type_section)
+            edge_aimsun = model.getCatalog().findByName(edge["id"], type_section)
             edge_aimsun.setSpeed(edge["speed"] * 3.6)
 
     # draw nodes and connections
     for node in nodes:
         # add a new node in Aimsun
         node_pos = GKPoint()
-        node_pos.set(node['x'], node['y'], 0)
+        node_pos.set(node["x"], node["y"], 0)
         cmd = model.createNewCmd(type_node)
         cmd.setPosition(node_pos)
         model.getCommander().addCommand(cmd)
@@ -150,25 +156,28 @@ def generate_net(nodes,
         new_node.setName(node["id"])
 
         # list of edges from and to the node
-        from_edges = [
-            edge['id'] for edge in edges if edge['from'] == node['id']]
-        to_edges = [edge['id'] for edge in edges if edge['to'] == node['id']]
+        from_edges = [edge["id"] for edge in edges if edge["from"] == node["id"]]
+        to_edges = [edge["id"] for edge in edges if edge["to"] == node["id"]]
 
         # if the node is a junction with a list of connections
-        if len(to_edges) > 1 and len(from_edges) > 1 \
-                and connections[node['id']] is not None:
+        if (
+            len(to_edges) > 1
+            and len(from_edges) > 1
+            and connections[node["id"]] is not None
+        ):
             # add connections
-            for connection in connections[node['id']]:
+            for connection in connections[node["id"]]:
                 cmd = model.createNewCmd(type_turn)
                 from_section = model.getCatalog().findByName(
-                    connection["from"], type_section, True)
+                    connection["from"], type_section, True
+                )
                 to_section = model.getCatalog().findByName(
-                    connection["to"], type_section, True)
+                    connection["to"], type_section, True
+                )
                 cmd.setTurning(from_section, to_section)
                 model.getCommander().addCommand(cmd)
                 turn = cmd.createdObject()
-                turn_name = "{}_to_{}".format(connection["from"],
-                                              connection["to"])
+                turn_name = "{}_to_{}".format(connection["from"], connection["to"])
                 turn.setName(turn_name)
                 existing_node = turn.getNode()
                 if existing_node is not None:
@@ -182,9 +191,11 @@ def generate_net(nodes,
                 for j in range(len(to_edges)):
                     cmd = model.createNewCmd(type_turn)
                     to_section = model.getCatalog().findByName(
-                        from_edges[i], type_section, True)
+                        from_edges[i], type_section, True
+                    )
                     from_section = model.getCatalog().findByName(
-                        to_edges[j], type_section, True)
+                        to_edges[j], type_section, True
+                    )
                     cmd.setTurning(from_section, to_section)
                     model.getCommander().addCommand(cmd)
                     turn = cmd.createdObject()
@@ -199,7 +210,8 @@ def generate_net(nodes,
 
     # get the control plan
     control_plan = model.getCatalog().findByName(
-            "Control Plan", model.getType("GKControlPlan"))
+        "Control Plan", model.getType("GKControlPlan")
+    )
 
     # add traffic lights
     tls_properties = traffic_lights.get_properties()
@@ -207,9 +219,9 @@ def generate_net(nodes,
     junctions = get_junctions(nodes)
     # add meters for all nodes in junctions
     for node in junctions:
-        phases = tls_properties[node['id']]["phases"]
+        phases = tls_properties[node["id"]]["phases"]
         print(phases)
-        create_node_meters(model, control_plan, node['id'], phases)
+        create_node_meters(model, control_plan, node["id"], phases)
 
     # set vehicle types
     vehicles = model.getCatalog().getObjectsByType(type_vehicle)
@@ -229,22 +241,21 @@ def generate_net(nodes,
         new_state = create_state(model, veh_type["veh_id"])
         # find vehicle type
         veh_type = model.getCatalog().findByName(
-            veh_type["veh_id"], model.getType("GKVehicle"))
+            veh_type["veh_id"], model.getType("GKVehicle")
+        )
         # set state vehicles
         new_state.setVehicle(veh_type)
 
     # add traffic inflows to traffic states
     for inflow in inflows:
         traffic_state_aimsun = model.getCatalog().findByName(
-            inflow["vtype"], type_traffic_state)
-        edge_aimsun = model.getCatalog().findByName(
-            inflow['edge'], type_section)
-        traffic_state_aimsun.setEntranceFlow(
-            edge_aimsun, None, inflow['vehsPerHour'])
+            inflow["vtype"], type_traffic_state
+        )
+        edge_aimsun = model.getCatalog().findByName(inflow["edge"], type_section)
+        traffic_state_aimsun.setEntranceFlow(edge_aimsun, None, inflow["vehsPerHour"])
 
     # get traffic demand
-    demand = model.getCatalog().findByName(
-        "Traffic Demand 864", type_demand)
+    demand = model.getCatalog().findByName("Traffic Demand 864", type_demand)
     # clear the demand of any previous item
     demand.removeSchedule()
 
@@ -252,7 +263,8 @@ def generate_net(nodes,
     for veh_type in veh_types:
         # find the state for each vehicle type
         state_car = model.getCatalog().findByName(
-            veh_type["veh_id"], type_traffic_state)
+            veh_type["veh_id"], type_traffic_state
+        )
         if demand is not None and demand.isA("GKTrafficDemand"):
             # Add the state
             if state_car is not None and state_car.isA("GKTrafficState"):
@@ -272,13 +284,15 @@ def generate_net(nodes,
     # set API
     network_name = data["network_name"]
     scenario = model.getCatalog().findByName(
-        network_name, model.getType("GKScenario"))  # find scenario
+        network_name, model.getType("GKScenario")
+    )  # find scenario
     scenario_data = scenario.getInputData()
-    scenario_data.addExtension(os.path.join(
-        config.PROJECT_PATH, "flow/utils/aimsun/run.py"), True)
+    scenario_data.addExtension(
+        os.path.join(config.PROJECT_PATH, "flow/utils/aimsun/run.py"), True
+    )
 
     # save
-    gui.save(model, 'flow.ang', GGui.GGuiSaveType.eSaveAs)
+    gui.save(model, "flow.ang", GGui.GGuiSaveType.eSaveAs)
 
 
 def generate_net_osm(file_name, inflows, veh_types):
@@ -327,7 +341,8 @@ def generate_net_osm(file_name, inflows, veh_types):
         new_state = create_state(model, veh_type["veh_id"])
         # find vehicle type
         veh_type = model.getCatalog().findByName(
-            veh_type["veh_id"], model.getType("GKVehicle"))
+            veh_type["veh_id"], model.getType("GKVehicle")
+        )
         # set state vehicles
         new_state.setVehicle(veh_type)
 
@@ -335,15 +350,15 @@ def generate_net_osm(file_name, inflows, veh_types):
     if inflows is not None:
         for inflow in inflows:
             traffic_state_aimsun = model.getCatalog().findByName(
-                inflow["vtype"], type_traffic_state)
-            edge_aimsun = model.getCatalog().findByName(
-                inflow['edge'], type_section)
+                inflow["vtype"], type_traffic_state
+            )
+            edge_aimsun = model.getCatalog().findByName(inflow["edge"], type_section)
             traffic_state_aimsun.setEntranceFlow(
-                edge_aimsun, None, inflow['vehsPerHour'])
+                edge_aimsun, None, inflow["vehsPerHour"]
+            )
 
     # get traffic demand
-    demand = model.getCatalog().findByName(
-        "Traffic Demand 864", type_demand)
+    demand = model.getCatalog().findByName("Traffic Demand 864", type_demand)
     # clear the demand of any previous item
     demand.removeSchedule()
 
@@ -351,7 +366,8 @@ def generate_net_osm(file_name, inflows, veh_types):
     for veh_type in veh_types:
         # find the state for each vehicle type
         state_car = model.getCatalog().findByName(
-            veh_type["veh_id"], type_traffic_state)
+            veh_type["veh_id"], type_traffic_state
+        )
         if demand is not None and demand.isA("GKTrafficDemand"):
             # Add the state
             if state_car is not None and state_car.isA("GKTrafficState"):
@@ -371,13 +387,15 @@ def generate_net_osm(file_name, inflows, veh_types):
     # set API
     network_name = data["network_name"]
     scenario = model.getCatalog().findByName(
-        network_name, model.getType("GKScenario"))  # find scenario
+        network_name, model.getType("GKScenario")
+    )  # find scenario
     scenario_data = scenario.getInputData()
-    scenario_data.addExtension(os.path.join(
-        config.PROJECT_PATH, "flow/utils/aimsun/run.py"), True)
+    scenario_data.addExtension(
+        os.path.join(config.PROJECT_PATH, "flow/utils/aimsun/run.py"), True
+    )
 
     # save
-    gui.save(model, 'flow.ang', GGui.GGuiSaveType.eSaveAs)
+    gui.save(model, "flow.ang", GGui.GGuiSaveType.eSaveAs)
 
 
 def get_junctions(nodes):
@@ -418,10 +436,8 @@ def get_edge_nodes(edge, nodes):
     dict
         information on the last node
     """
-    first_node = next(node for node in nodes
-                      if node["id"] == edge["from"])
-    last_node = next(node for node in nodes
-                     if node["id"] == edge["to"])
+    first_node = next(node for node in nodes if node["id"] == edge["from"])
+    last_node = next(node for node in nodes if node["id"] == edge["to"])
     return first_node, last_node
 
 
@@ -440,8 +456,8 @@ def get_edge_angle(first_node, last_node):
     float
         edge angle
     """
-    del_x = np.array([last_node['x'] - first_node['x']])
-    del_y = np.array([last_node['y'] - first_node['y']])
+    del_x = np.array([last_node["x"] - first_node["x"]])
+    del_y = np.array([last_node["y"] - first_node["y"]])
     theta = np.arctan2(del_y, del_x) * 180 / np.pi
     return theta
 
@@ -465,7 +481,8 @@ def get_state_folder(model):
     folder = model.getCreateRootFolder().findFolder(folder_name)
     if folder is None:
         folder = GKSystem.getSystem().createFolder(
-            model.getCreateRootFolder(), folder_name)
+            model.getCreateRootFolder(), folder_name
+        )
     return folder
 
 
@@ -510,7 +527,8 @@ def get_demand_folder(model):
     folder = model.getCreateRootFolder().findFolder(folder_name)
     if folder is None:
         folder = GKSystem.getSystem().createFolder(
-            model.getCreateRootFolder(), folder_name)
+            model.getCreateRootFolder(), folder_name
+        )
     return folder
 
 
@@ -575,8 +593,7 @@ def set_state_vehicle(model, state, veh_type_name):
         name of the vehicle type
     """
     # find vehicle type
-    veh_type = model.getCatalog().findByName(
-        veh_type_name, model.getType("GKVehicle"))
+    veh_type = model.getCatalog().findByName(veh_type_name, model.getType("GKVehicle"))
     # set state vehicles
     state.setVehicle(veh_type)
 
@@ -593,16 +610,14 @@ def set_vehicles_color(model):
     model : GKModel
         Aimsun model object
     """
-    view_mode = model.getGeoModel().findMode(
-        "GKViewMode::VehiclesByVehicleType", False)
+    view_mode = model.getGeoModel().findMode("GKViewMode::VehiclesByVehicleType", False)
     if view_mode is None:
         view_mode = GKSystem.getSystem().newObject("GKViewMode", model)
         view_mode.setInternalName("GKViewMode::VehiclesByVehicleType")
         view_mode.setName("DYNAMIC: Simulation Vehicles by Vehicle Type")
         model.getGeoModel().addMode(view_mode)
     view_mode.removeAllStyles()
-    view_style = model.getGeoModel().findStyle(
-        "GKViewModeStyle::VehiclesByVehicleType")
+    view_style = model.getGeoModel().findStyle("GKViewModeStyle::VehiclesByVehicleType")
     if view_style is None:
         view_style = GKSystem.getSystem().newObject("GKViewModeStyle", model)
         view_style.setInternalName("GKViewModeStyle::VehiclesByVehicleType")
@@ -610,13 +625,13 @@ def set_vehicles_color(model):
         view_style.setStyleType(GKViewModeStyle.eColor)
         view_style.setVariableType(GKViewModeStyle.eDiscrete)
         sim_type = model.getType("GKSimVehicle")
-        type_col = sim_type.getColumn("GKSimVehicle::vehicleTypeAtt",
-                                      GKType.eSearchOnlyThisType)
+        type_col = sim_type.getColumn(
+            "GKSimVehicle::vehicleTypeAtt", GKType.eSearchOnlyThisType
+        )
         view_style.setColumn(sim_type, type_col)
         ramp = GKColorRamp()
         ramp.setType(GKColorRamp.eRGB)
-        vehicles = model.getCatalog().getObjectsByType(
-            model.getType("GKVehicle"))
+        vehicles = model.getCatalog().getObjectsByType(model.getType("GKVehicle"))
         if vehicles is not None:
             ramp.lines(len(vehicles))
             for i, vehicle in enumerate(vehicles.itervalues()):
@@ -644,8 +659,9 @@ def get_control_plan_folder(model):
     folder_name = "GKModel::controlPlans"
     folder = model.getCreateRootFolder().findFolder(folder_name)
     if folder is None:
-        folder = GKSystem.getSystem().createFolder(model.getCreateRootFolder(),
-                                                   folder_name)
+        folder = GKSystem.getSystem().createFolder(
+            model.getCreateRootFolder(), folder_name
+        )
     return folder
 
 
@@ -699,8 +715,7 @@ def create_meter(model, edge):
     return meter
 
 
-def set_metering_times(
-        cp, meter, cycle, green, yellow, offset, min_green, max_green):
+def set_metering_times(cp, meter, cycle, green, yellow, offset, min_green, max_green):
     """Set a meter timing plan.
 
     Parameters
@@ -754,16 +769,16 @@ def create_node_meters(model, cp, node_id, phases):
     signal_groups = {}
     for connection in connections[node_id]:
         if connection["signal_group"] in signal_groups:
-            signal_groups[
-                connection["signal_group"]].append(connection["from"])
+            signal_groups[connection["signal_group"]].append(connection["from"])
         else:
             signal_groups[connection["signal_group"]] = [connection["from"]]
 
     # get cycle length
     cycle = 0
     for signal_group, edges in signal_groups.items():
-        cycle += int(phases[signal_group]["duration"]) + \
-                 int(phases[signal_group]["yellow"])
+        cycle += int(phases[signal_group]["duration"]) + int(
+            phases[signal_group]["yellow"]
+        )
 
     # set a meter for each edge in each signal group cycle length
     sum_phases = 0
@@ -774,8 +789,9 @@ def create_node_meters(model, cp, node_id, phases):
         max_green = int(phases[signal_group]["maxDur"])
         for edge in edges:
             meter = create_meter(model, edge)
-            set_metering_times(cp, meter, cycle, green, yellow,
-                               sum_phases, min_green, max_green)
+            set_metering_times(
+                cp, meter, cycle, green, yellow, sum_phases, min_green, max_green
+            )
             meters.append(meter)
         sum_phases += green + yellow
     return meters
@@ -792,29 +808,29 @@ def set_sim_step(experiment, sim_step):
         desired simulation step
     """
     # Get Simulation Step attribute column
-    col_sim = model.getColumn('GKExperiment::simStepAtt')
+    col_sim = model.getColumn("GKExperiment::simStepAtt")
     # Set new simulation step value
     experiment.setDataValue(col_sim, sim_step)
 
 
 # collect the network-specific data
-data_file = 'flow/core/kernel/network/data_%s.json'%port_string
+data_file = "flow/core/kernel/network/data_%s.json" % port_string
 with open(os.path.join(config.PROJECT_PATH, data_file)) as f:
     data = json.load(f)
 
 # export the data from the dictionary
-veh_types = data['vehicle_types']
-osm_path = data['osm_path']
+veh_types = data["vehicle_types"]
+osm_path = data["osm_path"]
 
-if data['inflows'] is not None:
+if data["inflows"] is not None:
     inflows = InFlows()
-    inflows.__dict__ = data['inflows'].copy()
+    inflows.__dict__ = data["inflows"].copy()
 else:
     inflows = None
 
-if data['traffic_lights'] is not None:
+if data["traffic_lights"] is not None:
     traffic_lights = TrafficLightParams()
-    traffic_lights.__dict__ = data['traffic_lights'].copy()
+    traffic_lights.__dict__ = data["traffic_lights"].copy()
 else:
     traffic_lights = None
 
@@ -830,24 +846,25 @@ if osm_path is not None:
             num_lanes = s.getNbFullLanes()
             length = s.length2D()
             speed = s.getSpeed()
-            edge_osm[s_id] = {"speed": speed,
-                              "length": length,
-                              "numLanes": num_lanes}
-    with open(os.path.join(config.PROJECT_PATH,
-                           'flow/utils/aimsun/osm_edges_%s.json' % port_string), 'w') \
-            as outfile:
+            edge_osm[s_id] = {"speed": speed, "length": length, "numLanes": num_lanes}
+    with open(
+        os.path.join(
+            config.PROJECT_PATH, "flow/utils/aimsun/osm_edges_%s.json" % port_string
+        ),
+        "w",
+    ) as outfile:
         json.dump(edge_osm, outfile, sort_keys=True, indent=4)
 
 else:
-    nodes = data['nodes']
-    edges = data['edges']
-    types = data['types']
-    connections = data['connections']
+    nodes = data["nodes"]
+    edges = data["edges"]
+    types = data["types"]
+    connections = data["connections"]
 
     for i in range(len(edges)):
-        if 'type' in edges[i]:
+        if "type" in edges[i]:
             for typ in types:
-                if typ['id'] == edges[i]['type']:
+                if typ["id"] == edges[i]["type"]:
                     new_dict = deepcopy(typ)
                     new_dict.pop("id")
                     edges[i].update(new_dict)
@@ -859,7 +876,8 @@ sim_step = data["sim_step"]
 # retrieve experiment by name
 experiment_name = data["experiment_name"]
 experiment = model.getCatalog().findByName(
-    experiment_name, model.getType("GKTExperiment"))
+    experiment_name, model.getType("GKTExperiment")
+)
 set_sim_step(experiment, sim_step)
 
 # run the simulation
@@ -867,5 +885,5 @@ set_sim_step(experiment, sim_step)
 replication_name = data["replication_name"]
 replication = model.getCatalog().findByName(replication_name)
 # execute, "play": run with GUI, "execute": run in batch mode
-mode = 'play' if data['render'] is True else 'execute'
+mode = "play" if data["render"] is True else "execute"
 GKSystem.getSystem().executeAction(mode, replication, [], "")

@@ -38,16 +38,16 @@ class AimsunKernelSimulation(KernelSimulation):
         self.emission_path = None
         self.time = 0
         self.stored_data = {
-            'time': [],
-            'x': [],
-            'y': [],
-            'angle': [],
-            'type': [],
-            'id': [],
-            'relative_position': [],
-            'speed': [],
-            'edge_id': [],
-            'lane_number': []
+            "time": [],
+            "x": [],
+            "y": [],
+            "angle": [],
+            "type": [],
+            "id": [],
+            "relative_position": [],
+            "speed": [],
+            "edge_id": [],
+            "lane_number": [],
         }
 
     def pass_api(self, kernel_api):
@@ -87,26 +87,28 @@ class AimsunKernelSimulation(KernelSimulation):
         if self.emission_path is not None:
             for veh_id in self.master_kernel.vehicle.get_ids():
                 pos = self.master_kernel.vehicle.get_position_world(veh_id)
-                self.stored_data['id'].append(
-                    veh_id)
-                self.stored_data['time'].append(
-                    self.time)
-                self.stored_data['type'].append(
-                    self.master_kernel.vehicle.get_type(veh_id))
-                self.stored_data['x'].append(
-                    pos[0])
-                self.stored_data['y'].append(
-                    pos[1])
-                self.stored_data['relative_position'].append(
-                    self.master_kernel.vehicle.get_position(veh_id))
-                self.stored_data['angle'].append(
-                    self.master_kernel.vehicle.get_angle(veh_id))
-                self.stored_data['speed'].append(
-                    self.master_kernel.vehicle.get_speed(veh_id))
-                self.stored_data['edge_id'].append(
-                    self.master_kernel.vehicle.get_edge(veh_id))
-                self.stored_data['lane_number'].append(
-                    self.master_kernel.vehicle.get_lane(veh_id))
+                self.stored_data["id"].append(veh_id)
+                self.stored_data["time"].append(self.time)
+                self.stored_data["type"].append(
+                    self.master_kernel.vehicle.get_type(veh_id)
+                )
+                self.stored_data["x"].append(pos[0])
+                self.stored_data["y"].append(pos[1])
+                self.stored_data["relative_position"].append(
+                    self.master_kernel.vehicle.get_position(veh_id)
+                )
+                self.stored_data["angle"].append(
+                    self.master_kernel.vehicle.get_angle(veh_id)
+                )
+                self.stored_data["speed"].append(
+                    self.master_kernel.vehicle.get_speed(veh_id)
+                )
+                self.stored_data["edge_id"].append(
+                    self.master_kernel.vehicle.get_edge(veh_id)
+                )
+                self.stored_data["lane_number"].append(
+                    self.master_kernel.vehicle.get_lane(veh_id)
+                )
 
     def check_collision(self):
         """See parent class."""
@@ -118,7 +120,7 @@ class AimsunKernelSimulation(KernelSimulation):
         if self.emission_path is not None:
             name = "%s_emission.csv" % self.master_kernel.network.network.name
             with open(osp.join(self.emission_path, name), "w") as f:
-                writer = csv.writer(f, delimiter=',')
+                writer = csv.writer(f, delimiter=",")
                 writer.writerow(self.stored_data.keys())
                 writer.writerows(zip(*self.stored_data.values()))
 

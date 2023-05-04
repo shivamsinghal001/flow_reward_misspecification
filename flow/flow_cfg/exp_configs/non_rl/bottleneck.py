@@ -27,15 +27,13 @@ vehicles.add(
     lane_change_params=SumoLaneChangeParams(
         lane_change_mode=1621,
     ),
-    num_vehicles=1)
+    num_vehicles=1,
+)
 
 inflow = InFlows()
 inflow.add(
-    veh_type="human",
-    edge="1",
-    vehsPerHour=INFLOW,
-    departLane="random",
-    departSpeed=10)
+    veh_type="human", edge="1", vehsPerHour=INFLOW, departLane="random", departSpeed=10
+)
 
 traffic_lights = TrafficLightParams()
 if not DISABLE_TB:
@@ -46,25 +44,17 @@ if not DISABLE_RAMP_METER:
 
 flow_params = dict(
     # name of the experiment
-    exp_tag='bay_bridge_toll',
-
+    exp_tag="bay_bridge_toll",
     # name of the flow environment the experiment is running on
     env_name=BottleneckEnv,
-
     # name of the network class the experiment is running on
     network=BottleneckNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
-        sim_step=0.5,
-        render=False,
-        overtake_right=False,
-        restart_instance=False
+        sim_step=0.5, render=False, overtake_right=False, restart_instance=False
     ),
-
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
@@ -75,33 +65,25 @@ flow_params = dict(
             "lane_change_duration": 5,
             "add_rl_if_exit": False,
             "disable_tb": DISABLE_TB,
-            "disable_ramp_metering": DISABLE_RAMP_METER
-        }
+            "disable_ramp_metering": DISABLE_RAMP_METER,
+        },
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
-        inflows=inflow,
-        additional_params={
-            "scaling": SCALING,
-            "speed_limit": 23
-        }
+        inflows=inflow, additional_params={"scaling": SCALING, "speed_limit": 23}
     ),
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
         spacing="random",
         min_gap=5,
         lanes_distribution=float("inf"),
-        edges_distribution=["2", "3", "4", "5"]
+        edges_distribution=["2", "3", "4", "5"],
     ),
-
     # traffic lights to be introduced to specific nodes (see
     # flow.core.params.TrafficLightParams)
     tls=traffic_lights,

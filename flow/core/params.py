@@ -14,7 +14,7 @@ SPEED_MODES = {
     "obey_safe_speed": 1,
     "no_collide": 7,
     "right_of_way": 25,
-    "all_checks": 31
+    "all_checks": 31,
 }
 
 LC_MODES = {
@@ -36,7 +36,7 @@ LC_MODES = {
     "no_right_drive_aggressive": 1045,
     "no_right_drive_safe": 1557,
     "only_right_drive_aggressive": 64,
-    "only_right_drive_safe": 576
+    "only_right_drive_safe": 576,
 }
 
 # Traffic light defaults
@@ -67,17 +67,19 @@ class TrafficLightParams:
         # all traffic light parameters are set to default baseline values
         self.baseline = baseline
 
-    def add(self,
-            node_id,
-            tls_type="static",
-            programID=10,
-            offset=None,
-            phases=None,
-            maxGap=None,
-            detectorGap=None,
-            showDetectors=None,
-            file=None,
-            freq=None):
+    def add(
+        self,
+        node_id,
+        tls_type="static",
+        programID=10,
+        offset=None,
+        phases=None,
+        maxGap=None,
+        detectorGap=None,
+        showDetectors=None,
+        file=None,
+        freq=None,
+    ):
         """Add a traffic light component to the network.
 
         When generating networks using xml files, using this method to add a
@@ -146,12 +148,13 @@ class TrafficLightParams:
 
         if tls_type == "actuated":
             # Required parameters
-            self.__tls_properties[node_id]["max-gap"] = \
-                maxGap if maxGap else MAX_GAP
-            self.__tls_properties[node_id]["detector-gap"] = \
+            self.__tls_properties[node_id]["max-gap"] = maxGap if maxGap else MAX_GAP
+            self.__tls_properties[node_id]["detector-gap"] = (
                 detectorGap if detectorGap else DETECTOR_GAP
-            self.__tls_properties[node_id]["show-detectors"] = \
+            )
+            self.__tls_properties[node_id]["show-detectors"] = (
                 showDetectors if showDetectors else SHOW_DETECTORS
+            )
 
             # Optional parameters
             if file:
@@ -184,27 +187,12 @@ class TrafficLightParams:
         max_gap = 3.0
         detector_gap = 0.8
         show_detectors = True
-        phases = [{
-            "duration": "31",
-            "minDur": "8",
-            "maxDur": "45",
-            "state": "GrGr"
-        }, {
-            "duration": "6",
-            "minDur": "3",
-            "maxDur": "6",
-            "state": "yryr"
-        }, {
-            "duration": "31",
-            "minDur": "8",
-            "maxDur": "45",
-            "state": "rGrG"
-        }, {
-            "duration": "6",
-            "minDur": "3",
-            "maxDur": "6",
-            "state": "ryry"
-        }]
+        phases = [
+            {"duration": "31", "minDur": "8", "maxDur": "45", "state": "GrGr"},
+            {"duration": "6", "minDur": "3", "maxDur": "6", "state": "yryr"},
+            {"duration": "31", "minDur": "8", "maxDur": "45", "state": "rGrG"},
+            {"duration": "6", "minDur": "3", "maxDur": "6", "state": "ryry"},
+        ]
 
         return {
             "tl_type": str(tl_type),
@@ -212,7 +200,7 @@ class TrafficLightParams:
             "max_gap": str(max_gap),
             "detector_gap": str(detector_gap),
             "show_detectors": show_detectors,
-            "phases": phases
+            "phases": phases,
         }
 
 
@@ -253,16 +241,18 @@ class VehicleParams:
         #: purposes
         self.initial = []
 
-    def add(self,
-            veh_id,
-            acceleration_controller=(SimCarFollowingController, {}),
-            lane_change_controller=(SimLaneChangeController, {}),
-            routing_controller=None,
-            initial_speed=0,
-            num_vehicles=0,
-            car_following_params=None,
-            lane_change_params=None,
-            color=None):
+    def add(
+        self,
+        veh_id,
+        acceleration_controller=(SimCarFollowingController, {}),
+        lane_change_controller=(SimLaneChangeController, {}),
+        routing_controller=None,
+        initial_speed=0,
+        num_vehicles=0,
+        car_following_params=None,
+        lane_change_params=None,
+        color=None,
+    ):
         """Add a sequence of vehicles to the list of vehicles in the network.
 
         Parameters
@@ -305,37 +295,32 @@ class VehicleParams:
         # This dict will be used when trying to introduce new vehicles into
         # the network via a Flow. It is passed to the vehicle kernel object
         # during environment instantiation.
-        self.type_parameters[veh_id] = \
-            {"acceleration_controller": acceleration_controller,
-             "lane_change_controller": lane_change_controller,
-             "routing_controller": routing_controller,
-             "initial_speed": initial_speed,
-             "car_following_params": car_following_params,
-             "lane_change_params": lane_change_params}
+        self.type_parameters[veh_id] = {
+            "acceleration_controller": acceleration_controller,
+            "lane_change_controller": lane_change_controller,
+            "routing_controller": routing_controller,
+            "initial_speed": initial_speed,
+            "car_following_params": car_following_params,
+            "lane_change_params": lane_change_params,
+        }
 
         if color:
-            type_params['color'] = color
-            self.type_parameters[veh_id]['color'] = color
+            type_params["color"] = color
+            self.type_parameters[veh_id]["color"] = color
 
         # TODO: delete?
-        self.initial.append({
-            "veh_id":
-                veh_id,
-            "acceleration_controller":
-                acceleration_controller,
-            "lane_change_controller":
-                lane_change_controller,
-            "routing_controller":
-                routing_controller,
-            "initial_speed":
-                initial_speed,
-            "num_vehicles":
-                num_vehicles,
-            "car_following_params":
-                car_following_params,
-            "lane_change_params":
-                lane_change_params
-        })
+        self.initial.append(
+            {
+                "veh_id": veh_id,
+                "acceleration_controller": acceleration_controller,
+                "lane_change_controller": lane_change_controller,
+                "routing_controller": routing_controller,
+                "initial_speed": initial_speed,
+                "num_vehicles": num_vehicles,
+                "car_following_params": car_following_params,
+                "lane_change_params": lane_change_params,
+            }
+        )
 
         # This is used to return the actual headways from the vehicles class.
         # It is passed to the vehicle kernel class during environment
@@ -343,7 +328,7 @@ class VehicleParams:
         self.minGap[veh_id] = type_params["minGap"]
 
         for i in range(num_vehicles):
-            v_id = veh_id + '_%d' % i
+            v_id = veh_id + "_%d" % i
 
             # add the vehicle to the list of vehicle ids
             self.ids.append(v_id)
@@ -413,16 +398,18 @@ class SimParams(object):
         whether or not to automatically color vehicles according to their types
     """
 
-    def __init__(self,
-                 sim_step=0.1,
-                 render=False,
-                 restart_instance=False,
-                 emission_path=None,
-                 save_render=False,
-                 sight_radius=25,
-                 show_radius=False,
-                 pxpm=2,
-                 force_color_update=False):
+    def __init__(
+        self,
+        sim_step=0.1,
+        render=False,
+        restart_instance=False,
+        emission_path=None,
+        save_render=False,
+        sight_radius=25,
+        show_radius=False,
+        pxpm=2,
+        force_color_update=False,
+    ):
         """Instantiate SimParams."""
         self.sim_step = sim_step
         self.render = render
@@ -492,27 +479,36 @@ class AimsunParams(SimParams):
         specified subnetwork does not exist, the whole network will be loaded.
     """
 
-    def __init__(self,
-                 sim_step=0.1,
-                 render=False,
-                 restart_instance=False,
-                 emission_path=None,
-                 save_render=False,
-                 sight_radius=25,
-                 show_radius=False,
-                 pxpm=2,
-                 # set to match Flow_Aimsun.ang's scenario name
-                 network_name="Dynamic Scenario 866",
-                 # set to match Flow_Aimsun.ang's experiment name
-                 experiment_name="Micro SRC Experiment 867",
-                 # set to match Flow_Aimsun.ang's replication name
-                 replication_name="Replication 870",
-                 centroid_config_name=None,
-                 subnetwork_name=None):
+    def __init__(
+        self,
+        sim_step=0.1,
+        render=False,
+        restart_instance=False,
+        emission_path=None,
+        save_render=False,
+        sight_radius=25,
+        show_radius=False,
+        pxpm=2,
+        # set to match Flow_Aimsun.ang's scenario name
+        network_name="Dynamic Scenario 866",
+        # set to match Flow_Aimsun.ang's experiment name
+        experiment_name="Micro SRC Experiment 867",
+        # set to match Flow_Aimsun.ang's replication name
+        replication_name="Replication 870",
+        centroid_config_name=None,
+        subnetwork_name=None,
+    ):
         """Instantiate AimsunParams."""
         super(AimsunParams, self).__init__(
-            sim_step, render, restart_instance, emission_path, save_render,
-            sight_radius, show_radius, pxpm)
+            sim_step,
+            render,
+            restart_instance,
+            emission_path,
+            save_render,
+            sight_radius,
+            show_radius,
+            pxpm,
+        )
         self.network_name = network_name
         self.experiment_name = experiment_name
         self.replication_name = replication_name
@@ -590,30 +586,40 @@ class SumoParams(SimParams):
         If true, use a ballistic integration step instead of an euler step
     """
 
-    def __init__(self,
-                 port=None,
-                 sim_step=0.1,
-                 emission_path=None,
-                 lateral_resolution=None,
-                 no_step_log=True,
-                 render=False,
-                 save_render=False,
-                 sight_radius=25,
-                 show_radius=False,
-                 pxpm=2,
-                 force_color_update=False,
-                 overtake_right=False,
-                 seed=None,
-                 restart_instance=False,
-                 print_warnings=True,
-                 teleport_time=-1,
-                 num_clients=1,
-                 color_by_speed=False,
-                 use_ballistic=False):
+    def __init__(
+        self,
+        port=None,
+        sim_step=0.1,
+        emission_path=None,
+        lateral_resolution=None,
+        no_step_log=True,
+        render=False,
+        save_render=False,
+        sight_radius=25,
+        show_radius=False,
+        pxpm=2,
+        force_color_update=False,
+        overtake_right=False,
+        seed=None,
+        restart_instance=False,
+        print_warnings=True,
+        teleport_time=-1,
+        num_clients=1,
+        color_by_speed=False,
+        use_ballistic=False,
+    ):
         """Instantiate SumoParams."""
         super(SumoParams, self).__init__(
-            sim_step, render, restart_instance, emission_path, save_render,
-            sight_radius, show_radius, pxpm, force_color_update)
+            sim_step,
+            render,
+            restart_instance,
+            emission_path,
+            save_render,
+            sight_radius,
+            show_radius,
+            pxpm,
+            force_color_update,
+        )
         self.port = port
         self.lateral_resolution = lateral_resolution
         self.no_step_log = no_step_log
@@ -659,16 +665,19 @@ class EnvParams:
         still clipped before they are provided to `apply_rl_actions`.
     """
 
-    def __init__(self,
-                 additional_params=None,
-                 horizon=float('inf'),
-                 warmup_steps=0,
-                 sims_per_step=1,
-                 evaluate=False,
-                 clip_actions=True):
+    def __init__(
+        self,
+        additional_params=None,
+        horizon=float("inf"),
+        warmup_steps=0,
+        sims_per_step=1,
+        evaluate=False,
+        clip_actions=True,
+    ):
         """Instantiate EnvParams."""
-        self.additional_params = \
+        self.additional_params = (
             additional_params if additional_params is not None else {}
+        )
         self.horizon = horizon
         self.warmup_steps = warmup_steps
         self.sims_per_step = sims_per_step
@@ -708,11 +717,9 @@ class NetParams:
         what is needed
     """
 
-    def __init__(self,
-                 inflows=None,
-                 osm_path=None,
-                 template=None,
-                 additional_params=None):
+    def __init__(
+        self, inflows=None, osm_path=None, template=None, additional_params=None
+    ):
         """Instantiate NetParams."""
         self.inflows = inflows or InFlows()
         self.osm_path = osm_path
@@ -764,16 +771,18 @@ class InitialConfig:
         some other network-specific params
     """
 
-    def __init__(self,
-                 shuffle=False,
-                 spacing="uniform",
-                 min_gap=0,
-                 perturbation=0.0,
-                 x0=0,
-                 bunching=0,
-                 lanes_distribution=float("inf"),
-                 edges_distribution="all",
-                 additional_params=None):
+    def __init__(
+        self,
+        shuffle=False,
+        spacing="uniform",
+        min_gap=0,
+        perturbation=0.0,
+        x0=0,
+        bunching=0,
+        lanes_distribution=float("inf"),
+        edges_distribution="all",
+        additional_params=None,
+    ):
         """Instantiate InitialConfig.
 
         These parameters that affect the positioning of vehicle in the
@@ -846,19 +855,20 @@ class SumoCarFollowingParams:
     """
 
     def __init__(
-            self,
-            speed_mode='right_of_way',
-            accel=2.6,
-            decel=4.5,
-            sigma=0.5,
-            tau=1.0,  # past 1 at sim_step=0.1 you no longer see waves
-            min_gap=2.5,
-            max_speed=30,
-            speed_factor=1.0,
-            speed_dev=0.1,
-            impatience=0.5,
-            car_follow_model="IDM",
-            **kwargs):
+        self,
+        speed_mode="right_of_way",
+        accel=2.6,
+        decel=4.5,
+        sigma=0.5,
+        tau=1.0,  # past 1 at sim_step=0.1 you no longer see waves
+        min_gap=2.5,
+        max_speed=30,
+        speed_factor=1.0,
+        speed_dev=0.1,
+        impatience=0.5,
+        car_follow_model="IDM",
+        **kwargs
+    ):
         """Instantiate SumoCarFollowingParams."""
         # check for deprecations (minGap)
         if "minGap" in kwargs:
@@ -902,8 +912,7 @@ class SumoCarFollowingParams:
         # adjust the speed mode value
         if isinstance(speed_mode, str) and speed_mode in SPEED_MODES:
             speed_mode = SPEED_MODES[speed_mode]
-        elif not (isinstance(speed_mode, int)
-                  or isinstance(speed_mode, float)):
+        elif not (isinstance(speed_mode, int) or isinstance(speed_mode, float)):
             logging.error("Setting speed mode of to default.")
             speed_mode = SPEED_MODES["obey_safe_speed"]
 
@@ -1019,21 +1028,23 @@ class SumoLaneChangeParams:
     http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes
     """
 
-    def __init__(self,
-                 lane_change_mode="no_lc_safe",
-                 model="LC2013",
-                 lc_strategic=1.0,
-                 lc_cooperative=1.0,
-                 lc_speed_gain=1.0,
-                 lc_keep_right=1.0,
-                 lc_look_ahead_left=2.0,
-                 lc_speed_gain_right=1.0,
-                 lc_sublane=1.0,
-                 lc_pushy=0,
-                 lc_pushy_gap=0.6,
-                 lc_assertive=1,
-                 lc_accel_lat=1.0,
-                 **kwargs):
+    def __init__(
+        self,
+        lane_change_mode="no_lc_safe",
+        model="LC2013",
+        lc_strategic=1.0,
+        lc_cooperative=1.0,
+        lc_speed_gain=1.0,
+        lc_keep_right=1.0,
+        lc_look_ahead_left=2.0,
+        lc_speed_gain_right=1.0,
+        lc_sublane=1.0,
+        lc_pushy=0,
+        lc_pushy_gap=0.6,
+        lc_assertive=1,
+        lc_accel_lat=1.0,
+        **kwargs
+    ):
         """Instantiate SumoLaneChangeParams."""
         # check for deprecations (lcStrategic)
         if "lcStrategic" in kwargs:
@@ -1062,8 +1073,7 @@ class SumoLaneChangeParams:
 
         # check for deprecations (lcSpeedGainRight)
         if "lcSpeedGainRight" in kwargs:
-            deprecated_attribute(self, "lcSpeedGainRight",
-                                 "lc_speed_gain_right")
+            deprecated_attribute(self, "lcSpeedGainRight", "lc_speed_gain_right")
             lc_speed_gain_right = kwargs["lcSpeedGainRight"]
 
         # check for deprecations (lcSublane)
@@ -1119,14 +1129,15 @@ class SumoLaneChangeParams:
                 "lcPushy": str(lc_pushy),
                 "lcPushyGap": str(lc_pushy_gap),
                 "lcAssertive": str(lc_assertive),
-                "lcAccelLat": str(lc_accel_lat)
+                "lcAccelLat": str(lc_accel_lat),
             }
 
         # adjust the lane change mode value
         if isinstance(lane_change_mode, str) and lane_change_mode in LC_MODES:
             lane_change_mode = LC_MODES[lane_change_mode]
-        elif not (isinstance(lane_change_mode, int)
-                  or isinstance(lane_change_mode, float)):
+        elif not (
+            isinstance(lane_change_mode, int) or isinstance(lane_change_mode, float)
+        ):
             logging.error("Setting lane change mode to default.")
             lane_change_mode = LC_MODES["no_lc_safe"]
 
@@ -1143,19 +1154,21 @@ class InFlows:
         """Instantiate Inflows."""
         self.__flows = []
 
-    def add(self,
-            edge,
-            veh_type,
-            vehs_per_hour=None,
-            probability=None,
-            period=None,
-            depart_lane="first",
-            depart_speed=0,
-            name="flow",
-            begin=1,
-            end=86400,
-            number=None,
-            **kwargs):
+    def add(
+        self,
+        edge,
+        veh_type,
+        vehs_per_hour=None,
+        probability=None,
+        period=None,
+        depart_lane="first",
+        depart_speed=0,
+        name="flow",
+        begin=1,
+        end=86400,
+        number=None,
+        **kwargs
+    ):
         r"""Specify a new inflow for a given type of vehicles and edge.
 
         Parameters
@@ -1224,6 +1237,7 @@ class InFlows:
         parameters that may be added via \*\*kwargs, refer to:
         http://sumo.dlr.de/wiki/Definition_of_Vehicles,_Vehicle_Types,_and_Routes
         """
+
         # check for deprecations
         def deprecate(old, new):
             deprecated_attribute(self, old, new)
@@ -1245,7 +1259,7 @@ class InFlows:
             "departLane": depart_lane,
             "departSpeed": depart_speed,
             "begin": begin,
-            "end": end
+            "end": end,
         }
         new_inflow.update(kwargs)
 
@@ -1255,15 +1269,18 @@ class InFlows:
             raise ValueError(
                 "Exactly one among the three parameters 'vehs_per_hour', "
                 "'probability' and 'period' must be specified in InFlows.add. "
-                "{} were specified.".format(n_inflow_params))
+                "{} were specified.".format(n_inflow_params)
+            )
         if probability is not None and (probability < 0 or probability > 1):
             raise ValueError(
                 "Inflow.add called with parameter 'probability' set to {}, but"
-                " probability should be between 0 and 1.".format(probability))
+                " probability should be between 0 and 1.".format(probability)
+            )
         if begin is not None and begin < 1:
             raise ValueError(
                 "Inflow.add called with parameter 'begin' set to {}, but begin"
-                " should be greater or equal than 1 second.".format(begin))
+                " should be greater or equal than 1 second.".format(begin)
+            )
 
         if number is not None:
             del new_inflow["end"]

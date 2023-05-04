@@ -20,52 +20,36 @@ N_CPUS = 2
 vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
-    acceleration_controller=(IDMController, {
-        "noise": 0.2
-    }),
-    car_following_params=SumoCarFollowingParams(
-        min_gap=0
-    ),
+    acceleration_controller=(IDMController, {"noise": 0.2}),
+    car_following_params=SumoCarFollowingParams(min_gap=0),
     routing_controller=(ContinuousRouter, {}),
-    num_vehicles=10)
+    num_vehicles=10,
+)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     routing_controller=(ContinuousRouter, {}),
-    num_vehicles=1)
+    num_vehicles=1,
+)
 
 flow_params = dict(
     # name of the experiment
     exp_tag="stabilizing_the_ring",
-
     # name of the flow environment the experiment is running on
-    env_name=WaveAttenuationEnv, #WaveAttenuationPOEnv,
-
+    env_name=WaveAttenuationEnv,  # WaveAttenuationPOEnv,
     # name of the network class the experiment is running on
     network=RingNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
-    sim=SumoParams(
-        sim_step=0.2,
-        render=False,
-        restart_instance=False
-    ),
-
+    sim=SumoParams(sim_step=0.2, render=False, restart_instance=False),
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
         warmup_steps=25,
         clip_actions=False,
-        additional_params={
-            "max_accel": 1,
-            "max_decel": 1,
-            "ring_length": [120, 170]
-        },
+        additional_params={"max_accel": 1, "max_decel": 1, "ring_length": [120, 170]},
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
@@ -74,12 +58,11 @@ flow_params = dict(
             "lanes": 1,
             "speed_limit": 30,
             "resolution": 40,
-        }, ),
-
+        },
+    ),
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),

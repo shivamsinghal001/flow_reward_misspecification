@@ -104,14 +104,16 @@ class Env(gym.Env, metaclass=ABCMeta):
         is set to True or False.
     """
 
-    def __init__(self,
-                 env_params,
-                 sim_params,
-                 network=None,
-                 simulator='traci',
-                 scenario=None,
-                 path=None,
-                 is_baseline=False):
+    def __init__(
+        self,
+        env_params,
+        sim_params,
+        network=None,
+        simulator="traci",
+        scenario=None,
+        path=None,
+        is_baseline=False,
+    ):
         """Initialize the environment class.
 
         Parameters
@@ -140,7 +142,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         # check whether we should be rendering
         self.should_render = self.sim_params.render
         self.sim_params.render = False
-        time_stamp = ''.join(str(time.time()).split('.'))
+        time_stamp = "".join(str(time.time()).split("."))
         if os.environ.get("TEST_FLAG", 0):
             # 1.0 works with stress_test_start 10k times
             time.sleep(1.0 * int(time_stamp[-6:]) / 1e6)
@@ -164,8 +166,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.simulator = simulator
 
         # create the Flow kernel
-        self.k = Kernel(simulator=self.simulator,
-                        sim_params=self.sim_params)
+        self.k = Kernel(simulator=self.simulator, sim_params=self.sim_params)
 
         # use the network class's network parameters to generate the necessary
         # network components within the network kernel
@@ -178,7 +179,8 @@ class Env(gym.Env, metaclass=ABCMeta):
         # the network kernel as an input in order to determine what network
         # needs to be simulated.
         kernel_api = self.k.simulation.start_simulation(
-            network=self.k.network, sim_params=self.sim_params)
+            network=self.k.network, sim_params=self.sim_params
+        )
 
         # pass the kernel api to the kernel and it's subclasses
         self.k.pass_api(kernel_api)
@@ -202,7 +204,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.setup_initial_state()
 
         # use pyglet to render the simulation
-        if self.should_render in ['gray', 'dgray', 'rgb', 'drgb']:
+        if self.should_render in ["gray", "dgray", "rgb", "drgb"]:
             save_render = self.sim_params.save_render
             sight_radius = self.sim_params.sight_radius
             pxpm = self.sim_params.pxpm
@@ -224,18 +226,20 @@ class Env(gym.Env, metaclass=ABCMeta):
                 sight_radius=sight_radius,
                 pxpm=pxpm,
                 show_radius=show_radius,
-                path=path)
+                path=path,
+            )
 
             # render a frame
             self.render(reset=True)
         elif self.should_render in [True, False]:
             # default to sumo-gui (if True) or sumo (if False)
             if (self.sim_params.render is True) and self.sim_params.save_render:
-                self.path = os.path.expanduser('~')+'/flow_rendering/' + self.network.name
+                self.path = (
+                    os.path.expanduser("~") + "/flow_rendering/" + self.network.name
+                )
                 os.makedirs(self.path, exist_ok=True)
         else:
-            raise FatalFlowError(
-                'Mode %s is not supported!' % self.sim_params.render)
+            raise FatalFlowError("Mode %s is not supported!" % self.sim_params.render)
         atexit.register(self.terminate)
 
     def restart_simulation(self, sim_params, render=None):
@@ -257,7 +261,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.k.close()
 
         # killed the sumo process if using sumo/TraCI
-        if self.simulator == 'traci':
+        if self.simulator == "traci":
             self.k.simulation.sumo_proc.kill()
 
         if render is not None:
@@ -270,7 +274,8 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.k.network.generate_network(self.network)
         self.k.vehicle.initialize(deepcopy(self.network.vehicles))
         kernel_api = self.k.simulation.start_simulation(
-            network=self.k.network, sim_params=self.sim_params)
+            network=self.k.network, sim_params=self.sim_params
+        )
         self.k.pass_api(kernel_api)
 
         self.setup_initial_state()
@@ -288,8 +293,8 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # generate starting position for vehicles in the network
         start_pos, start_lanes = self.k.network.generate_starting_positions(
-            initial_config=self.initial_config,
-            num_vehicles=len(self.initial_ids))
+            initial_config=self.initial_config, num_vehicles=len(self.initial_ids)
+        )
 
         # save the initial state. This is used in the _reset function
         for i, veh_id in enumerate(self.initial_ids):
@@ -342,33 +347,32 @@ class Env(gym.Env, metaclass=ABCMeta):
             if len(self.k.vehicle.get_controlled_ids()) > 0:
                 accel = []
                 for veh_id in self.k.vehicle.get_controlled_ids():
-                    action = self.k.vehicle.get_acc_controller(
-                        veh_id).get_action(self)
+                    action = self.k.vehicle.get_acc_controller(veh_id).get_action(self)
                     accel.append(action)
                 self.k.vehicle.apply_acceleration(
-                    self.k.vehicle.get_controlled_ids(), accel)
+                    self.k.vehicle.get_controlled_ids(), accel
+                )
 
             # perform lane change actions for controlled human-driven vehicles
             if len(self.k.vehicle.get_controlled_lc_ids()) > 0:
                 direction = []
                 for veh_id in self.k.vehicle.get_controlled_lc_ids():
                     target_lane = self.k.vehicle.get_lane_changing_controller(
-                        veh_id).get_action(self)
+                        veh_id
+                    ).get_action(self)
                     direction.append(target_lane)
                 self.k.vehicle.apply_lane_change(
-                    self.k.vehicle.get_controlled_lc_ids(),
-                    direction=direction)
+                    self.k.vehicle.get_controlled_lc_ids(), direction=direction
+                )
 
             # perform (optionally) routing actions for all vehicles in the
             # network, including RL and SUMO-controlled vehicles
             routing_ids = []
             routing_actions = []
             for veh_id in self.k.vehicle.get_ids():
-                if self.k.vehicle.get_routing_controller(veh_id) \
-                        is not None:
+                if self.k.vehicle.get_routing_controller(veh_id) is not None:
                     routing_ids.append(veh_id)
-                    route_contr = self.k.vehicle.get_routing_controller(
-                        veh_id)
+                    route_contr = self.k.vehicle.get_routing_controller(veh_id)
                     routing_actions.append(route_contr.choose_route(self))
 
             self.k.vehicle.choose_routes(routing_ids, routing_actions)
@@ -378,9 +382,15 @@ class Env(gym.Env, metaclass=ABCMeta):
             else:
                 acc_controller_actions = []
                 for veh_id in self.k.vehicle.get_rl_ids():
-                    if hasattr(self.k.vehicle.get_acc_controller(veh_id), "get_controller_accel"):
-                        acc_controller_actions.append(self.k.vehicle.get_acc_controller(
-                                veh_id).get_controller_accel(self))
+                    if hasattr(
+                        self.k.vehicle.get_acc_controller(veh_id),
+                        "get_controller_accel",
+                    ):
+                        acc_controller_actions.append(
+                            self.k.vehicle.get_acc_controller(
+                                veh_id
+                            ).get_controller_accel(self)
+                        )
 
             if self.get_additional_rl_control_info() is not None:
                 acc_controller_actions = self.get_additional_rl_control_info()
@@ -410,8 +420,8 @@ class Env(gym.Env, metaclass=ABCMeta):
             self.k.update(reset=False)
 
             # update the colors of vehicles
-#             if self.sim_params.render:
-#                 self.k.vehicle.update_vehicle_colors()
+            #             if self.sim_params.render:
+            #                 self.k.vehicle.update_vehicle_colors()
 
             # crash encodes whether the simulator experienced a collision
             crash = self.k.simulation.check_collision()
@@ -434,10 +444,13 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # test if the environment should terminate due to a collision or the
         # time horizon being met
-        done = (self.time_counter >= self.env_params.sims_per_step *
-                (self.env_params.warmup_steps + self.env_params.horizon)
-                or crash)
-        
+        done = (
+            self.time_counter
+            >= self.env_params.sims_per_step
+            * (self.env_params.warmup_steps + self.env_params.horizon)
+            or crash
+        )
+
         infos["crash"] = crash
 
         # compute the reward
@@ -450,8 +463,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         return next_observation, reward, done, infos
 
     def get_additional_rl_control_info(self):
-        """get actions from acc controller for baseline
-        """
+        """get actions from acc controller for baseline"""
         return None
 
     def reset(self):
@@ -481,8 +493,10 @@ class Env(gym.Env, metaclass=ABCMeta):
             self.restart_simulation(self.sim_params)
 
         # warn about not using restart_instance when using inflows
-        if len(self.net_params.inflows.get()) > 0 and \
-                not self.sim_params.restart_instance:
+        if (
+            len(self.net_params.inflows.get()) > 0
+            and not self.sim_params.restart_instance
+        ):
             print(
                 "**********************************************************\n"
                 "**********************************************************\n"
@@ -495,8 +509,9 @@ class Env(gym.Env, metaclass=ABCMeta):
                 "**********************************************************"
             )
 
-        if self.sim_params.restart_instance or \
-                (self.step_counter > 2e6 and self.simulator != 'aimsun'):
+        if self.sim_params.restart_instance or (
+            self.step_counter > 2e6 and self.simulator != "aimsun"
+        ):
             self.step_counter = 0
             # issue a random seed to induce randomness into the next rollout
             self.sim_params.seed = random.randint(0, 1e5)
@@ -511,7 +526,7 @@ class Env(gym.Env, metaclass=ABCMeta):
             self.setup_initial_state()
 
         # clear all vehicles from the network and the vehicles class
-        if self.simulator == 'traci':
+        if self.simulator == "traci":
             for veh_id in self.k.kernel_api.vehicle.getIDList():  # FIXME: hack
                 try:
                     self.k.vehicle.remove(veh_id)
@@ -535,8 +550,7 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # reintroduce the initial vehicles to the network
         for veh_id in self.initial_ids:
-            type_id, edge, lane_index, pos, speed = \
-                self.initial_state[veh_id]
+            type_id, edge, lane_index, pos, speed = self.initial_state[veh_id]
 
             try:
                 self.k.vehicle.add(
@@ -545,12 +559,13 @@ class Env(gym.Env, metaclass=ABCMeta):
                     edge=edge,
                     lane=lane_index,
                     pos=pos,
-                    speed=speed)
+                    speed=speed,
+                )
             except (FatalTraCIError, TraCIException):
                 # if a vehicle was not removed in the first attempt, remove it
                 # now and then reintroduce it
                 self.k.vehicle.remove(veh_id)
-                if self.simulator == 'traci':
+                if self.simulator == "traci":
                     self.k.kernel_api.vehicle.remove(veh_id)  # FIXME: hack
                 self.k.vehicle.add(
                     veh_id=veh_id,
@@ -558,7 +573,8 @@ class Env(gym.Env, metaclass=ABCMeta):
                     edge=edge,
                     lane=lane_index,
                     pos=pos,
-                    speed=speed)
+                    speed=speed,
+                )
 
         # advance the simulation in the simulator by one step
         self.k.simulation.simulation_step()
@@ -567,10 +583,10 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.k.update(reset=True)
 
         # update the colors of vehicles
-#         if self.sim_params.render:
-#             self.k.vehicle.update_vehicle_colors()
+        #         if self.sim_params.render:
+        #             self.k.vehicle.update_vehicle_colors()
 
-        if self.simulator == 'traci':
+        if self.simulator == "traci":
             initial_ids = self.k.kernel_api.vehicle.getIDList()
         else:
             initial_ids = self.initial_ids
@@ -578,10 +594,12 @@ class Env(gym.Env, metaclass=ABCMeta):
         # check to make sure all vehicles have been spawned
         if len(self.initial_ids) > len(initial_ids):
             missing_vehicles = list(set(self.initial_ids) - set(initial_ids))
-            msg = '\nNot enough vehicles have spawned! Bad start?\n' \
-                  'Missing vehicles / initial state:\n'
+            msg = (
+                "\nNot enough vehicles have spawned! Bad start?\n"
+                "Missing vehicles / initial state:\n"
+            )
             for veh_id in missing_vehicles:
-                msg += '- {}: {}\n'.format(veh_id, self.initial_state[veh_id])
+                msg += "- {}: {}\n".format(veh_id, self.initial_state[veh_id])
             raise FatalFlowError(msg=msg)
 
         states = self.get_state()
@@ -626,17 +644,15 @@ class Env(gym.Env, metaclass=ABCMeta):
         # clip according to the action space requirements
         if isinstance(self.action_space, Box):
             rl_actions = np.clip(
-                rl_actions,
-                a_min=self.action_space.low,
-                a_max=self.action_space.high)
+                rl_actions, a_min=self.action_space.low, a_max=self.action_space.high
+            )
         elif isinstance(self.action_space, Tuple):
             for idx, action in enumerate(rl_actions):
                 subspace = self.action_space[idx]
                 if isinstance(subspace, Box):
                     rl_actions[idx] = np.clip(
-                        action,
-                        a_min=subspace.low,
-                        a_max=subspace.high)
+                        action, a_min=subspace.low, a_max=subspace.high
+                    )
         return rl_actions
 
     def apply_rl_actions(self, rl_actions=None):
@@ -734,15 +750,26 @@ class Env(gym.Env, metaclass=ABCMeta):
             # close everything within the kernel
             self.k.close()
             # close pyglet renderer
-            if self.sim_params.render in ['gray', 'dgray', 'rgb', 'drgb']:
+            if self.sim_params.render in ["gray", "dgray", "rgb", "drgb"]:
                 self.renderer.close()
             # generate video
             elif (self.sim_params.render is True) and self.sim_params.save_render:
-                images_dir = self.path.split('/')[-1]
+                images_dir = self.path.split("/")[-1]
                 speedup = 10  # multiplier: renders video so that `speedup` seconds is rendered in 1 real second
-                fps = speedup//self.sim_step
-                p = subprocess.Popen(["ffmpeg", "-y", "-r", str(fps), "-i", self.path+"/frame_%06d.png",
-                                      "-pix_fmt", "yuv420p", "%s/../%s.mp4" % (self.path, images_dir)])
+                fps = speedup // self.sim_step
+                p = subprocess.Popen(
+                    [
+                        "ffmpeg",
+                        "-y",
+                        "-r",
+                        str(fps),
+                        "-i",
+                        self.path + "/frame_%06d.png",
+                        "-pix_fmt",
+                        "yuv420p",
+                        "%s/../%s.mp4" % (self.path, images_dir),
+                    ]
+                )
                 p.wait()
                 shutil.rmtree(self.path)
         except FileNotFoundError:
@@ -759,7 +786,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         buffer_length : int
             length of the buffer
         """
-        if self.sim_params.render in ['gray', 'dgray', 'rgb', 'drgb']:
+        if self.sim_params.render in ["gray", "dgray", "rgb", "drgb"]:
             # render a frame
             self.pyglet_render()
 
@@ -768,7 +795,7 @@ class Env(gym.Env, metaclass=ABCMeta):
                 self.frame_buffer = [self.frame.copy() for _ in range(5)]
                 self.sights_buffer = [self.sights.copy() for _ in range(5)]
             else:
-                if self.step_counter % int(1/self.sim_step) == 0:
+                if self.step_counter % int(1 / self.sim_step) == 0:
                     self.frame_buffer.append(self.frame.copy())
                     self.sights_buffer.append(self.sights.copy())
                 if len(self.frame_buffer) > buffer_length:
@@ -776,7 +803,9 @@ class Env(gym.Env, metaclass=ABCMeta):
                     self.sights_buffer.pop(0)
         elif (self.sim_params.render is True) and self.sim_params.save_render:
             # sumo-gui render
-            self.k.kernel_api.gui.screenshot("View #0", self.path+"/frame_%06d.png" % self.time_counter)
+            self.k.kernel_api.gui.screenshot(
+                "View #0", self.path + "/frame_%06d.png" % self.time_counter
+            )
 
     def pyglet_render(self):
         """Render a frame using pyglet."""
@@ -793,41 +822,42 @@ class Env(gym.Env, metaclass=ABCMeta):
         for id in human_idlist:
             # Force tracking human vehicles by adding "track" in vehicle id.
             # The tracked human vehicles will be treated as machine vehicles.
-            if 'track' in id:
+            if "track" in id:
                 machine_logs.append(
-                    [self.k.vehicle.get_timestep(id),
-                     self.k.vehicle.get_timedelta(id),
-                     id])
-                machine_orientations.append(
-                    self.k.vehicle.get_orientation(id))
-                machine_dynamics.append(
-                    self.k.vehicle.get_speed(id)/max_speed)
+                    [
+                        self.k.vehicle.get_timestep(id),
+                        self.k.vehicle.get_timedelta(id),
+                        id,
+                    ]
+                )
+                machine_orientations.append(self.k.vehicle.get_orientation(id))
+                machine_dynamics.append(self.k.vehicle.get_speed(id) / max_speed)
             else:
                 human_logs.append(
-                    [self.k.vehicle.get_timestep(id),
-                     self.k.vehicle.get_timedelta(id),
-                     id])
-                human_orientations.append(
-                    self.k.vehicle.get_orientation(id))
-                human_dynamics.append(
-                    self.k.vehicle.get_speed(id)/max_speed)
+                    [
+                        self.k.vehicle.get_timestep(id),
+                        self.k.vehicle.get_timedelta(id),
+                        id,
+                    ]
+                )
+                human_orientations.append(self.k.vehicle.get_orientation(id))
+                human_dynamics.append(self.k.vehicle.get_speed(id) / max_speed)
         for id in machine_idlist:
             machine_logs.append(
-                [self.k.vehicle.get_timestep(id),
-                 self.k.vehicle.get_timedelta(id),
-                 id])
-            machine_orientations.append(
-                self.k.vehicle.get_orientation(id))
-            machine_dynamics.append(
-                self.k.vehicle.get_speed(id)/max_speed)
+                [self.k.vehicle.get_timestep(id), self.k.vehicle.get_timedelta(id), id]
+            )
+            machine_orientations.append(self.k.vehicle.get_orientation(id))
+            machine_dynamics.append(self.k.vehicle.get_speed(id) / max_speed)
 
         # step the renderer
-        self.frame = self.renderer.render(human_orientations,
-                                          machine_orientations,
-                                          human_dynamics,
-                                          machine_dynamics,
-                                          human_logs,
-                                          machine_logs)
+        self.frame = self.renderer.render(
+            human_orientations,
+            machine_orientations,
+            human_dynamics,
+            machine_dynamics,
+            human_logs,
+            machine_logs,
+        )
 
         # get local observation of RL vehicles
         self.sights = []
@@ -836,11 +866,9 @@ class Env(gym.Env, metaclass=ABCMeta):
             # The tracked human vehicles will be treated as machine vehicles.
             if "track" in id:
                 orientation = self.k.vehicle.get_orientation(id)
-                sight = self.renderer.get_sight(
-                    orientation, id)
+                sight = self.renderer.get_sight(orientation, id)
                 self.sights.append(sight)
         for id in machine_idlist:
             orientation = self.k.vehicle.get_orientation(id)
-            sight = self.renderer.get_sight(
-                orientation, id)
+            sight = self.renderer.get_sight(orientation, id)
             self.sights.append(sight)

@@ -34,10 +34,7 @@ ADDITIONAL_NET_PARAMS = {
     "vertical_lanes": 1,
     # speed limit for all edges, may be represented as a float value, or a
     # dictionary with separate values for vertical and horizontal lanes
-    "speed_limit": {
-        "horizontal": 35,
-        "vertical": 35
-    }
+    "speed_limit": {"horizontal": 35, "vertical": 35},
 }
 
 
@@ -105,12 +102,14 @@ class TrafficLightGridNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Initialize an n*m traffic light grid network."""
         optional = ["tl_logic"]
         for p in ADDITIONAL_NET_PARAMS.keys():
@@ -119,19 +118,17 @@ class TrafficLightGridNetwork(Network):
 
         for p in ADDITIONAL_NET_PARAMS["grid_array"].keys():
             if p not in net_params.additional_params["grid_array"]:
-                raise KeyError(
-                    'Grid array parameter "{}" not supplied'.format(p))
+                raise KeyError('Grid array parameter "{}" not supplied'.format(p))
 
         # retrieve all additional parameters
         # refer to the ADDITIONAL_NET_PARAMS dict for more documentation
         self.vertical_lanes = net_params.additional_params["vertical_lanes"]
-        self.horizontal_lanes = net_params.additional_params[
-            "horizontal_lanes"]
+        self.horizontal_lanes = net_params.additional_params["horizontal_lanes"]
         self.speed_limit = net_params.additional_params["speed_limit"]
         if not isinstance(self.speed_limit, dict):
             self.speed_limit = {
                 "horizontal": self.speed_limit,
-                "vertical": self.speed_limit
+                "vertical": self.speed_limit,
             }
 
         self.grid_array = net_params.additional_params["grid_array"]
@@ -148,11 +145,13 @@ class TrafficLightGridNetwork(Network):
         # specifies whether or not there will be traffic lights at the
         # intersections (True by default)
         self.use_traffic_lights = net_params.additional_params.get(
-            "traffic_lights", True)
+            "traffic_lights", True
+        )
 
         # radius of the inner nodes (ie of the intersections)
-        self.inner_nodes_radius = 2.9 + 3.3 * max(self.vertical_lanes,
-                                                  self.horizontal_lanes)
+        self.inner_nodes_radius = 2.9 + 3.3 * max(
+            self.vertical_lanes, self.horizontal_lanes
+        )
 
         # total number of edges in the network
         self.num_edges = 4 * ((self.col_num + 1) * self.row_num + self.col_num)
@@ -160,8 +159,7 @@ class TrafficLightGridNetwork(Network):
         # name of the network (DO NOT CHANGE)
         self.name = "BobLoblawsLawBlog"
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_nodes(self, net_params):
         """See parent class."""
@@ -195,15 +193,18 @@ class TrafficLightGridNetwork(Network):
 
     def specify_types(self, net_params):
         """See parent class."""
-        types = [{
-            "id": "horizontal",
-            "numLanes": self.horizontal_lanes,
-            "speed": self.speed_limit["horizontal"]
-        }, {
-            "id": "vertical",
-            "numLanes": self.vertical_lanes,
-            "speed": self.speed_limit["vertical"]
-        }]
+        types = [
+            {
+                "id": "horizontal",
+                "numLanes": self.horizontal_lanes,
+                "speed": self.speed_limit["horizontal"],
+            },
+            {
+                "id": "vertical",
+                "numLanes": self.vertical_lanes,
+                "speed": self.speed_limit["vertical"],
+            },
+        ]
 
         return types
 
@@ -241,13 +242,15 @@ class TrafficLightGridNetwork(Network):
         nodes = []
         for row in range(self.row_num):
             for col in range(self.col_num):
-                nodes.append({
-                    "id": "center{}".format(row * self.col_num + col),
-                    "x": col * self.inner_length,
-                    "y": row * self.inner_length,
-                    "type": node_type,
-                    "radius": self.inner_nodes_radius
-                })
+                nodes.append(
+                    {
+                        "id": "center{}".format(row * self.col_num + col),
+                        "x": col * self.inner_length,
+                        "y": row * self.inner_length,
+                        "type": node_type,
+                        "radius": self.inner_nodes_radius,
+                    }
+                )
 
         return nodes
 
@@ -301,8 +304,8 @@ class TrafficLightGridNetwork(Network):
         for col in range(self.col_num):
             x = col * self.inner_length
             y = (self.row_num - 1) * self.inner_length
-            nodes += new_node(x, - self.short_length, "bot_col_short", col)
-            nodes += new_node(x, - self.long_length, "bot_col_long", col)
+            nodes += new_node(x, -self.short_length, "bot_col_short", col)
+            nodes += new_node(x, -self.long_length, "bot_col_long", col)
             nodes += new_node(x, y + self.short_length, "top_col_short", col)
             nodes += new_node(x, y + self.long_length, "top_col_long", col)
 
@@ -310,8 +313,8 @@ class TrafficLightGridNetwork(Network):
         for row in range(self.row_num):
             x = (self.col_num - 1) * self.inner_length
             y = row * self.inner_length
-            nodes += new_node(- self.short_length, y, "left_row_short", row)
-            nodes += new_node(- self.long_length, y, "left_row_long", row)
+            nodes += new_node(-self.short_length, y, "left_row_short", row)
+            nodes += new_node(-self.long_length, y, "left_row_long", row)
             nodes += new_node(x + self.short_length, y, "right_row_short", row)
             nodes += new_node(x + self.long_length, y, "right_row_long", row)
 
@@ -358,34 +361,40 @@ class TrafficLightGridNetwork(Network):
         edges = []
 
         def new_edge(index, from_node, to_node, orientation, lane):
-            return [{
-                "id": lane + index,
-                "type": orientation,
-                "priority": 78,
-                "from": "center" + str(from_node),
-                "to": "center" + str(to_node),
-                "length": self.inner_length
-            }]
+            return [
+                {
+                    "id": lane + index,
+                    "type": orientation,
+                    "priority": 78,
+                    "from": "center" + str(from_node),
+                    "to": "center" + str(to_node),
+                    "length": self.inner_length,
+                }
+            ]
 
         # Build the horizontal inner edges
         for i in range(self.row_num):
             for j in range(self.col_num - 1):
                 node_index = i * self.col_num + j
                 index = "{}_{}".format(i, j + 1)
-                edges += new_edge(index, node_index + 1, node_index,
-                                  "horizontal", "top")
-                edges += new_edge(index, node_index, node_index + 1,
-                                  "horizontal", "bot")
+                edges += new_edge(
+                    index, node_index + 1, node_index, "horizontal", "top"
+                )
+                edges += new_edge(
+                    index, node_index, node_index + 1, "horizontal", "bot"
+                )
 
         # Build the vertical inner edges
         for i in range(self.row_num - 1):
             for j in range(self.col_num):
                 node_index = i * self.col_num + j
                 index = "{}_{}".format(i + 1, j)
-                edges += new_edge(index, node_index, node_index + self.col_num,
-                                  "vertical", "right")
-                edges += new_edge(index, node_index + self.col_num, node_index,
-                                  "vertical", "left")
+                edges += new_edge(
+                    index, node_index, node_index + self.col_num, "vertical", "right"
+                )
+                edges += new_edge(
+                    index, node_index + self.col_num, node_index, "vertical", "left"
+                )
 
         return edges
 
@@ -435,14 +444,16 @@ class TrafficLightGridNetwork(Network):
         edges = []
 
         def new_edge(index, from_node, to_node, orientation, length):
-            return [{
-                "id": index,
-                "type": {"v": "vertical", "h": "horizontal"}[orientation],
-                "priority": 78,
-                "from": from_node,
-                "to": to_node,
-                "length": length
-            }]
+            return [
+                {
+                    "id": index,
+                    "type": {"v": "vertical", "h": "horizontal"}[orientation],
+                    "priority": 78,
+                    "from": from_node,
+                    "to": to_node,
+                    "length": length,
+                }
+            ]
 
         for i in range(self.col_num):
             # bottom edges
@@ -494,13 +505,15 @@ class TrafficLightGridNetwork(Network):
         con_dict = {}
 
         def new_con(side, from_id, to_id, lane, signal_group):
-            return [{
-                "from": side + from_id,
-                "to": side + to_id,
-                "fromLane": str(lane),
-                "toLane": str(lane),
-                "signal_group": signal_group
-            }]
+            return [
+                {
+                    "from": side + from_id,
+                    "to": side + to_id,
+                    "fromLane": str(lane),
+                    "toLane": str(lane),
+                    "signal_group": signal_group,
+                }
+            ]
 
         # build connections at each inner node
         for i in range(self.row_num):
@@ -530,11 +543,15 @@ class TrafficLightGridNetwork(Network):
             for j in range(self.row_num + 1):
                 index = "{}_{}".format(j, i)
                 if i != self.col_num:
-                    edgestarts += [("left" + index, 0 + i * 50 + j * 5000),
-                                   ("right" + index, 10 + i * 50 + j * 5000)]
+                    edgestarts += [
+                        ("left" + index, 0 + i * 50 + j * 5000),
+                        ("right" + index, 10 + i * 50 + j * 5000),
+                    ]
                 if j != self.row_num:
-                    edgestarts += [("top" + index, 15 + i * 50 + j * 5000),
-                                   ("bot" + index, 20 + i * 50 + j * 5000)]
+                    edgestarts += [
+                        ("top" + index, 15 + i * 50 + j * 5000),
+                        ("bot" + index, 20 + i * 50 + j * 5000),
+                    ]
 
         return edgestarts
 
@@ -557,21 +574,33 @@ class TrafficLightGridNetwork(Network):
 
         start_lanes = []
         for i in range(col_num):
-            start_pos += [("right0_{}".format(i), x0 + k * dx)
-                          for k in range(cars_heading_right)]
-            start_pos += [("left{}_{}".format(row_num, i), x0 + k * dx)
-                          for k in range(cars_heading_left)]
-            horz_lanes = np.random.randint(low=0, high=net_params.additional_params["horizontal_lanes"],
-                                           size=cars_heading_left + cars_heading_right).tolist()
+            start_pos += [
+                ("right0_{}".format(i), x0 + k * dx) for k in range(cars_heading_right)
+            ]
+            start_pos += [
+                ("left{}_{}".format(row_num, i), x0 + k * dx)
+                for k in range(cars_heading_left)
+            ]
+            horz_lanes = np.random.randint(
+                low=0,
+                high=net_params.additional_params["horizontal_lanes"],
+                size=cars_heading_left + cars_heading_right,
+            ).tolist()
             start_lanes += horz_lanes
 
         for i in range(row_num):
-            start_pos += [("top{}_{}".format(i, col_num), x0 + k * dx)
-                          for k in range(cars_heading_top)]
-            start_pos += [("bot{}_0".format(i), x0 + k * dx)
-                          for k in range(cars_heading_bot)]
-            vert_lanes = np.random.randint(low=0, high=net_params.additional_params["vertical_lanes"],
-                                           size=cars_heading_left + cars_heading_right).tolist()
+            start_pos += [
+                ("top{}_{}".format(i, col_num), x0 + k * dx)
+                for k in range(cars_heading_top)
+            ]
+            start_pos += [
+                ("bot{}_0".format(i), x0 + k * dx) for k in range(cars_heading_bot)
+            ]
+            vert_lanes = np.random.randint(
+                low=0,
+                high=net_params.additional_params["vertical_lanes"],
+                size=cars_heading_left + cars_heading_right,
+            ).tolist()
             start_lanes += vert_lanes
 
         return start_pos, start_lanes
@@ -597,7 +626,11 @@ class TrafficLightGridNetwork(Network):
                 right_edge_id = "top{}_{}".format(row, col + 1)
                 left_edge_id = "bot{}_{}".format(row, col)
 
-                mapping[node_id] = [left_edge_id, bot_edge_id,
-                                    right_edge_id, top_edge_id]
+                mapping[node_id] = [
+                    left_edge_id,
+                    bot_edge_id,
+                    right_edge_id,
+                    top_edge_id,
+                ]
 
         return sorted(mapping.items(), key=lambda x: x[0])

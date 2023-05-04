@@ -2,9 +2,10 @@
 
 import numpy as np
 
+
 def local_desired_velocity(env, veh_ids, fail=False):
-    """ 
-    Encourage proximity to a desired velocity. 
+    """
+    Encourage proximity to a desired velocity.
     We only observe the velocity of the specified car.
     If a collison or failure occurs, we return 0.
     """
@@ -12,9 +13,9 @@ def local_desired_velocity(env, veh_ids, fail=False):
     num_vehicles = len(veh_ids)
 
     if any(vel < -100) or fail or num_vehicles == 0:
-        return 0.
+        return 0.0
 
-    target_vel = env.env_params.additional_params['target_velocity']
+    target_vel = env.env_params.additional_params["target_velocity"]
     max_cost = np.array([target_vel] * num_vehicles)
     max_cost = np.linalg.norm(max_cost)
 
@@ -68,9 +69,9 @@ def desired_velocity(env, fail=False, edge_list=None):
     num_vehicles = len(veh_ids)
 
     if any(vel < -100) or fail or num_vehicles == 0:
-        return 0.
+        return 0.0
 
-    target_vel = env.env_params.additional_params['target_velocity']
+    target_vel = env.env_params.additional_params["target_velocity"]
     max_cost = np.array([target_vel] * num_vehicles)
     max_cost = np.linalg.norm(max_cost)
 
@@ -105,9 +106,9 @@ def average_velocity(env, fail=False):
     vel = np.array(env.k.vehicle.get_speed(env.k.vehicle.get_ids()))
 
     if any(vel < -100) or fail:
-        return 0.
+        return 0.0
     if len(vel) == 0:
-        return 0.
+        return 0.0
 
     return np.mean(vel)
 
@@ -159,8 +160,8 @@ def min_delay(env):
 
     vel = vel[vel >= -1e-6]
     v_top = max(
-        env.k.network.speed_limit(edge)
-        for edge in env.k.network.get_edge_list())
+        env.k.network.speed_limit(edge) for edge in env.k.network.get_edge_list()
+    )
     time_step = env.sim_step
 
     max_cost = time_step * sum(vel.shape)
@@ -218,8 +219,8 @@ def min_delay_unscaled(env):
 
     vel = vel[vel >= -1e-6]
     v_top = max(
-        env.k.network.speed_limit(edge)
-        for edge in env.k.network.get_edge_list())
+        env.k.network.speed_limit(edge) for edge in env.k.network.get_edge_list()
+    )
     time_step = env.sim_step
 
     # epsilon term (to deal with ZeroDivisionError exceptions)
@@ -280,11 +281,9 @@ def penalize_near_standstill(env, thresh=0.3, gain=1):
     return -penalty
 
 
-def penalize_headway_variance(vehicles,
-                              vids,
-                              normalization=1,
-                              penalty_gain=1,
-                              penalty_exponent=1):
+def penalize_headway_variance(
+    vehicles, vids, normalization=1, penalty_gain=1, penalty_exponent=1
+):
     """Reward function used to train rl vehicles to encourage large headways.
 
     Parameters
@@ -302,9 +301,9 @@ def penalize_headway_variance(vehicles,
         used to allow exponential punishing of smaller headways
     """
     headways = penalty_gain * np.power(
-        np.array(
-            [vehicles.get_headway(veh_id) / normalization
-             for veh_id in vids]), penalty_exponent)
+        np.array([vehicles.get_headway(veh_id) / normalization for veh_id in vids]),
+        penalty_exponent,
+    )
     return -np.var(headways)
 
 
@@ -330,7 +329,7 @@ def punish_rl_lane_changes(env, penalty=1):
     return total_lane_change_penalty
 
 
-def energy_consumption(env, gain=.001):
+def energy_consumption(env, gain=0.001):
     """Calculate power consumption of a vehicle.
 
     Assumes vehicle is an average sized vehicle.
@@ -341,7 +340,7 @@ def energy_consumption(env, gain=.001):
 
     M = 1200  # mass of average sized vehicle (kg)
     g = 9.81  # gravitational acceleration (m/s^2)
-    Cr = 0.005    # rolling resistance coefficient
+    Cr = 0.005  # rolling resistance coefficient
     Ca = 0.3  # aerodynamic drag coefficient
     rho = 1.225  # air density (kg/m^3)
     A = 2.6  # vehicle cross sectional area (m^2)
@@ -351,12 +350,14 @@ def energy_consumption(env, gain=.001):
 
         accel = abs(speed - prev_speed) / env.sim_step
 
-        power += M * speed * accel + M * g * Cr * speed + 0.5 * rho * A * Ca * speed ** 3
+        power += (
+            M * speed * accel + M * g * Cr * speed + 0.5 * rho * A * Ca * speed**3
+        )
 
     return -gain * power
 
 
-def veh_energy_consumption(env, veh_id, gain=.001):
+def veh_energy_consumption(env, veh_id, gain=0.001):
     """Calculate power consumption of a vehicle.
 
     Assumes vehicle is an average sized vehicle.
@@ -367,7 +368,7 @@ def veh_energy_consumption(env, veh_id, gain=.001):
 
     M = 1200  # mass of average sized vehicle (kg)
     g = 9.81  # gravitational acceleration (m/s^2)
-    Cr = 0.005    # rolling resistance coefficient
+    Cr = 0.005  # rolling resistance coefficient
     Ca = 0.3  # aerodynamic drag coefficient
     rho = 1.225  # air density (kg/m^3)
     A = 2.6  # vehicle cross sectional area (m^2)
@@ -376,12 +377,12 @@ def veh_energy_consumption(env, veh_id, gain=.001):
 
     accel = abs(speed - prev_speed) / env.sim_step
 
-    power += M * speed * accel + M * g * Cr * speed + 0.5 * rho * A * Ca * speed ** 3
+    power += M * speed * accel + M * g * Cr * speed + 0.5 * rho * A * Ca * speed**3
 
     return -gain * power
 
 
-def miles_per_megajoule(env, veh_ids=None, gain=.001):
+def miles_per_megajoule(env, veh_ids=None, gain=0.001):
     """Calculate miles per mega-joule of either a particular vehicle or the total average of all the vehicles.
 
     Assumes vehicle is an average sized vehicle.
@@ -423,7 +424,7 @@ def miles_per_megajoule(env, veh_ids=None, gain=.001):
     return mpj * gain
 
 
-def miles_per_gallon(env, veh_ids=None, gain=.001):
+def miles_per_gallon(env, veh_ids=None, gain=0.001):
     """Calculate mpg of either a particular vehicle or the total average of all the vehicles.
 
     Assumes vehicle is an average sized vehicle.
@@ -461,57 +462,80 @@ def miles_per_gallon(env, veh_ids=None, gain=.001):
 
     return mpg * gain
 
+
 ###################################### REWARD REGISTRY ######################################
 def upweight_bus_vel(env, rl_actions):
-    bus_vel = np.array([env.k.vehicle.get_speed(veh_id) for veh_id in env.k.vehicle.get_ids() if veh_id[:3] == 'bus'])
-    other_vel = np.array([env.k.vehicle.get_speed(veh_id) for veh_id in env.k.vehicle.get_ids() if veh_id[:3] != 'bus'])
-    bus = np.mean(bus_vel) if bus_vel.size != 0 else 0 
+    bus_vel = np.array(
+        [
+            env.k.vehicle.get_speed(veh_id)
+            for veh_id in env.k.vehicle.get_ids()
+            if veh_id[:3] == "bus"
+        ]
+    )
+    other_vel = np.array(
+        [
+            env.k.vehicle.get_speed(veh_id)
+            for veh_id in env.k.vehicle.get_ids()
+            if veh_id[:3] != "bus"
+        ]
+    )
+    bus = np.mean(bus_vel) if bus_vel.size != 0 else 0
     other = np.mean(other_vel) if other_vel.size != 0 else 0
     return 60 * bus + other
 
+
 def global_vel_all(env, rl_actions):
-    vel = np.array([
-        env.k.vehicle.get_speed(veh_id)
-        for veh_id in env.k.vehicle.get_ids()
-    ])
-    return np.mean(vel) if vel.size != 0 else 0 
+    vel = np.array(
+        [env.k.vehicle.get_speed(veh_id) for veh_id in env.k.vehicle.get_ids()]
+    )
+    return np.mean(vel) if vel.size != 0 else 0
+
 
 def commute_time(env, rl_actions):
     vel = np.array(env.k.vehicle.get_speed(env.k.vehicle.get_ids()))
-  
-    if any(vel < -100):
-        return -10000.
-    if len(vel) == 0:
-        return -10000.
 
-    commute = np.array([(v+0.001) ** -1 for v in vel])
+    if any(vel < -100):
+        return -10000.0
+    if len(vel) == 0:
+        return -10000.0
+
+    commute = np.array([(v + 0.001) ** -1 for v in vel])
     commute = commute[commute > 0]
     return -np.mean(commute)
+
 
 def desired_velocity_all(env, rl_actions):
     return desired_velocity(env)
 
+
 def local_desired_vel_first(env, rl_actions):
     return local_desired_velocity(env, env.rl_veh[:2])
+
 
 def local_desired_vel_last(env, rl_actions):
     return local_desired_velocity(env, env.rl_veh[-2:])
 
+
 def local_desired_vel_all(env, rl_actions):
     return local_desired_velocity(env, env.rl_veh)
 
+
 def outflow(env, rl_actions):
     return env.k.vehicle.get_outflow_rate(10 * env.sim_step)
+
 
 def forward_progress(env, rl_actions):
     rl_vel = env.k.vehicle.get_speed(env.k.vehicle.get_rl_ids())
     return np.linalg.norm(rl_vel, 1)
 
+
 def penalize_mean_delay(env, rl_actions):
-  return -min_delay_unscaled(env)
+    return -min_delay_unscaled(env)
+
 
 def penalize_still(env, rl_actions):
-  return penalize_standstill(env)
+    return penalize_standstill(env)
+
 
 def penalize_headway(env, rl_actions):
     cost = 0
@@ -519,9 +543,12 @@ def penalize_headway(env, rl_actions):
     for rl_id in env.rl_veh:
         lead_id = env.k.vehicle.get_leader(rl_id)
         if lead_id not in ["", None] and env.k.vehicle.get_speed(rl_id) > 0:
-            t_headway = max(env.k.vehicle.get_headway(rl_id) / env.k.vehicle.get_speed(rl_id), 0)
+            t_headway = max(
+                env.k.vehicle.get_headway(rl_id) / env.k.vehicle.get_speed(rl_id), 0
+            )
             cost += min((t_headway - t_min) / t_min, 0)
-    return cost 
+    return cost
+
 
 def penalize_accel(env, rl_actions):
     if rl_actions is None:
@@ -530,6 +557,7 @@ def penalize_accel(env, rl_actions):
     accel_threshold = 0
     return min(0, accel_threshold - mean_actions)
 
+
 def penalize_lane_change(env, rl_actions):
     reward = 0
     for veh_id in env.k.vehicle.get_rl_ids():
@@ -537,50 +565,56 @@ def penalize_lane_change(env, rl_actions):
             reward -= 0.1
     return reward
 
+
 def penalize_boolean_lane_change(env, rl_actions):
     if rl_actions is None:
         return 0
-    lane_change_acts = np.abs(np.round(rl_actions[1::2])[:env.k.vehicle.num_rl_vehicles])
+    lane_change_acts = np.abs(
+        np.round(rl_actions[1::2])[: env.k.vehicle.num_rl_vehicles]
+    )
     return -np.sum(lane_change_acts)
+
 
 def penalize_light_change(env, rl_actions):
     if rl_actions is None:
         return 0
     return -np.sum(rl_actions >= 0.5)
 
+
 def penalize_cars(env, rl_actions):
     return -len(env.k.vehicle.get_ids())
 
+
 REWARD_REGISTRY = {
-  "bus_vel": upweight_bus_vel,
-  "bus": upweight_bus_vel,
-  "commute": commute_time,
-  "time": commute_time,
-  "vel": global_vel_all,
-  "velocity": global_vel_all,
-  "desired_vel": desired_velocity_all,
-  "desired_velocity": desired_velocity_all,
-  "local_first": local_desired_vel_first,
-  "partial_first": local_desired_vel_first,
-  "local_last": local_desired_vel_last,
-  "partial_last": local_desired_vel_last,
-  "local": local_desired_vel_all,
-  "partial_all": local_desired_vel_all,
-  "outflow": outflow,
-  "out": outflow,
-  "forward_progress": forward_progress,
-  "forward": forward_progress,
-  "min_delay": penalize_mean_delay,
-  "delay": penalize_mean_delay,
-  "headway": penalize_headway,
-  "accel": penalize_accel,
-  "lane_change": penalize_lane_change,
-  "lane": penalize_lane_change,
-  "lane_change_bool": penalize_boolean_lane_change,
-  "lane_bool": penalize_boolean_lane_change,
-  "light_change": penalize_light_change,
-  "light": penalize_light_change,
-  "cars": penalize_cars,
-  "standstill": penalize_still,
-  "still": penalize_still,
+    "bus_vel": upweight_bus_vel,
+    "bus": upweight_bus_vel,
+    "commute": commute_time,
+    "time": commute_time,
+    "vel": global_vel_all,
+    "velocity": global_vel_all,
+    "desired_vel": desired_velocity_all,
+    "desired_velocity": desired_velocity_all,
+    "local_first": local_desired_vel_first,
+    "partial_first": local_desired_vel_first,
+    "local_last": local_desired_vel_last,
+    "partial_last": local_desired_vel_last,
+    "local": local_desired_vel_all,
+    "partial_all": local_desired_vel_all,
+    "outflow": outflow,
+    "out": outflow,
+    "forward_progress": forward_progress,
+    "forward": forward_progress,
+    "min_delay": penalize_mean_delay,
+    "delay": penalize_mean_delay,
+    "headway": penalize_headway,
+    "accel": penalize_accel,
+    "lane_change": penalize_lane_change,
+    "lane": penalize_lane_change,
+    "lane_change_bool": penalize_boolean_lane_change,
+    "lane_bool": penalize_boolean_lane_change,
+    "light_change": penalize_light_change,
+    "light": penalize_light_change,
+    "cars": penalize_cars,
+    "standstill": penalize_still,
+    "still": penalize_still,
 }

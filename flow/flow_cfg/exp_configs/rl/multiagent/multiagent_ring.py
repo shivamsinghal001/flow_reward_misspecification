@@ -9,7 +9,10 @@ from ray.tune.registry import register_env
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
 from flow.core.params import VehicleParams, SumoCarFollowingParams
 from flow.controllers import RLController, IDMController, ContinuousRouter
-from flow.envs.multiagent.ring.wave_attenuation import MultiAgentWaveAttenuationPOEnv, MultiAgentWaveAttenuationEnv
+from flow.envs.multiagent.ring.wave_attenuation import (
+    MultiAgentWaveAttenuationPOEnv,
+    MultiAgentWaveAttenuationEnv,
+)
 from flow.networks import RingNetwork
 from flow.utils.registry import make_create_env
 
@@ -34,43 +37,32 @@ for i in range(NUM_AUTOMATED):
         veh_id="rl_{}".format(i),
         acceleration_controller=(RLController, {}),
         routing_controller=(ContinuousRouter, {}),
-        num_vehicles=1)
+        num_vehicles=1,
+    )
 
     # Add a fraction of the remaining human vehicles.
     vehicles_to_add = round(humans_remaining / (NUM_AUTOMATED - i))
     humans_remaining -= vehicles_to_add
     vehicles.add(
         veh_id="human_{}".format(i),
-        acceleration_controller=(IDMController, {
-            "noise": 0.2
-        }),
-        car_following_params=SumoCarFollowingParams(
-            min_gap=0
-        ),
+        acceleration_controller=(IDMController, {"noise": 0.2}),
+        car_following_params=SumoCarFollowingParams(min_gap=0),
         routing_controller=(ContinuousRouter, {}),
-        num_vehicles=vehicles_to_add)
+        num_vehicles=vehicles_to_add,
+    )
 
 
 flow_params = dict(
     # name of the experiment
     exp_tag="multiagent_ring",
-
     # name of the flow environment the experiment is running on
-    env_name=MultiAgentWaveAttenuationEnv, #MultiAgentWaveAttenuationPOEnv,
-
+    env_name=MultiAgentWaveAttenuationEnv,  # MultiAgentWaveAttenuationPOEnv,
     # name of the network class the experiment is running on
     network=RingNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
-    sim=SumoParams(
-        sim_step=0.1,
-        render=False,
-        restart_instance=False
-    ),
-
+    sim=SumoParams(sim_step=0.1, render=False, restart_instance=False),
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
@@ -83,7 +75,6 @@ flow_params = dict(
             "local": None,
         },
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
@@ -92,12 +83,11 @@ flow_params = dict(
             "lanes": 1,
             "speed_limit": 30,
             "resolution": 40,
-        }, ),
-
+        },
+    ),
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),
@@ -120,12 +110,12 @@ def gen_policy():
 
 
 # Setup PG with an ensemble of `num_policies` different policy graphs
-POLICY_GRAPHS = {'av': gen_policy()}
+POLICY_GRAPHS = {"av": gen_policy()}
 
 
 def policy_mapping_fn(_):
     """Map a policy in RLlib."""
-    return 'av'
+    return "av"
 
 
-POLICIES_TO_TRAIN = ['av']
+POLICIES_TO_TRAIN = ["av"]

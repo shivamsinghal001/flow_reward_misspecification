@@ -1,5 +1,6 @@
 from .exp_configs.rl import singleagent, multiagent
 
+
 def get_exp(exp_tag):
     if exp_tag == "singleagent_traffic_light_grid":
         return singleagent.singleagent_traffic_light_grid
@@ -33,7 +34,7 @@ def get_exp(exp_tag):
         return multiagent.multiagent_highway
     elif exp_tag == "multiagent_figure_eight":
         return multiagent.multiagent_figure_eight
-    elif exp_tag == "lord_of_the_rings":   
+    elif exp_tag == "lord_of_the_rings":
         return multiagent.lord_of_the_rings
     elif exp_tag == "adversarial_figure_eight":
         return multiagent.adversarial_figure_eight

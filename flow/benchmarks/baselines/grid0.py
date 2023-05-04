@@ -27,24 +27,21 @@ def grid0_baseline(num_runs, render=True):
         flow.core.experiment.Experiment
             class needed to run simulations
     """
-    sim_params = flow_params['sim']
-    env_params = flow_params['env']
+    sim_params = flow_params["sim"]
+    env_params = flow_params["env"]
 
     # define the traffic light logic
     tl_logic = TrafficLightParams(baseline=False)
 
-    phases = [{"duration": "31", "minDur": "8", "maxDur": "45",
-               "state": "GrGr"},
-              {"duration": "6", "minDur": "3", "maxDur": "6",
-               "state": "yryr"},
-              {"duration": "31", "minDur": "8", "maxDur": "45",
-               "state": "rGrG"},
-              {"duration": "6", "minDur": "3", "maxDur": "6",
-               "state": "ryry"}]
+    phases = [
+        {"duration": "31", "minDur": "8", "maxDur": "45", "state": "GrGr"},
+        {"duration": "6", "minDur": "3", "maxDur": "6", "state": "yryr"},
+        {"duration": "31", "minDur": "8", "maxDur": "45", "state": "rGrG"},
+        {"duration": "6", "minDur": "3", "maxDur": "6", "state": "ryry"},
+    ]
 
     for i in range(N_ROWS * N_COLUMNS):
-        tl_logic.add('center'+str(i), tls_type='actuated', phases=phases,
-                     programID=1)
+        tl_logic.add("center" + str(i), tls_type="actuated", phases=phases, programID=1)
 
     # modify the rendering to match what is requested
     sim_params.render = render
@@ -52,18 +49,18 @@ def grid0_baseline(num_runs, render=True):
     # set the evaluation flag to True
     env_params.evaluate = True
 
-    flow_params['env'].horizon = env_params.horizon
+    flow_params["env"].horizon = env_params.horizon
     exp = Experiment(flow_params)
 
     results = exp.run(num_runs)
-    total_delay = np.mean(results['returns'])
+    total_delay = np.mean(results["returns"])
 
     return total_delay
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runs = 1  # number of simulations to average over
     res = grid0_baseline(num_runs=runs)
 
-    print('---------')
-    print('The total delay across {} runs is {}'.format(runs, res))
+    print("---------")
+    print("The total delay across {} runs is {}".format(runs, res))

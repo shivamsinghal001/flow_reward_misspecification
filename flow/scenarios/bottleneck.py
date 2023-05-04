@@ -7,8 +7,7 @@ from flow.networks.bottleneck import BottleneckNetwork
 from flow.networks.bottleneck import ADDITIONAL_NET_PARAMS  # noqa: F401
 
 
-@deprecated('flow.scenarios.bottleneck',
-            'flow.networks.bottleneck.BottleneckNetwork')
+@deprecated("flow.scenarios.bottleneck", "flow.networks.bottleneck.BottleneckNetwork")
 class BottleneckScenario(BottleneckNetwork):
     """See parent class."""
 

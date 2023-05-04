@@ -42,15 +42,17 @@ if WANT_DOWNSTREAM_BOUNDARY:
     NET_TEMPLATE = os.path.join(
         config.PROJECT_PATH,
         "examples/exp_configs/templates/sumo/i210_with_ghost_cell_with_"
-        "downstream.xml")
+        "downstream.xml",
+    )
 elif WANT_GHOST_CELL:
     NET_TEMPLATE = os.path.join(
         config.PROJECT_PATH,
-        "examples/exp_configs/templates/sumo/i210_with_ghost_cell.xml")
+        "examples/exp_configs/templates/sumo/i210_with_ghost_cell.xml",
+    )
 else:
     NET_TEMPLATE = os.path.join(
-        config.PROJECT_PATH,
-        "examples/exp_configs/templates/sumo/test2.net.xml")
+        config.PROJECT_PATH, "examples/exp_configs/templates/sumo/test2.net.xml"
+    )
 
 # If the ghost cell is not being used, remove it from the initial edges that
 # vehicles can be placed on.
@@ -69,11 +71,14 @@ vehicles.add(
     lane_change_params=SumoLaneChangeParams(
         lane_change_mode="strategic",
     ),
-    acceleration_controller=(IDMController, {
-        "a": 1.3,
-        "b": 2.0,
-        "noise": 0.3,
-    }),
+    acceleration_controller=(
+        IDMController,
+        {
+            "a": 1.3,
+            "b": 2.0,
+            "noise": 0.3,
+        },
+    ),
     routing_controller=(I210Router, {}) if ON_RAMP else None,
 )
 
@@ -85,7 +90,8 @@ for lane in [0, 1, 2, 3, 4]:
         edge="ghost0" if WANT_GHOST_CELL else "119257914",
         vehs_per_hour=INFLOW_RATE,
         departLane=lane,
-        departSpeed=INFLOW_SPEED)
+        departSpeed=INFLOW_SPEED,
+    )
 # on ramp
 if ON_RAMP:
     inflow.add(
@@ -93,13 +99,15 @@ if ON_RAMP:
         edge="27414345",
         vehs_per_hour=500,
         departLane="random",
-        departSpeed=10)
+        departSpeed=10,
+    )
     inflow.add(
         veh_type="human",
         edge="27414342#0",
         vehs_per_hour=500,
         departLane="random",
-        departSpeed=10)
+        departSpeed=10,
+    )
 
 # =========================================================================== #
 # Generate the flow_params dict with all relevant simulation information.     #
@@ -107,32 +115,17 @@ if ON_RAMP:
 
 flow_params = dict(
     # name of the experiment
-    exp_tag='I-210_subnetwork',
-
+    exp_tag="I-210_subnetwork",
     # name of the flow environment the experiment is running on
     env_name=TestEnv,
-
     # name of the network class the experiment is running on
     network=I210SubNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # simulation-related parameters
-    sim=SumoParams(
-        sim_step=0.4,
-        render=False,
-        color_by_speed=True,
-        use_ballistic=True
-    ),
-
+    sim=SumoParams(sim_step=0.4, render=False, color_by_speed=True, use_ballistic=True),
     # environment related parameters (see flow.core.params.EnvParams)
-    env=EnvParams(
-        horizon=HORIZON,
-        warmup_steps=WARMUP_STEPS,
-        sims_per_step=3
-    ),
-
+    env=EnvParams(horizon=HORIZON, warmup_steps=WARMUP_STEPS, sims_per_step=3),
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
@@ -141,13 +134,11 @@ flow_params = dict(
         additional_params={
             "on_ramp": ON_RAMP,
             "ghost_edge": WANT_GHOST_CELL,
-        }
+        },
     ),
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
@@ -161,13 +152,14 @@ flow_params = dict(
 
 edge_id = "119257908#1-AddedOnRampEdge"
 custom_callables = {
-    "avg_merge_speed": lambda env: np.nan_to_num(np.mean(
-        env.k.vehicle.get_speed(env.k.vehicle.get_ids_by_edge(edge_id)))),
-    "avg_outflow": lambda env: np.nan_to_num(
-        env.k.vehicle.get_outflow_rate(120)),
+    "avg_merge_speed": lambda env: np.nan_to_num(
+        np.mean(env.k.vehicle.get_speed(env.k.vehicle.get_ids_by_edge(edge_id)))
+    ),
+    "avg_outflow": lambda env: np.nan_to_num(env.k.vehicle.get_outflow_rate(120)),
     # we multiply by 5 to account for the vehicle length and by 1000 to convert
     # into veh/km
-    "avg_density": lambda env: 5 * 1000 * len(env.k.vehicle.get_ids_by_edge(
-        edge_id)) / (env.k.network.edge_length(edge_id)
-                     * env.k.network.num_lanes(edge_id)),
+    "avg_density": lambda env: 5
+    * 1000
+    * len(env.k.vehicle.get_ids_by_edge(edge_id))
+    / (env.k.network.edge_length(edge_id) * env.k.network.num_lanes(edge_id)),
 }

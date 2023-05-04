@@ -78,8 +78,11 @@ class Experiment:
         # Create the environment.
         self.env = create_env()
 
-        logging.info(" Starting experiment {} at {}".format(
-            self.env.network.name, str(datetime.utcnow())))
+        logging.info(
+            " Starting experiment {} at {}".format(
+                self.env.network.name, str(datetime.utcnow())
+            )
+        )
 
         logging.info("Initializing environment.")
 
@@ -109,13 +112,14 @@ class Experiment:
         # simulation
         if convert_to_csv and self.env.sim_params.emission_path is None:
             raise ValueError(
-                'The experiment was run with convert_to_csv set '
-                'to True, but no emission file will be generated. If you wish '
-                'to generate an emission file, you should set the parameter '
-                'emission_path in the simulation parameters (SumoParams or '
-                'AimsunParams) to the path of the folder where emissions '
-                'output should be generated. If you do not wish to generate '
-                'emissions, set the convert_to_csv parameter to False.')
+                "The experiment was run with convert_to_csv set "
+                "to True, but no emission file will be generated. If you wish "
+                "to generate an emission file, you should set the parameter "
+                "emission_path in the simulation parameters (SumoParams or "
+                "AimsunParams) to the path of the folder where emissions "
+                "output should be generated. If you do not wish to generate "
+                "emissions, set the convert_to_csv parameter to False."
+            )
 
         # used to store
         info_dict = {
@@ -123,11 +127,10 @@ class Experiment:
             "velocities": [],
             "outflows": [],
         }
-        info_dict.update({
-            key: [] for key in self.custom_callables.keys()
-        })
+        info_dict.update({key: [] for key in self.custom_callables.keys()})
 
         if rl_actions is None:
+
             def rl_actions(*_):
                 return None
 
@@ -152,7 +155,7 @@ class Experiment:
                 ret += reward
 
                 # Compute the results for the custom callables.
-                for (key, lambda_func) in self.custom_callables.items():
+                for key, lambda_func in self.custom_callables.items():
                     custom_vals[key].append(lambda_func(self.env))
 
                 if done:
@@ -175,8 +178,11 @@ class Experiment:
 
         # Print the averages/std for all variables in the info_dict.
         for key in info_dict.keys():
-            print("Average, std {}: {}, {}".format(
-                key, np.mean(info_dict[key]), np.std(info_dict[key])))
+            print(
+                "Average, std {}: {}, {}".format(
+                    key, np.mean(info_dict[key]), np.std(info_dict[key])
+                )
+            )
 
         print("Total time:", time.time() - t)
         print("steps/second:", np.mean(times))

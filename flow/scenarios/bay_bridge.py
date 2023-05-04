@@ -6,8 +6,7 @@ from flow.utils.flow_warnings import deprecated
 from flow.networks.bay_bridge import BayBridgeNetwork
 
 
-@deprecated('flow.scenarios.bay_bridge',
-            'flow.networks.bay_bridge.BayBridgeNetwork')
+@deprecated("flow.scenarios.bay_bridge", "flow.networks.bay_bridge.BayBridgeNetwork")
 class BayBridgeScenario(BayBridgeNetwork):
     """See parent class."""
 

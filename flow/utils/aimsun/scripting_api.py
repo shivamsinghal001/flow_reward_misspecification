@@ -5,15 +5,21 @@ import os
 import flow.config as config
 
 try:
-    SITEPACKAGES = os.path.join(config.AIMSUN_SITEPACKAGES,
-                                "lib/python2.7/site-packages")
+    SITEPACKAGES = os.path.join(
+        config.AIMSUN_SITEPACKAGES, "lib/python2.7/site-packages"
+    )
     sys.path.append(SITEPACKAGES)
 except TypeError:
-    raise EnvironmentError("Please declare the AIMSUN_SITEPACKAGES environment variable.")
+    raise EnvironmentError(
+        "Please declare the AIMSUN_SITEPACKAGES environment variable."
+    )
 
 try:
-    sys.path.append(os.path.join(config.AIMSUN_NEXT_PATH,
-                                 'programming/Aimsun Next API/AAPIPython/Micro'))
+    sys.path.append(
+        os.path.join(
+            config.AIMSUN_NEXT_PATH, "programming/Aimsun Next API/AAPIPython/Micro"
+        )
+    )
 except TypeError:
     raise EnvironmentError("Please declare the AIMSUN_NEXT_PATH environment variable.")
 
@@ -118,7 +124,7 @@ class AimsunTemplate(object):
             whether or not the simulation should be rendered
         """
         # "play": run with GUI; "execute": run in batch mode
-        mode = 'play' if render else 'execute'
+        mode = "play" if render else "execute"
         self.GKSystem.getSystem().executeAction(mode, replication, [], "")
 
     ####################################################################
@@ -175,10 +181,10 @@ class AimsunTemplate(object):
 
         def custom_getattr(self, name):
             # transform name from attr_name to AttrName
-            name = ''.join(map(capitalize, name.split('_')))
+            name = "".join(map(capitalize, name.split("_")))
 
             # attempt to retrieve getAttrName, or attrName if the first fails
-            name1 = 'get' + name
+            name1 = "get" + name
             name2 = name[0].lower() + name[1:]
             try:
                 aimsun_fct = object.__getattribute__(self, name1)
@@ -189,8 +195,10 @@ class AimsunTemplate(object):
                     # if both attempts fail, raise an AttributeError with
                     # the original attribute name (instead of name1 or name2)
                     raise AttributeError(
-                        '\'{}\' has no attribute \'{}\''.format(
-                            self.__class__.__name__, name))
+                        "'{}' has no attribute '{}'".format(
+                            self.__class__.__name__, name
+                        )
+                    )
 
             # call the Aimsun function (which most likely is a getter)
             try:
@@ -220,7 +228,7 @@ class AimsunTemplate(object):
         def custom_setattr(self, name, value):
             try:
                 # transform name from attr_name to setAttrName
-                aimsun_name = 'set' + ''.join(map(capitalize, name.split('_')))
+                aimsun_name = "set" + "".join(map(capitalize, name.split("_")))
                 # retrieve the Aimsun setter
                 aimsun_setter = object.__getattribute__(self, aimsun_name)
                 # call the setter to set the new value to attribute 'name'
@@ -310,7 +318,7 @@ class AimsunTemplate(object):
         closely to the road from one intersection to the next. In a freeway
         area, a section can be the part of the road between two ramps.
         """
-        return self.__get_objects_by_type('GKSection')
+        return self.__get_objects_by_type("GKSection")
 
     @property
     def nodes(self):
@@ -322,7 +330,7 @@ class AimsunTemplate(object):
         list, which determines the possible exits of a vehicle entering the
         nodes.
         """
-        return self.__get_objects_by_type('GKNode')
+        return self.__get_objects_by_type("GKNode")
 
     @property
     def turnings(self):
@@ -331,7 +339,7 @@ class AimsunTemplate(object):
         This object is responsible for connecting some (or all) lanes between
         two sections.
         """
-        return self.__get_objects_by_type('GKTurning')
+        return self.__get_objects_by_type("GKTurning")
 
     @property
     def cen_connections(self):
@@ -340,7 +348,7 @@ class AimsunTemplate(object):
         This contains information of a connection between an object and a
         centroid.
         """
-        return self.__get_objects_by_type('GKCenConnection')
+        return self.__get_objects_by_type("GKCenConnection")
 
     @property
     def replications(self):
@@ -350,7 +358,7 @@ class AimsunTemplate(object):
         of a single simulation and they are groupped in experiment averages
         (GKExperimentResult).
         """
-        return self.__get_objects_by_type('GKReplication')
+        return self.__get_objects_by_type("GKReplication")
 
     @property
     def centroid_configurations(self):
@@ -359,7 +367,7 @@ class AimsunTemplate(object):
         This object is a centroid set, which is appropriate to simulate either
         a part of the network or the whole network.
         """
-        return self.__get_objects_by_type('GKCentroidConfiguration')
+        return self.__get_objects_by_type("GKCentroidConfiguration")
 
     @property
     def problem_nets(self):
@@ -372,4 +380,4 @@ class AimsunTemplate(object):
         that information is possible to extract all the objects delimited by
         the subnetwork.
         """
-        return self.__get_objects_by_type('GKProblemNet')
+        return self.__get_objects_by_type("GKProblemNet")

@@ -306,12 +306,14 @@ class Network(object):
     >>> []
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Instantiate the base network class.
 
         Attributes
@@ -328,7 +330,7 @@ class Network(object):
             see flow/core/params.py
         """
         self.orig_name = name  # To avoid repeated concatenation upon reset
-        self.name = name + time.strftime('_%Y%m%d-%H%M%S') + str(time.time())
+        self.name = name + time.strftime("_%Y%m%d-%H%M%S") + str(time.time())
 
         self.vehicles = vehicles
         self.net_params = net_params
@@ -351,17 +353,21 @@ class Network(object):
         # this is to be used if file paths other than the the network geometry
         # file is specified
         elif type(net_params.template) is dict:
-            if 'rou' in net_params.template:
-                veh, rou = self._vehicle_infos(net_params.template['rou'])
+            if "rou" in net_params.template:
+                veh, rou = self._vehicle_infos(net_params.template["rou"])
 
-                vtypes = self._vehicle_type(net_params.template.get('vtype'))
+                vtypes = self._vehicle_type(net_params.template.get("vtype"))
                 cf = self._get_cf_params(vtypes)
                 lc = self._get_lc_params(vtypes)
 
                 # add the vehicle types to the VehicleParams object
                 for t in vtypes:
-                    vehicles.add(veh_id=t, car_following_params=cf[t],
-                                 lane_change_params=lc[t], num_vehicles=0)
+                    vehicles.add(
+                        veh_id=t,
+                        car_following_params=cf[t],
+                        lane_change_params=lc[t],
+                        num_vehicles=0,
+                    )
 
                 # add the routes of the vehicles that will be departed later
                 # under the name of the vehicle. This will later be identified
@@ -429,7 +435,7 @@ class Network(object):
             list of internal junction names and starting positions,
             ex: [(internal0, pos0), (internal1, pos1), ...]
         """
-        return [(':', -1)]
+        return [(":", -1)]
 
     # TODO: convert to property
     def specify_nodes(self, net_params):
@@ -700,30 +706,30 @@ class Network(object):
             # properties are instantiated within the .rou.xml file. This will
             # only apply if such data is within the file (it is not implemented
             # by networks in Flow).
-            for vehicle in root.findall('vehicle'):
+            for vehicle in root.findall("vehicle"):
                 # collect the edges the vehicle is meant to traverse
-                route = vehicle.find('route')
-                route_edges = route.attrib["edges"].split(' ')
+                route = vehicle.find("route")
+                route_edges = route.attrib["edges"].split(" ")
 
                 # collect the names of each vehicle type and number of vehicles
                 # of each type
-                type_vehicle = vehicle.attrib['type']
+                type_vehicle = vehicle.attrib["type"]
                 type_data[type_vehicle] += 1
 
-                vehicle_data[vehicle.attrib['id']] = {
-                    'departSpeed': vehicle.attrib['departSpeed'],
-                    'depart': vehicle.attrib['depart'],
-                    'typeID': type_vehicle,
-                    'departPos': vehicle.attrib['departPos'],
+                vehicle_data[vehicle.attrib["id"]] = {
+                    "departSpeed": vehicle.attrib["departSpeed"],
+                    "depart": vehicle.attrib["depart"],
+                    "typeID": type_vehicle,
+                    "departPos": vehicle.attrib["departPos"],
                 }
 
-                routes_data[vehicle.attrib['id']] = route_edges
+                routes_data[vehicle.attrib["id"]] = route_edges
 
             # collect the edges the vehicle is meant to traverse for the given
             # sets of routes that are not associated with individual vehicles
-            for route in root.findall('route'):
-                route_edges = route.attrib["edges"].split(' ')
-                routes_data[route.attrib['id']] = route_edges
+            for route in root.findall("route"):
+                route_edges = route.attrib["edges"].split(" ")
+                routes_data[route.attrib["id"]] = route_edges
 
         return vehicle_data, routes_data
 
@@ -755,23 +761,25 @@ class Network(object):
         veh_type = {}
 
         # this hack is meant to support the LuST network and Flow networks
-        root = [root] if len(root.findall('vTypeDistribution')) == 0 \
-            else root.findall('vTypeDistribution')
+        root = (
+            [root]
+            if len(root.findall("vTypeDistribution")) == 0
+            else root.findall("vTypeDistribution")
+        )
 
         for r in root:
-            for vtype in r.findall('vType'):
+            for vtype in r.findall("vType"):
                 # TODO: make for everything
-                veh_type[vtype.attrib['id']] = {
-                    'vClass': vtype.attrib.get('vClass', DEFAULT_VCLASS),
-                    'accel': vtype.attrib['accel'],
-                    'decel': vtype.attrib['decel'],
-                    'sigma': vtype.attrib['sigma'],
-                    'length': vtype.attrib.get('length', DEFAULT_LENGTH),
-                    'minGap': vtype.attrib['minGap'],
-                    'maxSpeed': vtype.attrib['maxSpeed'],
-                    'probability': vtype.attrib.get(
-                        'probability', DEFAULT_PROBABILITY),
-                    'speedDev': vtype.attrib['speedDev']
+                veh_type[vtype.attrib["id"]] = {
+                    "vClass": vtype.attrib.get("vClass", DEFAULT_VCLASS),
+                    "accel": vtype.attrib["accel"],
+                    "decel": vtype.attrib["decel"],
+                    "sigma": vtype.attrib["sigma"],
+                    "length": vtype.attrib.get("length", DEFAULT_LENGTH),
+                    "minGap": vtype.attrib["minGap"],
+                    "maxSpeed": vtype.attrib["maxSpeed"],
+                    "probability": vtype.attrib.get("probability", DEFAULT_PROBABILITY),
+                    "speedDev": vtype.attrib["speedDev"],
                 }
 
         return veh_type
@@ -783,15 +791,15 @@ class Network(object):
         for typ in vtypes:
             # TODO: add vClass
             ret[typ] = SumoCarFollowingParams(
-                speed_mode='all_checks',
-                accel=float(vtypes[typ]['accel']),
-                decel=float(vtypes[typ]['decel']),
-                sigma=float(vtypes[typ]['sigma']),
-                length=float(vtypes[typ]['length']),
-                min_gap=float(vtypes[typ]['minGap']),
-                max_speed=float(vtypes[typ]['maxSpeed']),
-                probability=float(vtypes[typ]['probability']),
-                speed_dev=float(vtypes[typ]['speedDev'])
+                speed_mode="all_checks",
+                accel=float(vtypes[typ]["accel"]),
+                decel=float(vtypes[typ]["decel"]),
+                sigma=float(vtypes[typ]["sigma"]),
+                length=float(vtypes[typ]["length"]),
+                min_gap=float(vtypes[typ]["minGap"]),
+                max_speed=float(vtypes[typ]["maxSpeed"]),
+                probability=float(vtypes[typ]["probability"]),
+                speed_dev=float(vtypes[typ]["speedDev"]),
             )
 
         return ret
@@ -807,5 +815,10 @@ class Network(object):
 
     def __str__(self):
         """Return the name of the network and the number of vehicles."""
-        return 'Network ' + self.name + ' with ' + \
-               str(self.vehicles.num_vehicles) + ' vehicles.'
+        return (
+            "Network "
+            + self.name
+            + " with "
+            + str(self.vehicles.num_vehicles)
+            + " vehicles."
+        )

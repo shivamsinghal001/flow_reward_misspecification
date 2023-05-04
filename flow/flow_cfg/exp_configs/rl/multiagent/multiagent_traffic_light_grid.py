@@ -42,7 +42,8 @@ vehicles.add(
         speed_mode="right_of_way",
     ),
     routing_controller=(GridRouter, {}),
-    num_vehicles=num_vehicles)
+    num_vehicles=num_vehicles,
+)
 
 # inflows of vehicles are place on all outer edges (listed here)
 outer_edges = []
@@ -59,28 +60,24 @@ for edge in outer_edges:
         edge=edge,
         vehs_per_hour=EDGE_INFLOW,
         depart_lane="free",
-        depart_speed=V_ENTER)
+        depart_speed=V_ENTER,
+    )
 
 flow_params = dict(
     # name of the experiment
     exp_tag="grid_0_{}x{}_i{}_multiagent".format(N_ROWS, N_COLUMNS, EDGE_INFLOW),
-
     # name of the flow environment the experiment is running on
     env_name=MultiTrafficLightGridPOEnv,
-
     # name of the network class the experiment is running on
     network=TrafficLightGridNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
         restart_instance=True,
         sim_step=1,
         render=False,
     ),
-
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
@@ -94,7 +91,6 @@ flow_params = dict(
             "num_local_lights": 4,
         },
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
@@ -116,15 +112,13 @@ flow_params = dict(
             "vertical_lanes": 1,
         },
     ),
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization
     # or reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
-        spacing='custom',
+        spacing="custom",
         shuffle=True,
     ),
 )
@@ -145,12 +139,12 @@ def gen_policy():
 
 
 # Setup PG with a single policy graph for all agents
-POLICY_GRAPHS = {'av': gen_policy()}
+POLICY_GRAPHS = {"av": gen_policy()}
 
 
 def policy_mapping_fn(_):
     """Map a policy in RLlib."""
-    return 'av'
+    return "av"
 
 
-POLICIES_TO_TRAIN = ['av']
+POLICIES_TO_TRAIN = ["av"]

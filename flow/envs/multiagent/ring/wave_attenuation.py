@@ -22,12 +22,12 @@ from flow.envs.ring.wave_attenuation import v_eq_max_function
 
 ADDITIONAL_ENV_PARAMS = {
     # maximum acceleration of autonomous vehicles
-    'max_accel': 1,
+    "max_accel": 1,
     # maximum deceleration of autonomous vehicles
-    'max_decel': 1,
+    "max_decel": 1,
     # bounds on the ranges of ring road lengths the autonomous vehicle is
     # trained on
-    'ring_length': [220, 270],
+    "ring_length": [220, 270],
 }
 
 
@@ -63,12 +63,13 @@ class MultiWaveAttenuationPOEnv(MultiEnv):
     def action_space(self):
         """See class definition."""
         add_params = self.net_params.additional_params
-        num_rings = add_params['num_rings']
+        num_rings = add_params["num_rings"]
         return Box(
-            low=-np.abs(self.env_params.additional_params['max_decel']),
-            high=self.env_params.additional_params['max_accel'],
-            shape=(int(self.initial_vehicles.num_rl_vehicles / num_rings), ),
-            dtype=np.float32)
+            low=-np.abs(self.env_params.additional_params["max_decel"]),
+            high=self.env_params.additional_params["max_accel"],
+            shape=(int(self.initial_vehicles.num_rl_vehicles / num_rings),),
+            dtype=np.float32,
+        )
 
     def get_state(self):
         """See class definition."""
@@ -77,16 +78,20 @@ class MultiWaveAttenuationPOEnv(MultiEnv):
             lead_id = self.k.vehicle.get_leader(rl_id) or rl_id
 
             # normalizers
-            max_speed = 15.
-            max_length = self.env_params.additional_params['ring_length'][1]
+            max_speed = 15.0
+            max_length = self.env_params.additional_params["ring_length"][1]
 
-            observation = np.array([
-                self.k.vehicle.get_speed(rl_id) / max_speed,
-                (self.k.vehicle.get_speed(lead_id) -
-                 self.k.vehicle.get_speed(rl_id))
-                / max_speed,
-                self.k.vehicle.get_headway(rl_id) / max_length
-            ])
+            observation = np.array(
+                [
+                    self.k.vehicle.get_speed(rl_id) / max_speed,
+                    (
+                        self.k.vehicle.get_speed(lead_id)
+                        - self.k.vehicle.get_speed(rl_id)
+                    )
+                    / max_speed,
+                    self.k.vehicle.get_headway(rl_id) / max_length,
+                ]
+            )
             obs.update({rl_id: observation})
 
         return obs
@@ -106,17 +111,16 @@ class MultiWaveAttenuationPOEnv(MultiEnv):
 
         rew = {}
         for rl_id in rl_actions.keys():
-            edge_id = rl_id.split('_')[1]
+            edge_id = rl_id.split("_")[1]
             edges = self.gen_edges(edge_id)
             vehs_on_edge = self.k.vehicle.get_ids_by_edge(edges)
-            vel = np.array([
-                self.k.vehicle.get_speed(veh_id)
-                for veh_id in vehs_on_edge
-            ])
-            if any(vel < -100) or kwargs['fail']:
-                return 0.
+            vel = np.array(
+                [self.k.vehicle.get_speed(veh_id) for veh_id in vehs_on_edge]
+            )
+            if any(vel < -100) or kwargs["fail"]:
+                return 0.0
 
-            target_vel = self.env_params.additional_params['target_velocity']
+            target_vel = self.env_params.additional_params["target_velocity"]
             max_cost = np.array([target_vel] * len(vehs_on_edge))
             max_cost = np.linalg.norm(max_cost)
 
@@ -136,8 +140,12 @@ class MultiWaveAttenuationPOEnv(MultiEnv):
     @staticmethod
     def gen_edges(i):
         """Return the edges corresponding to the rl id."""
-        return ['top_{}'.format(i), 'left_{}'.format(i),
-                'right_{}'.format(i), 'bottom_{}'.format(i)]
+        return [
+            "top_{}".format(i),
+            "left_{}".format(i),
+            "right_{}".format(i),
+            "bottom_{}".format(i),
+        ]
 
 
 class MultiAgentWaveAttenuationPOEnv(MultiEnv):
@@ -171,15 +179,14 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
         vehicles collide into one another.
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator="traci", path=None):
         for p in ADDITIONAL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
-                raise KeyError(
-                    'Environment parameter \'{}\' not supplied'.format(p))
+                raise KeyError("Environment parameter '{}' not supplied".format(p))
 
         self.local_reward = env_params.additional_params["local"]
-        if 'eta' in env_params.additional_params:
-            self.eta = float(env_params.additional_params['eta'])
+        if "eta" in env_params.additional_params:
+            self.eta = float(env_params.additional_params["eta"])
 
         super().__init__(env_params, sim_params, network, simulator, path=path)
 
@@ -192,10 +199,11 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
     def action_space(self):
         """See class definition."""
         return Box(
-            low=-np.abs(self.env_params.additional_params['max_decel']),
-            high=self.env_params.additional_params['max_accel'],
+            low=-np.abs(self.env_params.additional_params["max_decel"]),
+            high=self.env_params.additional_params["max_accel"],
             shape=(1,),
-            dtype=np.float32)
+            dtype=np.float32,
+        )
 
     def get_state(self):
         """See class definition."""
@@ -204,16 +212,20 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
             lead_id = self.k.vehicle.get_leader(rl_id) or rl_id
 
             # normalizers
-            max_speed = 15.
-            max_length = self.env_params.additional_params['ring_length'][1]
+            max_speed = 15.0
+            max_length = self.env_params.additional_params["ring_length"][1]
 
-            observation = np.array([
-                self.k.vehicle.get_speed(rl_id) / max_speed,
-                (self.k.vehicle.get_speed(lead_id) -
-                 self.k.vehicle.get_speed(rl_id))
-                / max_speed,
-                self.k.vehicle.get_headway(rl_id) / max_length
-            ])
+            observation = np.array(
+                [
+                    self.k.vehicle.get_speed(rl_id) / max_speed,
+                    (
+                        self.k.vehicle.get_speed(lead_id)
+                        - self.k.vehicle.get_speed(rl_id)
+                    )
+                    / max_speed,
+                    self.k.vehicle.get_headway(rl_id) / max_length,
+                ]
+            )
             obs.update({rl_id: observation})
 
         return obs
@@ -228,14 +240,14 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
         # in the warmup steps
-        if rl_actions is None or kwargs['fail']:
+        if rl_actions is None or kwargs["fail"]:
             return 0
-      
-        if self.local_reward == 'local':
+
+        if self.local_reward == "local":
             idx = self.k.vehicle.get_rl_ids()
-        elif self.local_reward == 'consecutive':
+        elif self.local_reward == "consecutive":
             idx = self.k.vehicle.get_rl_ids()[:2]
-        elif self.local_reward == 'alternating':
+        elif self.local_reward == "alternating":
             idx = self.k.vehicle.get_rl_ids()
             idx = [idx[0], idx[2]]
         else:
@@ -244,10 +256,10 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
         vel = np.array([self.k.vehicle.get_speed(veh_id) for veh_id in idx])
 
         if any(vel < -100):
-            return 0.
+            return 0.0
 
         # reward average velocity
-        eta_2 = 4.
+        eta_2 = 4.0
         reward = eta_2 * np.mean(vel) / 20
 
         # punish accelerations (should lead to reduced stop-and-go waves)
@@ -274,7 +286,7 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
         steps are performed with the rl vehicle acting as a human vehicle.
         """
         # skip if ring length is None
-        if self.env_params.additional_params['ring_length'] is None:
+        if self.env_params.additional_params["ring_length"] is None:
             return super().reset()
 
         # reset the step counter
@@ -283,61 +295,70 @@ class MultiAgentWaveAttenuationPOEnv(MultiEnv):
         # update the network
         initial_config = InitialConfig(bunching=50, min_gap=0)
         length = random.randint(
-            self.env_params.additional_params['ring_length'][0],
-            self.env_params.additional_params['ring_length'][1])
+            self.env_params.additional_params["ring_length"][0],
+            self.env_params.additional_params["ring_length"][1],
+        )
         additional_net_params = {
-            'length':
-                length,
-            'lanes':
-                self.net_params.additional_params['lanes'],
-            'speed_limit':
-                self.net_params.additional_params['speed_limit'],
-            'resolution':
-                self.net_params.additional_params['resolution']
+            "length": length,
+            "lanes": self.net_params.additional_params["lanes"],
+            "speed_limit": self.net_params.additional_params["speed_limit"],
+            "resolution": self.net_params.additional_params["resolution"],
         }
         net_params = NetParams(additional_params=additional_net_params)
 
         self.network = self.network.__class__(
-            self.network.orig_name, self.network.vehicles,
-            net_params, initial_config)
+            self.network.orig_name, self.network.vehicles, net_params, initial_config
+        )
         self.k.vehicle = deepcopy(self.initial_vehicles)
         self.k.vehicle.kernel_api = self.k.kernel_api
         self.k.vehicle.master_kernel = self.k
 
         # solve for the velocity upper bound of the ring
         v_guess = 4
-        v_eq_max = fsolve(v_eq_max_function, np.array(v_guess),
-                          args=(len(self.initial_ids), length))[0]
+        v_eq_max = fsolve(
+            v_eq_max_function, np.array(v_guess), args=(len(self.initial_ids), length)
+        )[0]
 
-        print('\n-----------------------')
-        print('ring length:', net_params.additional_params['length'])
-        print('v_max:', v_eq_max)
-        print('-----------------------')
+        print("\n-----------------------")
+        print("ring length:", net_params.additional_params["length"])
+        print("v_max:", v_eq_max)
+        print("-----------------------")
 
         # restart the sumo instance
         self.restart_simulation(
-            sim_params=self.sim_params,
-            render=self.sim_params.render)
+            sim_params=self.sim_params, render=self.sim_params.render
+        )
 
         # perform the generic reset function
         return super().reset()
 
+
 class MultiAgentWaveAttenuationEnv(MultiAgentWaveAttenuationPOEnv):
-	
-	@property
-	def observation_space(self):
-		return Box(low=-5, high=5, shape=(2 * self.initial_vehicles.num_vehicles, ), dtype=np.float32)
+    @property
+    def observation_space(self):
+        return Box(
+            low=-5,
+            high=5,
+            shape=(2 * self.initial_vehicles.num_vehicles,),
+            dtype=np.float32,
+        )
 
-	def get_state(self):
-		speed = [self.k.vehicle.get_speed(veh_id) / self.k.network.max_speed() for veh_id in self.k.vehicle.get_ids()]
-		pos = [self.k.vehicle.get_x_by_id(veh_id) / self.k.network.length() for veh_id in self.k.vehicle.get_ids()]
-		obs = np.array(speed + pos)
-		state = {}
-		for rl_id in self.k.vehicle.get_rl_ids():
-			state[rl_id] = obs
-		return state
+    def get_state(self):
+        speed = [
+            self.k.vehicle.get_speed(veh_id) / self.k.network.max_speed()
+            for veh_id in self.k.vehicle.get_ids()
+        ]
+        pos = [
+            self.k.vehicle.get_x_by_id(veh_id) / self.k.network.length()
+            for veh_id in self.k.vehicle.get_ids()
+        ]
+        obs = np.array(speed + pos)
+        state = {}
+        for rl_id in self.k.vehicle.get_rl_ids():
+            state[rl_id] = obs
+        return state
 
-	def additional_command(self):
-		if self.k.vehicle.num_rl_vehicles > 0:
-			for veh_id in self.k.vehicle.get_human_ids():
-				self.k.vehicle.set_observed(veh_id)
+    def additional_command(self):
+        if self.k.vehicle.num_rl_vehicles > 0:
+            for veh_id in self.k.vehicle.get_human_ids():
+                self.k.vehicle.set_observed(veh_id)

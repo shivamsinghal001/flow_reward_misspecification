@@ -1,7 +1,6 @@
 """Contains a list of custom lane change controllers."""
 
-from flow.controllers.base_lane_changing_controller import \
-    BaseLaneChangeController
+from flow.controllers.base_lane_changing_controller import BaseLaneChangeController
 
 
 class SimLaneChangeController(BaseLaneChangeController):

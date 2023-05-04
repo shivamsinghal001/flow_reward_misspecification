@@ -10,7 +10,7 @@ from flow.version import __version__
 
 def _read_requirements_file():
     """Return the elements in requirements.txt."""
-    req_file_path = '%s/requirements.txt' % dirname(realpath(__file__))
+    req_file_path = "%s/requirements.txt" % dirname(realpath(__file__))
     with open(req_file_path) as f:
         return [line.strip() for line in f]
 
@@ -21,9 +21,15 @@ class build_ext(_build_ext.build_ext):
     def run(self):
         """Install traci wheels."""
         subprocess.check_call(
-            ['python3','-m','pip', 'install',
-             'https://akreidieh.s3.amazonaws.com/sumo/flow-0.4.0/'
-             'sumotools-0.4.0-py3-none-any.whl'])
+            [
+                "python3",
+                "-m",
+                "pip",
+                "install",
+                "https://akreidieh.s3.amazonaws.com/sumo/flow-0.4.0/"
+                "sumotools-0.4.0-py3-none-any.whl",
+            ]
+        )
 
 
 class BinaryDistribution(Distribution):
@@ -35,17 +41,21 @@ class BinaryDistribution(Distribution):
 
 
 setup(
-    name='flow',
+    name="flow",
     version=__version__,
     distclass=BinaryDistribution,
     cmdclass={"build_ext": build_ext},
     packages=find_packages(),
-    description=("A system for applying deep reinforcement learning and "
-                 "control to autonomous vehicles and traffic infrastructure"),
+    description=(
+        "A system for applying deep reinforcement learning and "
+        "control to autonomous vehicles and traffic infrastructure"
+    ),
     long_description=open("README.md").read(),
     url="https://github.com/flow-project/flow",
-    keywords=("autonomous vehicles intelligent-traffic-control"
-              "reinforcement-learning deep-learning python"),
+    keywords=(
+        "autonomous vehicles intelligent-traffic-control"
+        "reinforcement-learning deep-learning python"
+    ),
     install_requires=_read_requirements_file(),
     zip_safe=False,
 )

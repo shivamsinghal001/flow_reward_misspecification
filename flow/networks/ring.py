@@ -13,7 +13,7 @@ ADDITIONAL_NET_PARAMS = {
     # speed limit for all edges
     "speed_limit": 30,
     # resolution of the curves on the ring
-    "resolution": 40
+    "resolution": 40,
 }
 
 
@@ -53,42 +53,32 @@ class RingNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Initialize a ring scenario."""
         for p in ADDITIONAL_NET_PARAMS.keys():
             if p not in net_params.additional_params:
                 raise KeyError('Network parameter "{}" not supplied'.format(p))
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_nodes(self, net_params):
         """See parent class."""
         length = net_params.additional_params["length"]
         r = length / (2 * pi)
 
-        nodes = [{
-            "id": "bottom",
-            "x": 0,
-            "y": -r
-        }, {
-            "id": "right",
-            "x": r,
-            "y": 0
-        }, {
-            "id": "top",
-            "x": 0,
-            "y": r
-        }, {
-            "id": "left",
-            "x": -r,
-            "y": 0
-        }]
+        nodes = [
+            {"id": "bottom", "x": 0, "y": -r},
+            {"id": "right", "x": r, "y": 0},
+            {"id": "top", "x": 0, "y": r},
+            {"id": "left", "x": -r, "y": 0},
+        ]
 
         return nodes
 
@@ -97,73 +87,51 @@ class RingNetwork(Network):
         length = net_params.additional_params["length"]
         resolution = net_params.additional_params["resolution"]
         r = length / (2 * pi)
-        edgelen = length / 4.
+        edgelen = length / 4.0
 
-        edges = [{
-            "id":
-                "bottom",
-            "type":
-                "edgeType",
-            "from":
-                "bottom",
-            "to":
-                "right",
-            "length":
-                edgelen,
-            "shape":
-                [
-                    (r * cos(t), r * sin(t))
-                    for t in linspace(-pi / 2, 0, resolution)
-                ]
-        }, {
-            "id":
-                "right",
-            "type":
-                "edgeType",
-            "from":
-                "right",
-            "to":
-                "top",
-            "length":
-                edgelen,
-            "shape":
-                [
-                    (r * cos(t), r * sin(t))
-                    for t in linspace(0, pi / 2, resolution)
-                ]
-        }, {
-            "id":
-                "top",
-            "type":
-                "edgeType",
-            "from":
-                "top",
-            "to":
-                "left",
-            "length":
-                edgelen,
-            "shape":
-                [
-                    (r * cos(t), r * sin(t))
-                    for t in linspace(pi / 2, pi, resolution)
-                ]
-        }, {
-            "id":
-                "left",
-            "type":
-                "edgeType",
-            "from":
-                "left",
-            "to":
-                "bottom",
-            "length":
-                edgelen,
-            "shape":
-                [
+        edges = [
+            {
+                "id": "bottom",
+                "type": "edgeType",
+                "from": "bottom",
+                "to": "right",
+                "length": edgelen,
+                "shape": [
+                    (r * cos(t), r * sin(t)) for t in linspace(-pi / 2, 0, resolution)
+                ],
+            },
+            {
+                "id": "right",
+                "type": "edgeType",
+                "from": "right",
+                "to": "top",
+                "length": edgelen,
+                "shape": [
+                    (r * cos(t), r * sin(t)) for t in linspace(0, pi / 2, resolution)
+                ],
+            },
+            {
+                "id": "top",
+                "type": "edgeType",
+                "from": "top",
+                "to": "left",
+                "length": edgelen,
+                "shape": [
+                    (r * cos(t), r * sin(t)) for t in linspace(pi / 2, pi, resolution)
+                ],
+            },
+            {
+                "id": "left",
+                "type": "edgeType",
+                "from": "left",
+                "to": "bottom",
+                "length": edgelen,
+                "shape": [
                     (r * cos(t), r * sin(t))
                     for t in linspace(pi, 3 * pi / 2, resolution)
-                ]
-        }]
+                ],
+            },
+        ]
 
         return edges
 
@@ -172,11 +140,7 @@ class RingNetwork(Network):
         lanes = net_params.additional_params["lanes"]
         speed_limit = net_params.additional_params["speed_limit"]
 
-        types = [{
-            "id": "edgeType",
-            "numLanes": lanes,
-            "speed": speed_limit
-        }]
+        types = [{"id": "edgeType", "numLanes": lanes, "speed": speed_limit}]
 
         return types
 
@@ -186,7 +150,7 @@ class RingNetwork(Network):
             "top": ["top", "left", "bottom", "right"],
             "left": ["left", "bottom", "right", "top"],
             "bottom": ["bottom", "right", "top", "left"],
-            "right": ["right", "top", "left", "bottom"]
+            "right": ["right", "top", "left", "bottom"],
         }
 
         return rts
@@ -196,10 +160,12 @@ class RingNetwork(Network):
         ring_length = self.net_params.additional_params["length"]
         junction_length = 0.1  # length of inter-edge junctions
 
-        edgestarts = [("bottom", 0),
-                      ("right", 0.25 * ring_length + junction_length),
-                      ("top", 0.5 * ring_length + 2 * junction_length),
-                      ("left", 0.75 * ring_length + 3 * junction_length)]
+        edgestarts = [
+            ("bottom", 0),
+            ("right", 0.25 * ring_length + junction_length),
+            ("top", 0.5 * ring_length + 2 * junction_length),
+            ("left", 0.75 * ring_length + 3 * junction_length),
+        ]
 
         return edgestarts
 
@@ -208,9 +174,11 @@ class RingNetwork(Network):
         ring_length = self.net_params.additional_params["length"]
         junction_length = 0.1  # length of inter-edge junctions
 
-        edgestarts = [(":right_0", 0.25 * ring_length),
-                      (":top_0", 0.5 * ring_length + junction_length),
-                      (":left_0", 0.75 * ring_length + 2 * junction_length),
-                      (":bottom_0", ring_length + 3 * junction_length)]
+        edgestarts = [
+            (":right_0", 0.25 * ring_length),
+            (":top_0", 0.5 * ring_length + junction_length),
+            (":left_0", 0.75 * ring_length + 2 * junction_length),
+            (":bottom_0", ring_length + 3 * junction_length),
+        ]
 
         return edgestarts

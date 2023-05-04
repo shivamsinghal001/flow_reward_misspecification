@@ -9,8 +9,15 @@ import os
 import sys
 
 import flow.envs
-from flow.core.params import SumoLaneChangeParams, SumoCarFollowingParams, \
-    SumoParams, InitialConfig, EnvParams, NetParams, InFlows
+from flow.core.params import (
+    SumoLaneChangeParams,
+    SumoCarFollowingParams,
+    SumoParams,
+    InitialConfig,
+    EnvParams,
+    NetParams,
+    InFlows,
+)
 from flow.core.params import TrafficLightParams
 from flow.core.params import VehicleParams
 from flow.envs import Env
@@ -37,21 +44,24 @@ class FlowParamsEncoder(json.JSONEncoder):
             if isinstance(obj, VehicleParams):
                 res = deepcopy(obj.initial)
                 for res_i in res:
-                    res_i["acceleration_controller"] = \
-                        (res_i["acceleration_controller"][0].__name__,
-                         res_i["acceleration_controller"][1])
-                    res_i["lane_change_controller"] = \
-                        (res_i["lane_change_controller"][0].__name__,
-                         res_i["lane_change_controller"][1])
+                    res_i["acceleration_controller"] = (
+                        res_i["acceleration_controller"][0].__name__,
+                        res_i["acceleration_controller"][1],
+                    )
+                    res_i["lane_change_controller"] = (
+                        res_i["lane_change_controller"][0].__name__,
+                        res_i["lane_change_controller"][1],
+                    )
                     if res_i["routing_controller"] is not None:
-                        res_i["routing_controller"] = \
-                            (res_i["routing_controller"][0].__name__,
-                             res_i["routing_controller"][1])
+                        res_i["routing_controller"] = (
+                            res_i["routing_controller"][0].__name__,
+                            res_i["routing_controller"][1],
+                        )
                 return res
             if inspect.isclass(obj):
                 if issubclass(obj, Env) or issubclass(obj, Network):
                     return "{}.{}".format(obj.__module__, obj.__name__)
-            if hasattr(obj, '__name__'):
+            if hasattr(obj, "__name__"):
                 return obj.__name__
             else:
                 return obj.__dict__
@@ -93,26 +103,26 @@ def get_flow_params(config):
     """
     # collect all data from the json file
     if type(config) == dict:
-        flow_params = json.loads(config['env_config']['flow_params'])
+        flow_params = json.loads(config["env_config"]["flow_params"])
     else:
-        flow_params = json.load(open(config, 'r'))
+        flow_params = json.load(open(config, "r"))
 
     # reinitialize the vehicles class from stored data
     veh = VehicleParams()
     for veh_params in flow_params["veh"]:
         module = __import__(
-            "flow.controllers",
-            fromlist=[veh_params['acceleration_controller'][0]])
-        acc_class = getattr(module, veh_params['acceleration_controller'][0])
-        lc_class = getattr(module, veh_params['lane_change_controller'][0])
+            "flow.controllers", fromlist=[veh_params["acceleration_controller"][0]]
+        )
+        acc_class = getattr(module, veh_params["acceleration_controller"][0])
+        lc_class = getattr(module, veh_params["lane_change_controller"][0])
 
-        acc_controller = (acc_class, veh_params['acceleration_controller'][1])
-        lc_controller = (lc_class, veh_params['lane_change_controller'][1])
+        acc_controller = (acc_class, veh_params["acceleration_controller"][1])
+        lc_controller = (lc_class, veh_params["lane_change_controller"][1])
 
         rt_controller = None
-        if veh_params['routing_controller'] is not None:
-            rt_class = getattr(module, veh_params['routing_controller'][0])
-            rt_controller = (rt_class, veh_params['routing_controller'][1])
+        if veh_params["routing_controller"] is not None:
+            rt_class = getattr(module, veh_params["routing_controller"][0])
+            rt_controller = (rt_class, veh_params["routing_controller"][1])
 
         # TODO: make ambiguous
         car_following_params = SumoCarFollowingParams()
@@ -122,11 +132,13 @@ def get_flow_params(config):
         lane_change_params = SumoLaneChangeParams()
         lane_change_params.__dict__ = veh_params["lane_change_params"]
 
-        del veh_params["car_following_params"], \
-            veh_params["lane_change_params"], \
-            veh_params["acceleration_controller"], \
-            veh_params["lane_change_controller"], \
-            veh_params["routing_controller"]
+        del (
+            veh_params["car_following_params"],
+            veh_params["lane_change_params"],
+            veh_params["acceleration_controller"],
+            veh_params["lane_change_controller"],
+            veh_params["routing_controller"],
+        )
 
         veh.add(
             acceleration_controller=acc_controller,
@@ -134,7 +146,8 @@ def get_flow_params(config):
             routing_controller=rt_controller,
             car_following_params=car_following_params,
             lane_change_params=lane_change_params,
-            **veh_params)
+            **veh_params
+        )
 
     # convert all parameters from dict to their object form
     sim = SumoParams()  # TODO: add check for simulation type
@@ -157,31 +170,30 @@ def get_flow_params(config):
     if "tls" in flow_params:
         tls.__dict__ = flow_params["tls"].copy()
 
-    env_name = flow_params['env_name']
+    env_name = flow_params["env_name"]
     if "." not in env_name:  # coming from old flow_params
-        single_agent_envs = [env for env in dir(flow.envs)
-                             if not env.startswith('__')]
+        single_agent_envs = [env for env in dir(flow.envs) if not env.startswith("__")]
         if env_name in single_agent_envs:
-            env_loc = 'flow.envs'
+            env_loc = "flow.envs"
         else:
-            env_loc = 'flow.envs.multiagent'
+            env_loc = "flow.envs.multiagent"
     else:
         env_loc = ".".join(env_name.split(".")[:-1])
         env_name = env_name.split(".")[-1]
     env_module = __import__(env_loc, fromlist=[env_name])
     env_instance = getattr(env_module, env_name)
 
-    network = flow_params['network']
+    network = flow_params["network"]
     if "." not in network:  # coming from old flow_params
-        net_loc = 'flow.networks'
+        net_loc = "flow.networks"
     else:
         net_loc = ".".join(network.split(".")[:-1])
         network = network.split(".")[-1]
     net_module = __import__(net_loc, fromlist=[network])
     net_instance = getattr(net_module, network)
 
-    flow_params['env_name'] = env_instance
-    flow_params['network'] = net_instance
+    flow_params["env_name"] = env_instance
+    flow_params["network"] = net_instance
     flow_params["sim"] = sim
     flow_params["env"] = env
     flow_params["initial"] = initial
@@ -200,7 +212,8 @@ def get_rllib_config(path):
     if not os.path.exists(config_path):
         raise ValueError(
             "Could not find params.json in either the checkpoint dir or "
-            "its parent directory.")
+            "its parent directory."
+        )
     with open(config_path) as f:
         config = json.load(f)
     return config
@@ -209,7 +222,7 @@ def get_rllib_config(path):
 def get_rllib_pkl(path):
     """Return the data from the specified rllib configuration file."""
     dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, '../../examples/')
+    filename = os.path.join(dirname, "../../examples/")
     sys.path.append(filename)
     config_path = os.path.join(path, "params.pkl")
     if not os.path.exists(config_path):
@@ -217,7 +230,8 @@ def get_rllib_pkl(path):
     if not os.path.exists(config_path):
         raise ValueError(
             "Could not find params.pkl in either the checkpoint dir or "
-            "its parent directory.")
-    with open(config_path, 'rb') as f:
+            "its parent directory."
+        )
+    with open(config_path, "rb") as f:
         config = cloudpickle.load(f)
     return config

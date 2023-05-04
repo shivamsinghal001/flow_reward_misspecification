@@ -109,28 +109,26 @@ class TrafficLightGridEnv(Env):
         https://github.com/openai/gym/blob/master/gym/spaces/discrete.py
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
-
+    def __init__(self, env_params, sim_params, network, simulator="traci", path=None):
         for p in ADDITIONAL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
-                raise KeyError(
-                    'Environment parameter "{}" not supplied'.format(p))
+                raise KeyError('Environment parameter "{}" not supplied'.format(p))
 
         self.grid_array = network.net_params.additional_params["grid_array"]
         self.rows = self.grid_array["row_num"]
         self.cols = self.grid_array["col_num"]
         # self.num_observed = self.grid_array.get("num_observed", 3)
         self.num_traffic_lights = self.rows * self.cols
-        self.tl_type = env_params.additional_params.get('tl_type')
+        self.tl_type = env_params.additional_params.get("tl_type")
 
         super().__init__(env_params, sim_params, network, simulator, path=path)
 
         # Saving env variables for plotting
         self.steps = env_params.horizon
         self.obs_var_labels = {
-            'edges': np.zeros((self.steps, self.k.vehicle.num_vehicles)),
-            'velocities': np.zeros((self.steps, self.k.vehicle.num_vehicles)),
-            'positions': np.zeros((self.steps, self.k.vehicle.num_vehicles))
+            "edges": np.zeros((self.steps, self.k.vehicle.num_vehicles)),
+            "velocities": np.zeros((self.steps, self.k.vehicle.num_vehicles)),
+            "positions": np.zeros((self.steps, self.k.vehicle.num_vehicles)),
         }
 
         # Keeps track of the last time the traffic lights in an intersection
@@ -153,8 +151,7 @@ class TrafficLightGridEnv(Env):
 
         if self.tl_type != "actuated":
             for i in range(self.rows * self.cols):
-                self.k.traffic_light.set_state(
-                    node_id='center' + str(i), state="GrGr")
+                self.k.traffic_light.set_state(node_id="center" + str(i), state="GrGr")
                 self.currently_yellow[i] = 0
 
         # # Additional Information for Plotting
@@ -173,46 +170,44 @@ class TrafficLightGridEnv(Env):
     def action_space(self):
         """See class definition."""
         if self.discrete:
-            return Discrete(2 ** self.num_traffic_lights)
+            return Discrete(2**self.num_traffic_lights)
         else:
             return Box(
-                low=-1,
-                high=1,
-                shape=(self.num_traffic_lights,),
-                dtype=np.float32)
+                low=-1, high=1, shape=(self.num_traffic_lights,), dtype=np.float32
+            )
 
     @property
     def observation_space(self):
         """See class definition."""
         speed = Box(
-            low=0,
-            high=1,
-            shape=(self.initial_vehicles.num_vehicles,),
-            dtype=np.float32)
+            low=0, high=1, shape=(self.initial_vehicles.num_vehicles,), dtype=np.float32
+        )
         dist_to_intersec = Box(
-            low=0.,
+            low=0.0,
             high=np.inf,
             shape=(self.initial_vehicles.num_vehicles,),
-            dtype=np.float32)
+            dtype=np.float32,
+        )
         edge_num = Box(
-            low=0.,
+            low=0.0,
             high=1,
             shape=(self.initial_vehicles.num_vehicles,),
-            dtype=np.float32)
+            dtype=np.float32,
+        )
         traffic_lights = Box(
-            low=0.,
-            high=1,
-            shape=(3 * self.rows * self.cols,),
-            dtype=np.float32)
+            low=0.0, high=1, shape=(3 * self.rows * self.cols,), dtype=np.float32
+        )
         return Tuple((speed, dist_to_intersec, edge_num, traffic_lights))
 
     def get_state(self):
         """See class definition."""
         # compute the normalizers
         grid_array = self.net_params.additional_params["grid_array"]
-        max_dist = max(grid_array["short_length"],
-                       grid_array["long_length"],
-                       grid_array["inner_length"])
+        max_dist = max(
+            grid_array["short_length"],
+            grid_array["long_length"],
+            grid_array["inner_length"],
+        )
 
         # get the state arrays
         speeds = [
@@ -224,16 +219,18 @@ class TrafficLightGridEnv(Env):
             for veh_id in self.k.vehicle.get_ids()
         ]
         edges = [
-            self._convert_edge(self.k.vehicle.get_edge(veh_id)) /
-            (self.k.network.network.num_edges - 1)
+            self._convert_edge(self.k.vehicle.get_edge(veh_id))
+            / (self.k.network.network.num_edges - 1)
             for veh_id in self.k.vehicle.get_ids()
         ]
 
         state = [
-            speeds, dist_to_intersec, edges,
+            speeds,
+            dist_to_intersec,
+            edges,
             self.last_change.flatten().tolist(),
             self.direction.flatten().tolist(),
-            self.currently_yellow.flatten().tolist()
+            self.currently_yellow.flatten().tolist(),
         ]
         return np.array(state)
 
@@ -242,7 +239,7 @@ class TrafficLightGridEnv(Env):
         # check if the action space is discrete
         if self.discrete:
             # convert single value to list of 0's and 1's
-            rl_mask = [int(x) for x in list('{0:0b}'.format(rl_actions))]
+            rl_mask = [int(x) for x in list("{0:0b}".format(rl_actions))]
             rl_mask = [0] * (self.num_traffic_lights - len(rl_mask)) + rl_mask
         else:
             # convert values less than 0 to zero and above 0 to 1. 0 indicates
@@ -258,31 +255,32 @@ class TrafficLightGridEnv(Env):
                 if self.last_change[i] >= self.min_switch_time:
                     if self.direction[i] == 0:
                         self.k.traffic_light.set_state(
-                            node_id='center{}'.format(i),
-                            state="GrGr")
+                            node_id="center{}".format(i), state="GrGr"
+                        )
                     else:
                         self.k.traffic_light.set_state(
-                            node_id='center{}'.format(i),
-                            state='rGrG')
+                            node_id="center{}".format(i), state="rGrG"
+                        )
                     self.currently_yellow[i] = 0
             else:
                 if action:
                     if self.direction[i] == 0:
                         self.k.traffic_light.set_state(
-                            node_id='center{}'.format(i),
-                            state='yryr')
+                            node_id="center{}".format(i), state="yryr"
+                        )
                     else:
                         self.k.traffic_light.set_state(
-                            node_id='center{}'.format(i),
-                            state='ryry')
+                            node_id="center{}".format(i), state="ryry"
+                        )
                     self.last_change[i] = 0.0
                     self.direction[i] = not self.direction[i]
                     self.currently_yellow[i] = 1
 
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
-        return - rewards.min_delay_unscaled(self) \
-            - rewards.boolean_action_penalty(rl_actions >= 0.5, gain=1.0)
+        return -rewards.min_delay_unscaled(self) - rewards.boolean_action_penalty(
+            rl_actions >= 0.5, gain=1.0
+        )
 
     # ===============================
     # ============ UTILS ============
@@ -302,8 +300,7 @@ class TrafficLightGridEnv(Env):
             distance to closest intersection
         """
         if isinstance(veh_ids, list):
-            return [self.get_distance_to_intersection(veh_id)
-                    for veh_id in veh_ids]
+            return [self.get_distance_to_intersection(veh_id) for veh_id in veh_ids]
         return self.find_intersection_dist(veh_ids)
 
     def find_intersection_dist(self, veh_id):
@@ -316,7 +313,7 @@ class TrafficLightGridEnv(Env):
         # FIXME this might not be the best way of handling this
         if edge_id == "":
             return -10
-        if 'center' in edge_id:
+        if "center" in edge_id:
             return 0
         edge_len = self.k.network.edge_length(edge_id)
         relative_pos = self.k.vehicle.get_position(veh_id)
@@ -355,24 +352,25 @@ class TrafficLightGridEnv(Env):
         if edge:
             if edge[0] == ":":  # center
                 center_index = int(edge.split("center")[1][0])
-                base = ((self.cols + 1) * self.rows * 2) \
-                    + ((self.rows + 1) * self.cols * 2)
+                base = ((self.cols + 1) * self.rows * 2) + (
+                    (self.rows + 1) * self.cols * 2
+                )
                 return base + center_index + 1
             else:
                 pattern = re.compile(r"[a-zA-Z]+")
                 edge_type = pattern.match(edge).group()
-                edge = edge.split(edge_type)[1].split('_')
+                edge = edge.split(edge_type)[1].split("_")
                 row_index, col_index = [int(x) for x in edge]
-                if edge_type in ['bot', 'top']:
+                if edge_type in ["bot", "top"]:
                     rows_below = 2 * (self.cols + 1) * row_index
                     cols_below = 2 * (self.cols * (row_index + 1))
                     edge_num = rows_below + cols_below + 2 * col_index + 1
-                    return edge_num if edge_type == 'bot' else edge_num + 1
-                if edge_type in ['left', 'right']:
+                    return edge_num if edge_type == "bot" else edge_num + 1
+                if edge_type in ["left", "right"]:
                     rows_below = 2 * (self.cols + 1) * row_index
                     cols_below = 2 * (self.cols * row_index)
                     edge_num = rows_below + cols_below + 2 * col_index + 1
-                    return edge_num if edge_type == 'left' else edge_num + 1
+                    return edge_num if edge_type == "left" else edge_num + 1
         else:
             return 0
 
@@ -453,19 +451,19 @@ class TrafficLightGridEnv(Env):
             return
         pattern = re.compile(r"[a-zA-Z]+")
         edge_type = pattern.match(edge).group()
-        edge = edge.split(edge_type)[1].split('_')
+        edge = edge.split(edge_type)[1].split("_")
         row_index, col_index = [int(x) for x in edge]
 
         # find the route that we're going to place the vehicle on if we are
         # going to remove it
         route_id = None
-        if edge_type == 'bot' and col_index == self.cols:
+        if edge_type == "bot" and col_index == self.cols:
             route_id = "bot{}_0".format(row_index)
-        elif edge_type == 'top' and col_index == 0:
+        elif edge_type == "top" and col_index == 0:
             route_id = "top{}_{}".format(row_index, self.cols)
-        elif edge_type == 'left' and row_index == 0:
+        elif edge_type == "left" and row_index == 0:
             route_id = "left{}_{}".format(self.rows, col_index)
-        elif edge_type == 'right' and row_index == self.rows:
+        elif edge_type == "right" and row_index == self.rows:
             route_id = "right0_{}".format(col_index)
 
         if route_id is not None:
@@ -480,7 +478,8 @@ class TrafficLightGridEnv(Env):
                 type_id=str(type_id),
                 lane=str(lane_index),
                 pos="0",
-                speed="max")
+                speed="max",
+            )
 
     def get_closest_to_intersection(self, edges, num_closest, padding=False):
         """Return the IDs of the vehicles that are closest to an intersection.
@@ -558,20 +557,24 @@ class TrafficLightGridEnv(Env):
             if num_closest <= 0
         """
         if num_closest <= 0:
-            raise ValueError("Function get_closest_to_intersection called with"
-                             "parameter num_closest={}, but num_closest should"
-                             "be positive".format(num_closest))
+            raise ValueError(
+                "Function get_closest_to_intersection called with"
+                "parameter num_closest={}, but num_closest should"
+                "be positive".format(num_closest)
+            )
 
         if isinstance(edges, list):
-            ids = [self.get_closest_to_intersection(edge, num_closest)
-                   for edge in edges]
+            ids = [
+                self.get_closest_to_intersection(edge, num_closest) for edge in edges
+            ]
             # flatten the list and return it
             return [veh_id for sublist in ids for veh_id in sublist]
 
         # get the ids of all the vehicles on the edge 'edges' ordered by
         # increasing distance to end of edge (intersection)
-        veh_ids_ordered = sorted(self.k.vehicle.get_ids_by_edge(edges),
-                                 key=self.get_distance_to_intersection)
+        veh_ids_ordered = sorted(
+            self.k.vehicle.get_ids_by_edge(edges), key=self.get_distance_to_intersection
+        )
 
         # return the ids of the num_closest vehicles closest to the
         # intersection, potentially with ""-padding.
@@ -614,13 +617,12 @@ class TrafficLightGridPOEnv(TrafficLightGridEnv):
 
     """
 
-    def __init__(self, env_params, sim_params, network, simulator='traci', path=None):
+    def __init__(self, env_params, sim_params, network, simulator="traci", path=None):
         super().__init__(env_params, sim_params, network, simulator, path=path)
 
         for p in ADDITIONAL_PO_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
-                raise KeyError(
-                    'Environment parameter "{}" not supplied'.format(p))
+                raise KeyError('Environment parameter "{}" not supplied'.format(p))
 
         # number of vehicles nearest each intersection that is observed in the
         # state space; defaults to 2
@@ -638,12 +640,15 @@ class TrafficLightGridPOEnv(TrafficLightGridEnv):
         state.
         """
         tl_box = Box(
-            low=0.,
+            low=0.0,
             high=3,
-            shape=(3 * 4 * self.num_observed * self.num_traffic_lights +
-                   2 * len(self.k.network.get_edge_list()) +
-                   3 * self.num_traffic_lights,),
-            dtype=np.float32)
+            shape=(
+                3 * 4 * self.num_observed * self.num_traffic_lights
+                + 2 * len(self.k.network.get_edge_list())
+                + 3 * self.num_traffic_lights,
+            ),
+            dtype=np.float32,
+        )
         return tl_box
 
     def get_state(self):
@@ -657,17 +662,19 @@ class TrafficLightGridPOEnv(TrafficLightGridEnv):
         dist_to_intersec = []
         edge_number = []
         max_speed = max(
-            self.k.network.speed_limit(edge)
-            for edge in self.k.network.get_edge_list())
+            self.k.network.speed_limit(edge) for edge in self.k.network.get_edge_list()
+        )
         grid_array = self.net_params.additional_params["grid_array"]
-        max_dist = max(grid_array["short_length"], grid_array["long_length"],
-                       grid_array["inner_length"])
+        max_dist = max(
+            grid_array["short_length"],
+            grid_array["long_length"],
+            grid_array["inner_length"],
+        )
         all_observed_ids = []
 
         for _, edges in self.network.node_mapping:
             for edge in edges:
-                observed_ids = \
-                    self.get_closest_to_intersection(edge, self.num_observed)
+                observed_ids = self.get_closest_to_intersection(edge, self.num_observed)
                 all_observed_ids += observed_ids
 
                 # check which edges we have so we can always pad in the right
@@ -677,15 +684,18 @@ class TrafficLightGridPOEnv(TrafficLightGridEnv):
                     for veh_id in observed_ids
                 ]
                 dist_to_intersec += [
-                    (self.k.network.edge_length(
-                        self.k.vehicle.get_edge(veh_id)) -
-                        self.k.vehicle.get_position(veh_id)) / max_dist
+                    (
+                        self.k.network.edge_length(self.k.vehicle.get_edge(veh_id))
+                        - self.k.vehicle.get_position(veh_id)
+                    )
+                    / max_dist
                     for veh_id in observed_ids
                 ]
-                edge_number += \
-                    [self._convert_edge(self.k.vehicle.get_edge(veh_id)) /
-                     (self.k.network.network.num_edges - 1)
-                     for veh_id in observed_ids]
+                edge_number += [
+                    self._convert_edge(self.k.vehicle.get_edge(veh_id))
+                    / (self.k.network.network.num_edges - 1)
+                    for veh_id in observed_ids
+                ]
 
                 if len(observed_ids) < self.num_observed:
                     diff = self.num_observed - len(observed_ids)
@@ -700,30 +710,40 @@ class TrafficLightGridPOEnv(TrafficLightGridEnv):
             ids = self.k.vehicle.get_ids_by_edge(edge)
             if len(ids) > 0:
                 vehicle_length = 5
-                density += [vehicle_length * len(ids) /
-                            self.k.network.edge_length(edge)]
-                velocity_avg += [np.mean(
-                    [self.k.vehicle.get_speed(veh_id) for veh_id in
-                     ids]) / max_speed]
+                density += [
+                    vehicle_length * len(ids) / self.k.network.edge_length(edge)
+                ]
+                velocity_avg += [
+                    np.mean([self.k.vehicle.get_speed(veh_id) for veh_id in ids])
+                    / max_speed
+                ]
             else:
                 density += [0]
                 velocity_avg += [0]
         self.observed_ids = all_observed_ids
         return np.array(
-            np.concatenate([
-                speeds, dist_to_intersec, edge_number, density, velocity_avg,
-                self.last_change.flatten().tolist(),
-                self.direction.flatten().tolist(),
-                self.currently_yellow.flatten().tolist()
-            ]))
+            np.concatenate(
+                [
+                    speeds,
+                    dist_to_intersec,
+                    edge_number,
+                    density,
+                    velocity_avg,
+                    self.last_change.flatten().tolist(),
+                    self.direction.flatten().tolist(),
+                    self.currently_yellow.flatten().tolist(),
+                ]
+            )
+        )
 
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
         if self.env_params.evaluate:
-            return - rewards.min_delay_unscaled(self)
+            return -rewards.min_delay_unscaled(self)
         else:
-            return (- rewards.min_delay_unscaled(self) +
-                    rewards.penalize_standstill(self, gain=0.2))
+            return -rewards.min_delay_unscaled(self) + rewards.penalize_standstill(
+                self, gain=0.2
+            )
 
     def additional_command(self):
         """See class definition."""
@@ -737,7 +757,7 @@ class TrafficLightGridBenchmarkEnv(TrafficLightGridPOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
         if self.env_params.evaluate:
-            return - rewards.min_delay_unscaled(self)
+            return -rewards.min_delay_unscaled(self)
         else:
             return rewards.desired_velocity(self)
 

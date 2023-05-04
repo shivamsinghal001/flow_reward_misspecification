@@ -46,14 +46,14 @@ class TraCITrafficLight(KernelTrafficLight):
         # subscribe the traffic light signal data
         for node_id in self.__ids:
             self.kernel_api.trafficlight.subscribe(
-                node_id, [tc.TL_RED_YELLOW_GREEN_STATE])
+                node_id, [tc.TL_RED_YELLOW_GREEN_STATE]
+            )
 
     def update(self, reset):
         """See parent class."""
         tls_obs = {}
         for tl_id in self.__ids:
-            tls_obs[tl_id] = \
-                self.kernel_api.trafficlight.getSubscriptionResults(tl_id)
+            tls_obs[tl_id] = self.kernel_api.trafficlight.getSubscriptionResults(tl_id)
         self.__tls = tls_obs.copy()
 
     def get_ids(self):
@@ -65,11 +65,13 @@ class TraCITrafficLight(KernelTrafficLight):
         if link_index == "all":
             # if lights on all lanes are changed
             self.kernel_api.trafficlight.setRedYellowGreenState(
-                tlsID=node_id, state=state)
+                tlsID=node_id, state=state
+            )
         else:
             # if lights on a single lane is changed
             self.kernel_api.trafficlight.setLinkState(
-                tlsID=node_id, tlsLinkIndex=link_index, state=state)
+                tlsID=node_id, tlsLinkIndex=link_index, state=state
+            )
 
     def get_state(self, node_id):
         """See parent class."""

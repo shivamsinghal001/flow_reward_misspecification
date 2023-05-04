@@ -15,7 +15,7 @@ ADDITIONAL_NET_PARAMS = {
     # resolution of the curves on the ring
     "resolution": 40,
     # number of rings in the system
-    "num_rings": 7
+    "num_rings": 7,
 }
 
 VEHICLE_LENGTH = 5  # length of vehicles in the network, in meters
@@ -57,12 +57,14 @@ class MultiRingNetwork(Network):
     >>> )
     """
 
-    def __init__(self,
-                 name,
-                 vehicles,
-                 net_params,
-                 initial_config=InitialConfig(),
-                 traffic_lights=TrafficLightParams()):
+    def __init__(
+        self,
+        name,
+        vehicles,
+        net_params,
+        initial_config=InitialConfig(),
+        traffic_lights=TrafficLightParams(),
+    ):
         """Initialize a loop network."""
         for p in ADDITIONAL_NET_PARAMS.keys():
             if p not in net_params.additional_params:
@@ -72,8 +74,7 @@ class MultiRingNetwork(Network):
         self.lanes = net_params.additional_params["lanes"]
         self.num_rings = net_params.additional_params["num_rings"]
 
-        super().__init__(name, vehicles, net_params, initial_config,
-                         traffic_lights)
+        super().__init__(name, vehicles, net_params, initial_config, traffic_lights)
 
     def specify_edge_starts(self):
         """See parent class."""
@@ -82,10 +83,12 @@ class MultiRingNetwork(Network):
 
         edgestarts = []
         for i in range(self.num_rings):
-            edgestarts += [("bottom_{}".format(i), 0 + i * shift),
-                           ("right_{}".format(i), edgelen + i * shift),
-                           ("top_{}".format(i), 2 * edgelen + i * shift),
-                           ("left_{}".format(i), 3 * edgelen + i * shift)]
+            edgestarts += [
+                ("bottom_{}".format(i), 0 + i * shift),
+                ("right_{}".format(i), edgelen + i * shift),
+                ("top_{}".format(i), 2 * edgelen + i * shift),
+                ("left_{}".format(i), 3 * edgelen + i * shift),
+            ]
 
         return edgestarts
 
@@ -99,9 +102,15 @@ class MultiRingNetwork(Network):
         distribution by a gaussian whose std is equal to this perturbation
         term.
         """
-        (x0, min_gap, bunching, lanes_distr, available_length,
-         available_edges, initial_config) = \
-            cls._get_start_pos_util(initial_config, num_vehicles)
+        (
+            x0,
+            min_gap,
+            bunching,
+            lanes_distr,
+            available_length,
+            available_edges,
+            initial_config,
+        ) = cls._get_start_pos_util(initial_config, num_vehicles)
 
         length = net_params.additional_params["length"]
         num_rings = net_params.additional_params["num_rings"]
@@ -160,23 +169,28 @@ class MultiRingNetwork(Network):
         i = 0
         for j in range(num_rows):
             for k in range(num_cols):
-                nodes += [{
-                    "id": "bottom_{}".format(i),
-                    "x": 0 + j * ring_spacing,
-                    "y": -r + k * ring_spacing
-                }, {
-                    "id": "right_{}".format(i),
-                    "x": r + j * ring_spacing,
-                    "y": 0 + k * ring_spacing
-                }, {
-                    "id": "top_{}".format(i),
-                    "x": 0 + j * ring_spacing,
-                    "y": r + k * ring_spacing
-                }, {
-                    "id": "left_{}".format(i),
-                    "x": -r + j * ring_spacing,
-                    "y": 0 + k * ring_spacing
-                }]
+                nodes += [
+                    {
+                        "id": "bottom_{}".format(i),
+                        "x": 0 + j * ring_spacing,
+                        "y": -r + k * ring_spacing,
+                    },
+                    {
+                        "id": "right_{}".format(i),
+                        "x": r + j * ring_spacing,
+                        "y": 0 + k * ring_spacing,
+                    },
+                    {
+                        "id": "top_{}".format(i),
+                        "x": 0 + j * ring_spacing,
+                        "y": r + k * ring_spacing,
+                    },
+                    {
+                        "id": "left_{}".format(i),
+                        "x": -r + j * ring_spacing,
+                        "y": 0 + k * ring_spacing,
+                    },
+                ]
                 i += 1
                 # FIXME this break if we don't have an exact square
                 if i >= ring_num:
@@ -194,82 +208,71 @@ class MultiRingNetwork(Network):
         num_rows = num_cols = int(ceil(sqrt(ring_num)))
         r = length / (2 * pi)
         ring_spacing = 4 * r
-        edgelen = length / 4.
+        edgelen = length / 4.0
         edges = []
 
         i = 0
 
         for j in range(num_rows):
             for k in range(num_cols):
-                edges += [{
-                    "id":
-                        "bottom_{}".format(i),
-                    "type":
-                        "edgeType",
-                    "from":
-                        "bottom_{}".format(i),
-                    "to":
-                        "right_{}".format(i),
-                    "length":
-                        edgelen,
-                    "shape":
-                        [
-                            (r * cos(t) + j * ring_spacing,
-                             r * sin(t) + k * ring_spacing)
+                edges += [
+                    {
+                        "id": "bottom_{}".format(i),
+                        "type": "edgeType",
+                        "from": "bottom_{}".format(i),
+                        "to": "right_{}".format(i),
+                        "length": edgelen,
+                        "shape": [
+                            (
+                                r * cos(t) + j * ring_spacing,
+                                r * sin(t) + k * ring_spacing,
+                            )
                             for t in linspace(-pi / 2, 0, resolution)
-                        ]
-                }, {
-                    "id":
-                        "right_{}".format(i),
-                    "type":
-                        "edgeType",
-                    "from":
-                        "right_{}".format(i),
-                    "to":
-                        "top_{}".format(i),
-                    "length":
-                        edgelen,
-                    "shape":
-                        [
-                            (r * cos(t) + j * ring_spacing,
-                             r * sin(t) + k * ring_spacing)
+                        ],
+                    },
+                    {
+                        "id": "right_{}".format(i),
+                        "type": "edgeType",
+                        "from": "right_{}".format(i),
+                        "to": "top_{}".format(i),
+                        "length": edgelen,
+                        "shape": [
+                            (
+                                r * cos(t) + j * ring_spacing,
+                                r * sin(t) + k * ring_spacing,
+                            )
                             for t in linspace(0, pi / 2, resolution)
-                        ]
-                }, {
-                    "id":
-                        "top_{}".format(i),
-                    "type":
-                        "edgeType",
-                    "from":
-                        "top_{}".format(i),
-                    "to":
-                        "left_{}".format(i),
-                    "length":
-                        edgelen,
-                    "shape":
-                        [
-                            (r * cos(t) + j * ring_spacing,
-                             r * sin(t) + k * ring_spacing)
+                        ],
+                    },
+                    {
+                        "id": "top_{}".format(i),
+                        "type": "edgeType",
+                        "from": "top_{}".format(i),
+                        "to": "left_{}".format(i),
+                        "length": edgelen,
+                        "shape": [
+                            (
+                                r * cos(t) + j * ring_spacing,
+                                r * sin(t) + k * ring_spacing,
+                            )
                             for t in linspace(pi / 2, pi, resolution)
-                        ]
-                }, {
-                    "id":
-                        "left_{}".format(i),
-                    "type":
-                        "edgeType",
-                    "from":
-                        "left_{}".format(i),
-                    "to":
-                        "bottom_{}".format(i),
-                    "length":
-                        edgelen,
-                    "shape":
-                        [
-                            (r * cos(t) + j * ring_spacing,
-                             r * sin(t) + k * ring_spacing)
+                        ],
+                    },
+                    {
+                        "id": "left_{}".format(i),
+                        "type": "edgeType",
+                        "from": "left_{}".format(i),
+                        "to": "bottom_{}".format(i),
+                        "length": edgelen,
+                        "shape": [
+                            (
+                                r * cos(t) + j * ring_spacing,
+                                r * sin(t) + k * ring_spacing,
+                            )
                             for t in linspace(pi, 3 * pi / 2, resolution)
-                        ]
-                }]
+                        ],
+                    },
+                ]
                 i += 1
                 if i >= ring_num:
                     break
@@ -283,11 +286,7 @@ class MultiRingNetwork(Network):
         lanes = net_params.additional_params["lanes"]
         speed_limit = net_params.additional_params["speed_limit"]
 
-        types = [{
-            "id": "edgeType",
-            "numLanes": lanes,
-            "speed": speed_limit
-        }]
+        types = [{"id": "edgeType", "numLanes": lanes, "speed": speed_limit}]
 
         return types
 
@@ -296,24 +295,33 @@ class MultiRingNetwork(Network):
         ring_num = net_params.additional_params["num_rings"]
         rts = {}
         for i in range(ring_num):
-            rts.update({
-                "top_{}".format(i):
-                    ["top_{}".format(i),
-                     "left_{}".format(i),
-                     "bottom_{}".format(i),
-                     "right_{}".format(i)],
-                "left_{}".format(i): ["left_{}".format(i),
-                                      "bottom_{}".format(i),
-                                      "right_{}".format(i),
-                                      "top_{}".format(i)],
-                "bottom_{}".format(i): ["bottom_{}".format(i),
-                                        "right_{}".format(i),
-                                        "top_{}".format(i),
-                                        "left_{}".format(i)],
-                "right_{}".format(i): ["right_{}".format(i),
-                                       "top_{}".format(i),
-                                       "left_{}".format(i),
-                                       "bottom_{}".format(i)]
-            })
+            rts.update(
+                {
+                    "top_{}".format(i): [
+                        "top_{}".format(i),
+                        "left_{}".format(i),
+                        "bottom_{}".format(i),
+                        "right_{}".format(i),
+                    ],
+                    "left_{}".format(i): [
+                        "left_{}".format(i),
+                        "bottom_{}".format(i),
+                        "right_{}".format(i),
+                        "top_{}".format(i),
+                    ],
+                    "bottom_{}".format(i): [
+                        "bottom_{}".format(i),
+                        "right_{}".format(i),
+                        "top_{}".format(i),
+                        "left_{}".format(i),
+                    ],
+                    "right_{}".format(i): [
+                        "right_{}".format(i),
+                        "top_{}".format(i),
+                        "left_{}".format(i),
+                        "bottom_{}".format(i),
+                    ],
+                }
+            )
 
         return rts

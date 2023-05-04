@@ -4,7 +4,7 @@ import functools
 import inspect
 import warnings
 
-string_types = (type(b''), type(u''))
+string_types = (type(b""), type(""))
 
 
 def deprecated_attribute(obj, dep_from, dep_to):
@@ -19,11 +19,12 @@ def deprecated_attribute(obj, dep_from, dep_to):
     dep_to : str
         new name for the attribute
     """
-    warnings.simplefilter('always', PendingDeprecationWarning)
+    warnings.simplefilter("always", PendingDeprecationWarning)
     warnings.warn(
         "The attribute {} in {} is deprecated, use {} instead.".format(
-            dep_from, obj.__class__.__name__, dep_to),
-        PendingDeprecationWarning
+            dep_from, obj.__class__.__name__, dep_to
+        ),
+        PendingDeprecationWarning,
     )
 
 
@@ -44,27 +45,22 @@ def deprecated(base, new_path):
     #      pass
 
     def decorator(func1):
-
         if inspect.isclass(func1):
-            fmt1 = "The class {base}.{name} is deprecated, use " \
-                   "{new_path} instead."
+            fmt1 = "The class {base}.{name} is deprecated, use " "{new_path} instead."
         else:
-            fmt1 = "The function {base}.{name} is deprecated, use " \
-                   "{new_path} instead."
+            fmt1 = (
+                "The function {base}.{name} is deprecated, use " "{new_path} instead."
+            )
 
         @functools.wraps(func1)
         def new_func1(*args, **kwargs):
-            warnings.simplefilter('always', PendingDeprecationWarning)
+            warnings.simplefilter("always", PendingDeprecationWarning)
             warnings.warn(
-                fmt1.format(
-                    base=base,
-                    name=func1.__name__,
-                    new_path=new_path
-                ),
+                fmt1.format(base=base, name=func1.__name__, new_path=new_path),
                 category=PendingDeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
-            warnings.simplefilter('default', PendingDeprecationWarning)
+            warnings.simplefilter("default", PendingDeprecationWarning)
             return func1(*args, **kwargs)
 
         return new_func1

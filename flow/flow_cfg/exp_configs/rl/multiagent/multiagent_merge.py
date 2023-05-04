@@ -45,90 +45,86 @@ additional_net_params["pre_merge_length"] = 300
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(
-	veh_id="human",
-	acceleration_controller=(IDMController, {
-	}),
-	car_following_params=SumoCarFollowingParams(
-		speed_mode="obey_safe_speed",
-	),
-	num_vehicles=5)
+    veh_id="human",
+    acceleration_controller=(IDMController, {}),
+    car_following_params=SumoCarFollowingParams(
+        speed_mode="obey_safe_speed",
+    ),
+    num_vehicles=5,
+)
 vehicles.add(
-	veh_id="rl",
-	acceleration_controller=(RLController, {}),
-	car_following_params=SumoCarFollowingParams(
-		speed_mode="obey_safe_speed",
-	),
-	num_vehicles=0)
+    veh_id="rl",
+    acceleration_controller=(RLController, {}),
+    car_following_params=SumoCarFollowingParams(
+        speed_mode="obey_safe_speed",
+    ),
+    num_vehicles=0,
+)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
 inflow = InFlows()
 inflow.add(
-	veh_type="human",
-	edge="inflow_highway",
-	vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-	depart_lane="free",
-	depart_speed=10)
+    veh_type="human",
+    edge="inflow_highway",
+    vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
+    depart_lane="free",
+    depart_speed=10,
+)
 inflow.add(
-	veh_type="rl",
-	edge="inflow_highway",
-	vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-	depart_lane="free",
-	depart_speed=10)
+    veh_type="rl",
+    edge="inflow_highway",
+    vehs_per_hour=RL_PENETRATION * FLOW_RATE,
+    depart_lane="free",
+    depart_speed=10,
+)
 inflow.add(
-	veh_type="human",
-	edge="inflow_merge",
-	vehs_per_hour=400,
-	depart_lane="free",
-	depart_speed=7.5)
+    veh_type="human",
+    edge="inflow_merge",
+    vehs_per_hour=400,
+    depart_lane="free",
+    depart_speed=7.5,
+)
 
 flow_params = dict(
-	# name of the experiment
-	exp_tag="multiagent_merge",
-
-	# name of the flow environment the experiment is running on
-	env_name=MultiAgentMergePOEnv,
-
-	# name of the network class the experiment is running on
-	network=MergeNetwork,
-
-	# simulator that is used by the experiment
-	simulator='traci',
-
-	# sumo-related parameters (see flow.core.params.SumoParams)
-	sim=SumoParams(
-		sim_step=0.2,
-		render=False,
-		restart_instance=True,
-	),
-
-	# environment related parameters (see flow.core.params.EnvParams)
-	env=EnvParams(
-		horizon=HORIZON,
-		sims_per_step=5,
-		warmup_steps=0,
-		additional_params={
-			"max_accel": 1.5,
-			"max_decel": 1.5,
-			"target_velocity": 20,
-			"local": 'test',
-		},
-	),
-
-	# network-related parameters (see flow.core.params.NetParams and the
-	# network's documentation or ADDITIONAL_NET_PARAMS component)
-	net=NetParams(
-		inflows=inflow,
-		additional_params=additional_net_params,
-	),
-
-	# vehicles to be placed in the network at the start of a rollout (see
-	# flow.core.params.VehicleParams)
-	veh=vehicles,
-
-	# parameters specifying the positioning of vehicles upon initialization/
-	# reset (see flow.core.params.InitialConfig)
-	initial=InitialConfig(),
+    # name of the experiment
+    exp_tag="multiagent_merge",
+    # name of the flow environment the experiment is running on
+    env_name=MultiAgentMergePOEnv,
+    # name of the network class the experiment is running on
+    network=MergeNetwork,
+    # simulator that is used by the experiment
+    simulator="traci",
+    # sumo-related parameters (see flow.core.params.SumoParams)
+    sim=SumoParams(
+        sim_step=0.2,
+        render=False,
+        restart_instance=True,
+    ),
+    # environment related parameters (see flow.core.params.EnvParams)
+    env=EnvParams(
+        horizon=HORIZON,
+        sims_per_step=5,
+        warmup_steps=0,
+        additional_params={
+            "max_accel": 1.5,
+            "max_decel": 1.5,
+            "target_velocity": 20,
+            "local": "test",
+        },
+    ),
+    # network-related parameters (see flow.core.params.NetParams and the
+    # network's documentation or ADDITIONAL_NET_PARAMS component)
+    net=NetParams(
+        inflows=inflow,
+        additional_params=additional_net_params,
+    ),
+    # vehicles to be placed in the network at the start of a rollout (see
+    # flow.core.params.VehicleParams)
+    veh=vehicles,
+    # parameters specifying the positioning of vehicles upon initialization/
+    # reset (see flow.core.params.InitialConfig)
+    initial=InitialConfig(),
 )
 
 
@@ -143,17 +139,17 @@ act_space = test_env.action_space
 
 
 def gen_policy():
-	"""Generate a policy in RLlib."""
-	return PPOTFPolicy, obs_space, act_space, {}
+    """Generate a policy in RLlib."""
+    return PPOTFPolicy, obs_space, act_space, {}
 
 
 # Setup PG with an ensemble of `num_policies` different policy graphs
-POLICY_GRAPHS = {'av': gen_policy()}
+POLICY_GRAPHS = {"av": gen_policy()}
 
 
 def policy_mapping_fn(_):
-	"""Map a policy in RLlib."""
-	return 'av'
+    """Map a policy in RLlib."""
+    return "av"
 
 
-POLICIES_TO_TRAIN = ['av']
+POLICIES_TO_TRAIN = ["av"]

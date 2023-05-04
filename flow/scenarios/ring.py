@@ -7,8 +7,7 @@ from flow.networks.ring import RingNetwork
 from flow.networks.ring import ADDITIONAL_NET_PARAMS  # noqa: F401
 
 
-@deprecated('flow.scenarios.ring',
-            'flow.networks.ring.RingNetwork')
+@deprecated("flow.scenarios.ring", "flow.networks.ring.RingNetwork")
 class RingScenario(RingNetwork):
     """See parent class."""
 

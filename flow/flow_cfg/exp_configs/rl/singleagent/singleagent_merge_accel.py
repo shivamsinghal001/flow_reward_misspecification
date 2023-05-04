@@ -46,14 +46,16 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),
-    num_vehicles=5)
+    num_vehicles=5,
+)
 vehicles.add(
     veh_id="rl1",
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode="obey_safe_speed",
     ),
-    num_vehicles=0)
+    num_vehicles=0,
+)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
@@ -63,40 +65,38 @@ inflow.add(
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
     depart_lane="free",
-    depart_speed=10)
+    depart_speed=10,
+)
 inflow.add(
     veh_type="rl1",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
     depart_lane="free",
-    depart_speed=10)
+    depart_speed=10,
+)
 inflow.add(
     veh_type="human1",
     edge="inflow_merge",
     vehs_per_hour=400,
     depart_lane="free",
-    depart_speed=7.5)
+    depart_speed=7.5,
+)
 
 flow_params = dict(
     # name of the experiment
     exp_tag="stabilizing_open_network_merges",
-
     # name of the flow environment the experiment is running on
     env_name=MergePOEnvAccel,
-
     # name of the network class the experiment is running on
     network=MergeNetwork,
-
     # simulator that is used by the experiment
-    simulator='traci',
-
+    simulator="traci",
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
         sim_step=0.2,
         render=False,
         restart_instance=True,
     ),
-
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
@@ -109,18 +109,15 @@ flow_params = dict(
             "num_rl": NUM_RL,
         },
     ),
-
     # network-related parameters (see flow.core.params.NetParams and the
     # network's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
         inflows=inflow,
         additional_params=additional_net_params,
     ),
-
     # vehicles to be placed in the network at the start of a rollout (see
     # flow.core.params.VehicleParams)
     veh=vehicles,
-
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),

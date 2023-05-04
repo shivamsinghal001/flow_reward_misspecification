@@ -22,21 +22,17 @@ class FollowerStopper(BaseController):
         desired speed of the vehicles (m/s)
     """
 
-    def __init__(self,
-                 veh_id,
-                 car_following_params,
-                 v_des=15,
-                 danger_edges=None):
+    def __init__(self, veh_id, car_following_params, v_des=15, danger_edges=None):
         """Instantiate FollowerStopper."""
         BaseController.__init__(
-            self, veh_id, car_following_params, delay=1.0,
-            fail_safe='safe_velocity')
+            self, veh_id, car_following_params, delay=1.0, fail_safe="safe_velocity"
+        )
 
         # desired speed of the vehicle
         self.v_des = v_des
 
         # maximum achievable acceleration by the vehicle
-        self.max_accel = car_following_params.controller_params['accel']
+        self.max_accel = car_following_params.controller_params["accel"]
 
         # other parameters
         self.dx_1_0 = 4.5
@@ -65,7 +61,7 @@ class FollowerStopper(BaseController):
         # FIXME this might not be the best way of handling this
         if edge_id == "":
             return -10
-        if 'center' in edge_id:
+        if "center" in edge_id:
             return 0
         edge_len = env.k.network.edge_length(edge_id)
         relative_pos = env.k.vehicle.get_position(self.veh_id)
@@ -97,8 +93,7 @@ class FollowerStopper(BaseController):
             elif dx <= dx_2:
                 v_cmd = v * (dx - dx_1) / (dx_2 - dx_1)
             elif dx <= dx_3:
-                v_cmd = v + (self.v_des - this_vel) * (dx - dx_2) \
-                        / (dx_3 - dx_2)
+                v_cmd = v + (self.v_des - this_vel) * (dx - dx_2) / (dx_3 - dx_2)
             else:
                 v_cmd = self.v_des
 
@@ -107,9 +102,11 @@ class FollowerStopper(BaseController):
         if edge == "":
             return None
 
-        if self.find_intersection_dist(env) <= 10 and \
-                env.k.vehicle.get_edge(self.veh_id) in self.danger_edges or \
-                env.k.vehicle.get_edge(self.veh_id)[0] == ":":
+        if (
+            self.find_intersection_dist(env) <= 10
+            and env.k.vehicle.get_edge(self.veh_id) in self.danger_edges
+            or env.k.vehicle.get_edge(self.veh_id)[0] == ":"
+        ):
             return None
         else:
             # compute the acceleration from the desired velocity
@@ -135,9 +132,9 @@ class NonLocalFollowerStopper(FollowerStopper):
             dx = env.k.vehicle.get_headway(self.veh_id)
             dv_minus = min(lead_vel - this_vel, 0)
 
-            dx_1 = self.dx_1_0 + 1 / (2 * self.d_1) * dv_minus ** 2
-            dx_2 = self.dx_2_0 + 1 / (2 * self.d_2) * dv_minus ** 2
-            dx_3 = self.dx_3_0 + 1 / (2 * self.d_3) * dv_minus ** 2
+            dx_1 = self.dx_1_0 + 1 / (2 * self.d_1) * dv_minus**2
+            dx_2 = self.dx_2_0 + 1 / (2 * self.d_2) * dv_minus**2
+            dx_3 = self.dx_3_0 + 1 / (2 * self.d_3) * dv_minus**2
             v = min(max(lead_vel, 0), self.v_des)
             # compute the desired velocity
             if dx <= dx_1:
@@ -145,8 +142,7 @@ class NonLocalFollowerStopper(FollowerStopper):
             elif dx <= dx_2:
                 v_cmd = v * (dx - dx_1) / (dx_2 - dx_1)
             elif dx <= dx_3:
-                v_cmd = v + (self.v_des - this_vel) * (dx - dx_2) \
-                        / (dx_3 - dx_2)
+                v_cmd = v + (self.v_des - this_vel) * (dx - dx_2) / (dx_3 - dx_2)
             else:
                 v_cmd = self.v_des
 
@@ -155,9 +151,11 @@ class NonLocalFollowerStopper(FollowerStopper):
         if edge == "":
             return None
 
-        if self.find_intersection_dist(env) <= 10 and \
-                env.k.vehicle.get_edge(self.veh_id) in self.danger_edges or \
-                env.k.vehicle.get_edge(self.veh_id)[0] == ":":
+        if (
+            self.find_intersection_dist(env) <= 10
+            and env.k.vehicle.get_edge(self.veh_id) in self.danger_edges
+            or env.k.vehicle.get_edge(self.veh_id)[0] == ":"
+        ):
             return None
         else:
             # compute the acceleration from the desired velocity
@@ -187,7 +185,7 @@ class PISaturation(BaseController):
         BaseController.__init__(self, veh_id, car_following_params, delay=1.0)
 
         # maximum achievable acceleration by the vehicle
-        self.max_accel = car_following_params.controller_params['accel']
+        self.max_accel = car_following_params.controller_params["accel"]
 
         # history used to determine AV desired velocity
         self.v_history = []
@@ -223,16 +221,18 @@ class PISaturation(BaseController):
 
         # update desired velocity values
         v_des = np.mean(self.v_history)
-        v_target = v_des + self.v_catch \
-            * min(max((dx - self.g_l) / (self.g_u - self.g_l), 0), 1)
+        v_target = v_des + self.v_catch * min(
+            max((dx - self.g_l) / (self.g_u - self.g_l), 0), 1
+        )
 
         # update the alpha and beta values
         alpha = min(max((dx - dx_s) / self.gamma, 0), 1)
         beta = 1 - 0.5 * alpha
 
         # compute desired velocity
-        self.v_cmd = beta * (alpha * v_target + (1 - alpha) * lead_vel) \
-            + (1 - beta) * self.v_cmd
+        self.v_cmd = (
+            beta * (alpha * v_target + (1 - alpha) * lead_vel) + (1 - beta) * self.v_cmd
+        )
 
         # compute the acceleration
         accel = (self.v_cmd - this_vel) / env.sim_step

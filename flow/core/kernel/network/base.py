@@ -234,18 +234,23 @@ class BaseKernelNetwork(object):
         """
         num_vehicles = num_vehicles or self.network.vehicles.num_vehicles
 
-        if initial_config.spacing == 'uniform':
+        if initial_config.spacing == "uniform":
             startpositions, startlanes = self.gen_even_start_pos(
-                initial_config, num_vehicles)
-        elif initial_config.spacing == 'random':
+                initial_config, num_vehicles
+            )
+        elif initial_config.spacing == "random":
             startpositions, startlanes = self.gen_random_start_pos(
-                initial_config, num_vehicles)
-        elif initial_config.spacing == 'custom':
+                initial_config, num_vehicles
+            )
+        elif initial_config.spacing == "custom":
             startpositions, startlanes = self.gen_custom_start_pos(
-                initial_config, num_vehicles)
+                initial_config, num_vehicles
+            )
         else:
-            raise FatalFlowError('"spacing" argument in initial_config does '
-                                 'not contain a valid option')
+            raise FatalFlowError(
+                '"spacing" argument in initial_config does '
+                "not contain a valid option"
+            )
 
         return startpositions, startlanes
 
@@ -274,12 +279,14 @@ class BaseKernelNetwork(object):
         if isinstance(initial_config.edges_distribution, dict):
             # check that the number of vehicle in edges_distribution matches
             # that of the vehicles class
-            num_vehicles_e = sum(initial_config.edges_distribution[k]
-                                 for k in initial_config.edges_distribution)
-            assert num_vehicles == num_vehicles_e, \
-                'Number of vehicles in edges_distribution and the Vehicles ' \
-                'class do not match: {}, {}'.format(num_vehicles,
-                                                    num_vehicles_e)
+            num_vehicles_e = sum(
+                initial_config.edges_distribution[k]
+                for k in initial_config.edges_distribution
+            )
+            assert num_vehicles == num_vehicles_e, (
+                "Number of vehicles in edges_distribution and the Vehicles "
+                "class do not match: {}, {}".format(num_vehicles, num_vehicles_e)
+            )
 
             # add starting positions and lanes
             edges_distribution = deepcopy(initial_config.edges_distribution)
@@ -290,15 +297,20 @@ class BaseKernelNetwork(object):
                 # set the number of vehicles that this edge can carry
                 num_vehicles = edges_distribution[key]
                 # recursively collect the next starting positions and lanes
-                pos, lane = self.gen_even_start_pos(
-                    initial_config, num_vehicles)
+                pos, lane = self.gen_even_start_pos(initial_config, num_vehicles)
                 startpositions.extend(pos)
                 startlanes.extend(lane)
             return startpositions, startlanes
 
-        (x0, min_gap, bunching, lanes_distr, available_length,
-         available_edges, initial_config) = \
-            self._get_start_pos_util(initial_config, num_vehicles)
+        (
+            x0,
+            min_gap,
+            bunching,
+            lanes_distr,
+            available_length,
+            available_edges,
+            initial_config,
+        ) = self._get_start_pos_util(initial_config, num_vehicles)
 
         # return an empty list of starting positions and lanes if there are no
         # vehicles to be placed
@@ -329,8 +341,7 @@ class BaseKernelNetwork(object):
                 # find the location of the internal edge in total_edgestarts,
                 # which has the edges ordered by position
                 edges = [tup[0] for tup in self.total_edgestarts]
-                indx_edge = next(
-                    i for i, edge in enumerate(edges) if edge == pos[0])
+                indx_edge = next(i for i, edge in enumerate(edges) if edge == pos[0])
 
                 # take the next edge in the list, and place the car at the
                 # beginning of this edge
@@ -354,8 +365,9 @@ class BaseKernelNetwork(object):
                 pos0, pos1 = pos
                 pos = (pos0, VEHICLE_LENGTH)
                 x += VEHICLE_LENGTH
-                increment -= (VEHICLE_LENGTH * self.num_lanes(pos0)) / \
-                             (num_vehicles - car_count)
+                increment -= (VEHICLE_LENGTH * self.num_lanes(pos0)) / (
+                    num_vehicles - car_count
+                )
 
             # place vehicles side-by-side in all available lanes on this edge
             for lane in range(min([self.num_lanes(pos[0]), lanes_distr])):
@@ -399,12 +411,14 @@ class BaseKernelNetwork(object):
         if isinstance(initial_config.edges_distribution, dict):
             # check that the number of vehicle in edges_distribution matches
             # that of the vehicles class
-            num_vehicles_e = sum(initial_config.edges_distribution[k]
-                                 for k in initial_config.edges_distribution)
-            assert num_vehicles == num_vehicles_e, \
-                'Number of vehicles in edges_distribution and the Vehicles ' \
-                'class do not match: {}, {}'.format(num_vehicles,
-                                                    num_vehicles_e)
+            num_vehicles_e = sum(
+                initial_config.edges_distribution[k]
+                for k in initial_config.edges_distribution
+            )
+            assert num_vehicles == num_vehicles_e, (
+                "Number of vehicles in edges_distribution and the Vehicles "
+                "class do not match: {}, {}".format(num_vehicles, num_vehicles_e)
+            )
 
             # add starting positions and lanes
             edges_distribution = deepcopy(initial_config.edges_distribution)
@@ -415,15 +429,20 @@ class BaseKernelNetwork(object):
                 # set the number of vehicles that this edge can carry
                 num_vehicles = edges_distribution[key]
                 # recursively collect the next starting positions and lanes
-                pos, lane = self.gen_random_start_pos(
-                    initial_config, num_vehicles)
+                pos, lane = self.gen_random_start_pos(initial_config, num_vehicles)
                 startpositions.extend(pos)
                 startlanes.extend(lane)
             return startpositions, startlanes
 
-        (x0, min_gap, bunching, lanes_distr, available_length,
-         available_edges, initial_config) = self._get_start_pos_util(
-            initial_config, num_vehicles)
+        (
+            x0,
+            min_gap,
+            bunching,
+            lanes_distr,
+            available_length,
+            available_edges,
+            initial_config,
+        ) = self._get_start_pos_util(initial_config, num_vehicles)
 
         # extra space a vehicle needs to cover from the start of an edge to be
         # fully in the edge and not risk having a gap with a vehicle behind it
@@ -434,8 +453,9 @@ class BaseKernelNetwork(object):
             available_length -= efs * min([self.num_lanes(edge), lanes_distr])
 
         # choose random positions for each vehicle
-        init_absolute_pos = [random.random() * available_length
-                             for _ in range(num_vehicles)]
+        init_absolute_pos = [
+            random.random() * available_length for _ in range(num_vehicles)
+        ]
         init_absolute_pos.sort()
 
         # these positions do not include the length of the vehicle, which need
@@ -450,23 +470,30 @@ class BaseKernelNetwork(object):
         for i in range(num_vehicles):
             edge_i = available_edges[edge_indx]
             pos_i = (init_absolute_pos[i] - decrement) % (
-                    self.edge_length(edge_i) - efs)
-            lane_i = int(((init_absolute_pos[i] - decrement) - pos_i) /
-                         (self.edge_length(edge_i) - efs))
+                self.edge_length(edge_i) - efs
+            )
+            lane_i = int(
+                ((init_absolute_pos[i] - decrement) - pos_i)
+                / (self.edge_length(edge_i) - efs)
+            )
 
             pos_i += efs
 
             while lane_i > min([self.num_lanes(edge_i), lanes_distr]) - 1:
-                decrement += min([self.num_lanes(edge_i), lanes_distr]) \
-                             * (self.edge_length(edge_i) - efs)
+                decrement += min([self.num_lanes(edge_i), lanes_distr]) * (
+                    self.edge_length(edge_i) - efs
+                )
                 edge_indx += 1
 
                 edge_i = available_edges[edge_indx]
                 pos_i = (init_absolute_pos[i] - decrement) % (
-                        self.edge_length(edge_i) - efs)
+                    self.edge_length(edge_i) - efs
+                )
 
-                lane_i = int(((init_absolute_pos[i] - decrement) - pos_i) /
-                             (self.edge_length(edge_i) - efs))
+                lane_i = int(
+                    ((init_absolute_pos[i] - decrement) - pos_i)
+                    / (self.edge_length(edge_i) - efs)
+                )
 
                 pos_i += efs
 
@@ -546,14 +573,17 @@ class BaseKernelNetwork(object):
             initial_config.bunching = 0
 
         # compute the lanes distribution (adjust of edge cases)
-        if initial_config.edges_distribution == 'all':
+        if initial_config.edges_distribution == "all":
             max_lane = max(
-                [self.num_lanes(edge_id) for edge_id in self.get_edge_list()])
+                [self.num_lanes(edge_id) for edge_id in self.get_edge_list()]
+            )
         else:
-            max_lane = max([
-                self.num_lanes(edge_id)
-                for edge_id in initial_config.edges_distribution
-            ])
+            max_lane = max(
+                [
+                    self.num_lanes(edge_id)
+                    for edge_id in initial_config.edges_distribution
+                ]
+            )
 
         if initial_config.lanes_distribution > max_lane:
             lanes_distribution = max_lane
@@ -563,35 +593,51 @@ class BaseKernelNetwork(object):
         else:
             lanes_distribution = initial_config.lanes_distribution
 
-        if initial_config.edges_distribution == 'all':
-            distribution_length = \
-                sum(self.edge_length(edge_id) *
-                    min([self.num_lanes(edge_id), lanes_distribution])
-                    for edge_id in self.get_edge_list()
-                    if self.edge_length(edge_id) > min_gap + VEHICLE_LENGTH)
+        if initial_config.edges_distribution == "all":
+            distribution_length = sum(
+                self.edge_length(edge_id)
+                * min([self.num_lanes(edge_id), lanes_distribution])
+                for edge_id in self.get_edge_list()
+                if self.edge_length(edge_id) > min_gap + VEHICLE_LENGTH
+            )
         else:
-            distribution_length = \
-                sum(self.edge_length(edge_id) *
-                    min(self.num_lanes(edge_id), lanes_distribution)
-                    for edge_id in initial_config.edges_distribution
-                    if self.edge_length(edge_id) > min_gap + VEHICLE_LENGTH)
+            distribution_length = sum(
+                self.edge_length(edge_id)
+                * min(self.num_lanes(edge_id), lanes_distribution)
+                for edge_id in initial_config.edges_distribution
+                if self.edge_length(edge_id) > min_gap + VEHICLE_LENGTH
+            )
 
-        if initial_config.edges_distribution == 'all':
+        if initial_config.edges_distribution == "all":
             available_edges = [
-                edge for edge in self.get_edge_list()
-                if self.edge_length(edge) > min_gap + VEHICLE_LENGTH]
+                edge
+                for edge in self.get_edge_list()
+                if self.edge_length(edge) > min_gap + VEHICLE_LENGTH
+            ]
         else:
             available_edges = [
-                edge for edge in initial_config.edges_distribution
-                if self.edge_length(edge) > min_gap + VEHICLE_LENGTH]
+                edge
+                for edge in initial_config.edges_distribution
+                if self.edge_length(edge) > min_gap + VEHICLE_LENGTH
+            ]
 
-        available_length = \
-            distribution_length - lanes_distribution * bunching - \
-            num_vehicles * (min_gap + VEHICLE_LENGTH)
+        available_length = (
+            distribution_length
+            - lanes_distribution * bunching
+            - num_vehicles * (min_gap + VEHICLE_LENGTH)
+        )
 
         if available_length < 0:
-            raise FatalFlowError('There is not enough space to place all '
-                                 'vehicles in the network.')
+            raise FatalFlowError(
+                "There is not enough space to place all " "vehicles in the network."
+            )
 
-        return (initial_config.x0, min_gap, bunching, lanes_distribution,
-                available_length, available_edges, initial_config)
+        return (
+            initial_config.x0,
+            min_gap,
+            bunching,
+            lanes_distribution,
+            available_length,
+            available_edges,
+            initial_config,
+        )

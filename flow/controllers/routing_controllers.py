@@ -33,8 +33,9 @@ class ContinuousRouter(BaseRouter):
             # the given route can be chosen
             num_routes = len(env.available_routes[edge])
             frac = [val[1] for val in env.available_routes[edge]]
-            route_id = np.random.choice(
-                [i for i in range(num_routes)], size=1, p=frac)[0]
+            route_id = np.random.choice([i for i in range(num_routes)], size=1, p=frac)[
+                0
+            ]
 
             # pass the chosen route
             return env.available_routes[edge][route_id][0]
@@ -58,8 +59,7 @@ class MinicityRouter(BaseRouter):
         veh_id = self.veh_id
         veh_edge = vehicles.get_edge(veh_id)
         veh_route = vehicles.get_route(veh_id)
-        veh_next_edge = env.k.network.next_edge(veh_edge,
-                                                vehicles.get_lane(veh_id))
+        veh_next_edge = env.k.network.next_edge(veh_edge, vehicles.get_lane(veh_id))
         not_an_edge = ":"
         no_next = 0
 
@@ -69,14 +69,14 @@ class MinicityRouter(BaseRouter):
             random_route = random.randint(0, len(veh_next_edge) - 1)
             while veh_next_edge[0][0][0] == not_an_edge:
                 veh_next_edge = env.k.network.next_edge(
-                    veh_next_edge[random_route][0],
-                    veh_next_edge[random_route][1])
+                    veh_next_edge[random_route][0], veh_next_edge[random_route][1]
+                )
             next_route = [veh_edge, veh_next_edge[0][0]]
         else:
             next_route = None
 
-        if veh_edge in ['e_37', 'e_51']:
-            next_route = [veh_edge, 'e_29_u', 'e_21']
+        if veh_edge in ["e_37", "e_51"]:
+            next_route = [veh_edge, "e_29_u", "e_21"]
 
         return next_route
 
@@ -95,8 +95,10 @@ class GridRouter(BaseRouter):
             # this occurs to inflowing vehicles, whose information is not added
             # to the subscriptions in the first step that they departed
             return None
-        elif env.k.vehicle.get_edge(self.veh_id) == \
-                env.k.vehicle.get_route(self.veh_id)[-1]:
+        elif (
+            env.k.vehicle.get_edge(self.veh_id)
+            == env.k.vehicle.get_route(self.veh_id)[-1]
+        ):
             return [env.k.vehicle.get_edge(self.veh_id)]
         else:
             return None
@@ -117,8 +119,12 @@ class BayBridgeRouter(ContinuousRouter):
         edge = env.k.vehicle.get_edge(self.veh_id)
         lane = env.k.vehicle.get_lane(self.veh_id)
 
-        if edge == "183343422" and lane in [2] \
-                or edge == "124952179" and lane in [1, 2]:
+        if (
+            edge == "183343422"
+            and lane in [2]
+            or edge == "124952179"
+            and lane in [1, 2]
+        ):
             new_route = env.available_routes[edge + "_1"][0][0]
         else:
             new_route = super().choose_route(env)
@@ -144,8 +150,7 @@ class I210Router(ContinuousRouter):
         # vehicles on these edges in lanes 4 and 5 are not going to be able to
         # make it out in time
         if edge == "119257908#1-AddedOffRampEdge" and lane in [5, 4, 3]:
-            new_route = env.available_routes[
-                "119257908#1-AddedOffRampEdge"][0][0]
+            new_route = env.available_routes["119257908#1-AddedOffRampEdge"][0][0]
         else:
             new_route = super().choose_route(env)
 

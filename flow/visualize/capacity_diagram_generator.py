@@ -40,13 +40,13 @@ def import_data_from_csv(fp):
     """
     inflows = []
     outflows = []
-    with open(fp, 'rt') as csvfile:
+    with open(fp, "rt") as csvfile:
         spamreader = csv.reader(csvfile)
         for row in spamreader:
             inflows.append(float(row[0]))
             outflows.append(float(row[1]))
 
-    return {'inflows': inflows, 'outflows': outflows}
+    return {"inflows": inflows, "outflows": outflows}
 
 
 def get_capacity_data(data):
@@ -67,10 +67,10 @@ def get_capacity_data(data):
     as_array
         std deviation of outflow at given inflow
     """
-    unique_vals = sorted(list(set(data['inflows'])))
+    unique_vals = sorted(list(set(data["inflows"])))
     sorted_outflows = {inflow: [] for inflow in unique_vals}
 
-    for inflow, outlfow in zip(data['inflows'], data['outflows']):
+    for inflow, outlfow in zip(data["inflows"], data["outflows"]):
         sorted_outflows[inflow].append(outlfow)
 
     mean = np.asarray([np.mean(sorted_outflows[val]) for val in unique_vals])
@@ -83,15 +83,16 @@ def create_parser():
     """Create an argument parser."""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description='[Flow] Generates capacity diagrams for the bottleneck.',
-        epilog="python capacity_diagram_generator.py </path/to/file>.csv")
+        description="[Flow] Generates capacity diagrams for the bottleneck.",
+        epilog="python capacity_diagram_generator.py </path/to/file>.csv",
+    )
 
-    parser.add_argument('file', type=str, help='path to the csv file.')
+    parser.add_argument("file", type=str, help="path to the csv file.")
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # import parser arguments
     parser = create_parser()
     args = parser.parse_args()
@@ -103,18 +104,23 @@ if __name__ == '__main__':
     unique_inflows, mean_outflows, std_outflows = get_capacity_data(data)
 
     # some plotting parameters
-    rc('text', usetex=True)
-    font = {'weight': 'bold', 'size': 18}
-    rc('font', **font)
+    rc("text", usetex=True)
+    font = {"weight": "bold", "size": 18}
+    rc("font", **font)
 
     # perform plotting operation
     plt.figure(figsize=(27, 9))
-    plt.plot(unique_inflows, mean_outflows, linewidth=2, color='orange')
-    plt.fill_between(unique_inflows, mean_outflows - std_outflows,
-                     mean_outflows + std_outflows, alpha=0.25, color='orange')
-    plt.xlabel('Inflow' + r'$ \ \frac{vehs}{hour}$')
-    plt.ylabel('Outflow' + r'$ \ \frac{vehs}{hour}$')
+    plt.plot(unique_inflows, mean_outflows, linewidth=2, color="orange")
+    plt.fill_between(
+        unique_inflows,
+        mean_outflows - std_outflows,
+        mean_outflows + std_outflows,
+        alpha=0.25,
+        color="orange",
+    )
+    plt.xlabel("Inflow" + r"$ \ \frac{vehs}{hour}$")
+    plt.ylabel("Outflow" + r"$ \ \frac{vehs}{hour}$")
     plt.tick_params(labelsize=20)
-    plt.rcParams['xtick.minor.size'] = 20
+    plt.rcParams["xtick.minor.size"] = 20
     plt.minorticks_on()
     plt.show()

@@ -7,8 +7,9 @@ from flow.networks.traffic_light_grid import TrafficLightGridNetwork
 from flow.networks.traffic_light_grid import ADDITIONAL_NET_PARAMS  # noqa: F401
 
 
-@deprecated('flow.scenarios.grid',
-            'flow.networks.traffic_light_grid.TrafficLightGridNetwork')
+@deprecated(
+    "flow.scenarios.grid", "flow.networks.traffic_light_grid.TrafficLightGridNetwork"
+)
 class SimpleGridScenario(TrafficLightGridNetwork):
     """See parent class."""
 

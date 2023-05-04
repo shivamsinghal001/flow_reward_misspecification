@@ -28,8 +28,8 @@ def figure_eight_baseline(num_runs, render=True):
         Experiment
             class needed to run simulations
     """
-    sim_params = flow_params['sim']
-    env_params = flow_params['env']
+    sim_params = flow_params["sim"]
+    env_params = flow_params["env"]
 
     # modify the rendering to match what is requested
     sim_params.render = render
@@ -39,26 +39,28 @@ def figure_eight_baseline(num_runs, render=True):
 
     # we want no autonomous vehicles in the simulation
     vehicles = VehicleParams()
-    vehicles.add(veh_id='human',
-                 acceleration_controller=(IDMController, {'noise': 0.2}),
-                 routing_controller=(ContinuousRouter, {}),
-                 car_following_params=SumoCarFollowingParams(
-                     speed_mode='obey_safe_speed',
-                 ),
-                 num_vehicles=14)
+    vehicles.add(
+        veh_id="human",
+        acceleration_controller=(IDMController, {"noise": 0.2}),
+        routing_controller=(ContinuousRouter, {}),
+        car_following_params=SumoCarFollowingParams(
+            speed_mode="obey_safe_speed",
+        ),
+        num_vehicles=14,
+    )
 
-    flow_params['env'].horizon = env_params.horizon
+    flow_params["env"].horizon = env_params.horizon
     exp = Experiment(flow_params)
 
     results = exp.run(num_runs)
-    avg_speed = np.mean(results['returns'])
+    avg_speed = np.mean(results["returns"])
 
     return avg_speed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runs = 2  # number of simulations to average over
     res = figure_eight_baseline(num_runs=runs)
 
-    print('---------')
-    print('The average speed across {} runs is {}'.format(runs, res))
+    print("---------")
+    print("The average speed across {} runs is {}".format(runs, res))

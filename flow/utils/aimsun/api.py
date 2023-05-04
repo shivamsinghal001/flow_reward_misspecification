@@ -26,14 +26,14 @@ def create_client(port, print_status=False):
     """
     # create a socket connection
     if print_status:
-        print('Listening for connection...', end=' ')
+        print("Listening for connection...", end=" ")
 
     stop = False
     while not stop:
         # try to connect
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('localhost', port))
+            s.connect(("localhost", port))
 
             # check the connection
             data = None
@@ -42,14 +42,14 @@ def create_client(port, print_status=False):
             stop = True
 
         except Exception as e:
-            logging.debug('Cannot connect to the server: {}'.format(e))
+            logging.debug("Cannot connect to the server: {}".format(e))
 
         except socket.error:
             stop = False
 
     # print the return statement
     if print_status:
-        print(data.decode('utf-8'))
+        print(data.decode("utf-8"))
 
     return s
 
@@ -105,14 +105,14 @@ class FlowAimsunAPI(object):
         self.s.send(str(command_type).encode())
 
         # wait for a response
-        unpacker = struct.Struct(format='i')
+        unpacker = struct.Struct(format="i")
         data = None
         while data is None:
             data = self.s.recv(unpacker.size)
 
         # send the command values
         if in_format is not None:
-            if in_format == 'str':
+            if in_format == "str":
                 self.s.send(str.encode(values[0]))
             else:
                 packer = struct.Struct(format=in_format)
@@ -120,27 +120,27 @@ class FlowAimsunAPI(object):
                 self.s.send(packed_data)
         else:
             # if no command is needed, just send a status response
-            self.s.send(str.encode('1'))
+            self.s.send(str.encode("1"))
 
         # collect the return values
         if out_format is not None:
-            if out_format == 'str':
+            if out_format == "str":
                 done = False
-                unpacked_data = ''
+                unpacked_data = ""
                 while not done:
                     # get the next bit of data
                     data = None
-                    while data is None or data == b'':
+                    while data is None or data == b"":
                         data = self.s.recv(256)
 
                     # concatenate the results
-                    unpacked_data += data.decode('utf-8')
+                    unpacked_data += data.decode("utf-8")
 
                     # ask for a status check (just by sending any command)
-                    self.s.send(str.encode('1'))
+                    self.s.send(str.encode("1"))
 
                     # check if done
-                    unpacker = struct.Struct(format='i')
+                    unpacker = struct.Struct(format="i")
                     data = None
                     while data is None:
                         data = self.s.recv(unpacker.size)
@@ -160,8 +160,9 @@ class FlowAimsunAPI(object):
         Since the connection is lost when this happens, this method also waits
         for and reconnects to the server.
         """
-        self._send_command(ac.SIMULATION_STEP,
-                           in_format=None, values=None, out_format=None)
+        self._send_command(
+            ac.SIMULATION_STEP, in_format=None, values=None, out_format=None
+        )
 
         # reconnect to the server
         self.s = create_client(self.port)
@@ -173,8 +174,9 @@ class FlowAimsunAPI(object):
         """
         # inform the simulation that it should terminate the simulation and the
         # server connection
-        self._send_command(ac.SIMULATION_TERMINATE,
-                           in_format=None, values=None, out_format=None)
+        self._send_command(
+            ac.SIMULATION_TERMINATE, in_format=None, values=None, out_format=None
+        )
 
         # terminate the connection
         self.s.close()
@@ -192,10 +194,9 @@ class FlowAimsunAPI(object):
         int
             name of the edge in Aimsun
         """
-        return self._send_command(ac.GET_EDGE_NAME,
-                                  in_format='str',
-                                  values=(edge,),
-                                  out_format='i')[0]
+        return self._send_command(
+            ac.GET_EDGE_NAME, in_format="str", values=(edge,), out_format="i"
+        )[0]
 
     def add_vehicle(self, edge, lane, type_id, pos, speed, next_section):
         """Add a vehicle to the network.
@@ -224,18 +225,18 @@ class FlowAimsunAPI(object):
         """
         # if type_id is a string, retrieve the id of the type
         if isinstance(type_id, str):
-            type_id = self._send_command(ac.VEH_GET_TYPE_ID,
-                                         in_format='str',
-                                         values=(type_id,),
-                                         out_format='i')[0]
+            type_id = self._send_command(
+                ac.VEH_GET_TYPE_ID, in_format="str", values=(type_id,), out_format="i"
+            )[0]
         # TODO maybe put back the type conversion dict
         # to avoid useless API calls
 
-        veh_id, = self._send_command(
+        (veh_id,) = self._send_command(
             ac.ADD_VEHICLE,
-            in_format='i i i f f i',
+            in_format="i i i f f i",
             values=(edge, lane, type_id, pos, speed, next_section),
-            out_format='i')
+            out_format="i",
+        )
 
         return veh_id
 
@@ -247,10 +248,9 @@ class FlowAimsunAPI(object):
         veh_id : int
             name of the vehicle in Aimsun
         """
-        self._send_command(ac.REMOVE_VEHICLE,
-                           in_format='i',
-                           values=(veh_id,),
-                           out_format='i')
+        self._send_command(
+            ac.REMOVE_VEHICLE, in_format="i", values=(veh_id,), out_format="i"
+        )
 
     def set_speed(self, veh_id, speed):
         """Set the speed of a specific vehicle.
@@ -262,10 +262,9 @@ class FlowAimsunAPI(object):
         speed : float
             target speed
         """
-        self._send_command(ac.VEH_SET_SPEED,
-                           in_format='i f',
-                           values=(veh_id, speed),
-                           out_format='i')
+        self._send_command(
+            ac.VEH_SET_SPEED, in_format="i f", values=(veh_id, speed), out_format="i"
+        )
 
     def apply_lane_change(self, veh_id, direction):
         """Set the lane change action of a specific vehicle.
@@ -282,10 +281,9 @@ class FlowAimsunAPI(object):
         float
             status (should be 0)
         """
-        return self._send_command(ac.VEH_SET_LANE,
-                                  in_format='i i',
-                                  values=(veh_id, direction),
-                                  out_format='i')
+        return self._send_command(
+            ac.VEH_SET_LANE, in_format="i i", values=(veh_id, direction), out_format="i"
+        )
 
     def set_route(self, veh_id, route):
         """Set the route of a specific vehicle.
@@ -302,8 +300,7 @@ class FlowAimsunAPI(object):
         float
             status (should be 0)
         """
-        return self._send_command(ac.VEH_SET_ROUTE,
-                                  values=(veh_id, route))
+        return self._send_command(ac.VEH_SET_ROUTE, values=(veh_id, route))
 
     def set_color(self, veh_id, color):
         """Set the color of a specific vehicle.
@@ -316,35 +313,35 @@ class FlowAimsunAPI(object):
             red, green, blue values
         """
         r, g, b = color
-        return self._send_command(ac.VEH_SET_COLOR,
-                                  in_format='i i i i',
-                                  values=(veh_id, r, g, b),
-                                  out_format='i')
+        return self._send_command(
+            ac.VEH_SET_COLOR,
+            in_format="i i i i",
+            values=(veh_id, r, g, b),
+            out_format="i",
+        )
 
     def get_entered_ids(self):
         """Return the ids of all vehicles that entered the network."""
-        veh_ids = self._send_command(ac.VEH_GET_ENTERED_IDS,
-                                     in_format=None,
-                                     values=None,
-                                     out_format='str')
+        veh_ids = self._send_command(
+            ac.VEH_GET_ENTERED_IDS, in_format=None, values=None, out_format="str"
+        )
 
-        if veh_ids == '-1':
+        if veh_ids == "-1":
             return []
         else:
-            veh_ids = veh_ids.split(':')
+            veh_ids = veh_ids.split(":")
             return [int(v) for v in veh_ids]
 
     def get_exited_ids(self):
         """Return the ids of all vehicles that exited the network."""
-        veh_ids = self._send_command(ac.VEH_GET_EXITED_IDS,
-                                     in_format=None,
-                                     values=None,
-                                     out_format='str')
+        veh_ids = self._send_command(
+            ac.VEH_GET_EXITED_IDS, in_format=None, values=None, out_format="str"
+        )
 
-        if veh_ids == '-1':
+        if veh_ids == "-1":
             return []
         else:
-            veh_ids = veh_ids.split(':')
+            veh_ids = veh_ids.split(":")
             return [int(v) for v in veh_ids]
 
     def get_vehicle_type_id(self, flow_id):
@@ -360,10 +357,9 @@ class FlowAimsunAPI(object):
         int
             Aimsun-specific vehicle type
         """
-        return self._send_command(ac.VEH_GET_TYPE_ID,
-                                  in_format='str',
-                                  values=(flow_id,),
-                                  out_format='i')[0]
+        return self._send_command(
+            ac.VEH_GET_TYPE_ID, in_format="str", values=(flow_id,), out_format="i"
+        )[0]
 
     def get_vehicle_type_name(self, veh_id):
         """Get the Aimsun type name of an Aimsun vehicle.
@@ -378,10 +374,9 @@ class FlowAimsunAPI(object):
         str
             Aimsun-specific vehicle type name
         """
-        return self._send_command(ac.VEH_GET_TYPE_NAME,
-                                  in_format='i',
-                                  values=(veh_id,),
-                                  out_format='str')
+        return self._send_command(
+            ac.VEH_GET_TYPE_NAME, in_format="i", values=(veh_id,), out_format="str"
+        )
 
     def get_vehicle_length(self, veh_id):
         """Get the length of an Aimsun vehicle.
@@ -396,10 +391,9 @@ class FlowAimsunAPI(object):
         float
             length of the vehicle in Aimsun
         """
-        return self._send_command(ac.VEH_GET_LENGTH,
-                                  in_format='i',
-                                  values=(veh_id,),
-                                  out_format='f')[0]
+        return self._send_command(
+            ac.VEH_GET_LENGTH, in_format="i", values=(veh_id,), out_format="f"
+        )[0]
 
     def get_vehicle_static_info(self, veh_id):
         """Return the static information of the specified vehicle.
@@ -416,36 +410,39 @@ class FlowAimsunAPI(object):
         """
         static_info = aimsun_struct.StaticInfVeh()
 
-        (static_info.report,
-         static_info.idVeh,
-         static_info.type,
-         static_info.length,
-         static_info.width,
-         static_info.maxDesiredSpeed,
-         static_info.maxAcceleration,
-         static_info.normalDeceleration,
-         static_info.maxDeceleration,
-         static_info.speedAcceptance,
-         static_info.minDistanceVeh,
-         static_info.giveWayTime,
-         static_info.guidanceAcceptance,
-         static_info.enrouted,
-         static_info.equipped,
-         static_info.tracked,
-         static_info.keepfastLane,
-         static_info.headwayMin,
-         static_info.sensitivityFactor,
-         static_info.reactionTime,
-         static_info.reactionTimeAtStop,
-         static_info.reactionTimeAtTrafficLight,
-         static_info.centroidOrigin,
-         static_info.centroidDest,
-         static_info.idsectionExit,
-         static_info.idLine) = self._send_command(
+        (
+            static_info.report,
+            static_info.idVeh,
+            static_info.type,
+            static_info.length,
+            static_info.width,
+            static_info.maxDesiredSpeed,
+            static_info.maxAcceleration,
+            static_info.normalDeceleration,
+            static_info.maxDeceleration,
+            static_info.speedAcceptance,
+            static_info.minDistanceVeh,
+            static_info.giveWayTime,
+            static_info.guidanceAcceptance,
+            static_info.enrouted,
+            static_info.equipped,
+            static_info.tracked,
+            static_info.keepfastLane,
+            static_info.headwayMin,
+            static_info.sensitivityFactor,
+            static_info.reactionTime,
+            static_info.reactionTimeAtStop,
+            static_info.reactionTimeAtTrafficLight,
+            static_info.centroidOrigin,
+            static_info.centroidDest,
+            static_info.idsectionExit,
+            static_info.idLine,
+        ) = self._send_command(
             ac.VEH_GET_STATIC,
-            in_format='i',
+            in_format="i",
             values=(veh_id,),
-            out_format='i i i f f f f f f f f f f i i i ? f f f f f i i i i')
+            out_format="i i i f f f f f f f f f f i i i ? f f f f f i i i i",
+        )
 
         return static_info
 
@@ -469,14 +466,14 @@ class FlowAimsunAPI(object):
             tracking info object
         """
         # build the output format from the bitmap
-        out_format = ''
+        out_format = ""
         for i in range(len(info_bitmap)):
-            if info_bitmap[i] == '1':
+            if info_bitmap[i] == "1":
                 if i <= 12:
-                    out_format += 'f '
+                    out_format += "f "
                 else:
-                    out_format += 'i '
-        if out_format == '':
+                    out_format += "i "
+        if out_format == "":
             return
         else:
             out_format = out_format[:-1]
@@ -488,16 +485,14 @@ class FlowAimsunAPI(object):
 
         # retrieve the vehicle tracking info specified by the bitmap
         info = self._send_command(
-            ac.VEH_GET_TRACKING,
-            in_format='str',
-            values=(val,),
-            out_format=out_format)
+            ac.VEH_GET_TRACKING, in_format="str", values=(val,), out_format=out_format
+        )
 
         # place these tracking info into a struct
         ret = aimsun_struct.InfVeh()
         count = 0
         for map_index in range(len(INFOS_ATTR_BY_INDEX)):
-            if info_bitmap[map_index] == '1':
+            if info_bitmap[map_index] == "1":
                 setattr(ret, INFOS_ATTR_BY_INDEX[map_index], info[count])
                 count += 1
 
@@ -516,10 +511,9 @@ class FlowAimsunAPI(object):
         int
             name of the leader
         """
-        return self._send_command(ac.VEH_GET_LEADER,
-                                  in_format='i',
-                                  values=(veh_id,),
-                                  out_format='i')[0]
+        return self._send_command(
+            ac.VEH_GET_LEADER, in_format="i", values=(veh_id,), out_format="i"
+        )[0]
 
     def get_vehicle_follower(self, veh_id):
         """Return the follower of a specific vehicle.
@@ -534,10 +528,9 @@ class FlowAimsunAPI(object):
         int
             name of the follower
         """
-        return self._send_command(ac.VEH_GET_FOLLOWER,
-                                  in_format='i',
-                                  values=(veh_id,),
-                                  out_format='i')[0]
+        return self._send_command(
+            ac.VEH_GET_FOLLOWER, in_format="i", values=(veh_id,), out_format="i"
+        )[0]
 
     def get_next_section(self, veh_id, section):
         """Return the headway of a specific vehicle.
@@ -554,10 +547,12 @@ class FlowAimsunAPI(object):
         int
             next section
         """
-        return self._send_command(ac.VEH_GET_NEXT_SECTION,
-                                  in_format='i i',
-                                  values=(veh_id, section),
-                                  out_format='i')[0]
+        return self._send_command(
+            ac.VEH_GET_NEXT_SECTION,
+            in_format="i i",
+            values=(veh_id, section),
+            out_format="i",
+        )[0]
 
     def get_route(self, veh_id):
         """Return the route of a specific vehicle.
@@ -572,20 +567,18 @@ class FlowAimsunAPI(object):
         list of int
             list of edge names in Aimsun
         """
-        return self._send_command(ac.VEH_GET_ROUTE,
-                                  values=[veh_id])
+        return self._send_command(ac.VEH_GET_ROUTE, values=[veh_id])
 
     def get_traffic_light_ids(self):
         """Return the ids of all traffic lights in the network."""
-        tl_ids = self._send_command(ac.TL_GET_IDS,
-                                    in_format=None,
-                                    values=None,
-                                    out_format='str')
+        tl_ids = self._send_command(
+            ac.TL_GET_IDS, in_format=None, values=None, out_format="str"
+        )
 
-        if tl_ids == '-1':
+        if tl_ids == "-1":
             return []
         else:
-            tl_ids = tl_ids.split(':')
+            tl_ids = tl_ids.split(":")
             return [int(t) for t in tl_ids]
 
     def get_traffic_light_state(self, tl_id):
@@ -601,9 +594,9 @@ class FlowAimsunAPI(object):
         str
             traffic light state of each light on that node
         """
-        res, = self._send_command(ac.TL_GET_STATE, values=(tl_id,),
-                                  in_format='i',
-                                  out_format='i')
+        (res,) = self._send_command(
+            ac.TL_GET_STATE, values=(tl_id,), in_format="i", out_format="i"
+        )
         return res
 
     def set_traffic_light_state(self, tl_id, link_index, state):
@@ -618,10 +611,12 @@ class FlowAimsunAPI(object):
         state : str
             TODO
         """
-        self._send_command(ac.TL_SET_STATE,
-                           in_format='i i i',
-                           values=(tl_id, link_index, state),
-                           out_format=None)
+        self._send_command(
+            ac.TL_SET_STATE,
+            in_format="i i i",
+            values=(tl_id, link_index, state),
+            out_format=None,
+        )
 
     def set_vehicle_tracked(self, veh_id):
         """Set a vehicle as tracked in Aimsun.
@@ -633,10 +628,9 @@ class FlowAimsunAPI(object):
         veh_id : int
             name of the vehicle in Aimsun
         """
-        self._send_command(ac.VEH_SET_TRACKED,
-                           in_format='i',
-                           values=(veh_id,),
-                           out_format=None)
+        self._send_command(
+            ac.VEH_SET_TRACKED, in_format="i", values=(veh_id,), out_format=None
+        )
 
     def set_vehicle_no_tracked(self, veh_id):
         """Set a tracked vehicle as untracked in Aimsun.
@@ -646,7 +640,6 @@ class FlowAimsunAPI(object):
         veh_id : int
             name of the vehicle in Aimsun
         """
-        self._send_command(ac.VEH_SET_NO_TRACKED,
-                           in_format='i',
-                           values=(veh_id,),
-                           out_format=None)
+        self._send_command(
+            ac.VEH_SET_NO_TRACKED, in_format="i", values=(veh_id,), out_format=None
+        )

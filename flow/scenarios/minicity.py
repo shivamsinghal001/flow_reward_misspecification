@@ -6,8 +6,7 @@ from flow.utils.flow_warnings import deprecated
 from flow.networks.minicity import MiniCityNetwork
 
 
-@deprecated('flow.scenarios.minicity',
-            'flow.networks.minicity.MiniCityNetwork')
+@deprecated("flow.scenarios.minicity", "flow.networks.minicity.MiniCityNetwork")
 class MiniCityScenario(MiniCityNetwork):
     """See parent class."""
 

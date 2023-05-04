@@ -7,8 +7,9 @@ from flow.networks.highway_ramps import HighwayRampsNetwork
 from flow.networks.highway_ramps import ADDITIONAL_NET_PARAMS  # noqa: F401
 
 
-@deprecated('flow.scenarios.highway_ramps',
-            'flow.networks.highway_ramps.HighwayRampsNetwork')
+@deprecated(
+    "flow.scenarios.highway_ramps", "flow.networks.highway_ramps.HighwayRampsNetwork"
+)
 class HighwayRampsScenario(HighwayRampsNetwork):
     """See parent class."""
 

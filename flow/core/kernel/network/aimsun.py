@@ -62,14 +62,14 @@ class AimsunKernelNetwork(BaseKernelNetwork):
             "inflows": None,
             "vehicle_types": network.vehicles.types,
             "osm_path": network.net_params.osm_path,
-            'render': self.sim_params.render,
+            "render": self.sim_params.render,
             "sim_step": self.sim_params.sim_step,
             "traffic_lights": None,
             "network_name": self.sim_params.network_name,
             "experiment_name": self.sim_params.experiment_name,
             "replication_name": self.sim_params.replication_name,
             "centroid_config_name": self.sim_params.centroid_config_name,
-            "subnetwork_name": self.sim_params.subnetwork_name
+            "subnetwork_name": self.sim_params.subnetwork_name,
         }
 
         if network.net_params.inflows is not None:
@@ -78,27 +78,31 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         if network.traffic_lights is not None:
             output["traffic_lights"] = network.traffic_lights.__dict__
 
-        cur_dir = os.path.join(config.PROJECT_PATH,
-                               'flow/core/kernel/network')
+        cur_dir = os.path.join(config.PROJECT_PATH, "flow/core/kernel/network")
         # TODO: add current time
-        with open(os.path.join(cur_dir, 'data_%s.json' % self.sim_params.port), 'w') as outfile:
+        with open(
+            os.path.join(cur_dir, "data_%s.json" % self.sim_params.port), "w"
+        ) as outfile:
             json.dump(output, outfile, sort_keys=True, indent=4)
 
         # path to the Aimsun_Next binary
-        if platform.system() == 'Darwin':  # OS X
-            binary_name = 'Aimsun Next'
+        if platform.system() == "Darwin":  # OS X
+            binary_name = "Aimsun Next"
         else:
-            binary_name = 'Aimsun_Next'
-        aimsun_path = osp.join(osp.expanduser(config.AIMSUN_NEXT_PATH),
-                               binary_name)
+            binary_name = "Aimsun_Next"
+        aimsun_path = osp.join(osp.expanduser(config.AIMSUN_NEXT_PATH), binary_name)
 
         # remove network data file if if still exists from
         # the previous simulation
-        data_file = 'flow/core/kernel/network/network_data_%s.json' % self.sim_params.port
+        data_file = (
+            "flow/core/kernel/network/network_data_%s.json" % self.sim_params.port
+        )
         data_file_path = os.path.join(config.PROJECT_PATH, data_file)
         if os.path.exists(data_file_path):
             os.remove(data_file_path)
-        check_file = 'flow/core/kernel/network/network_data_check%s' % self.sim_params.port
+        check_file = (
+            "flow/core/kernel/network/network_data_check%s" % self.sim_params.port
+        )
         check_file_path = os.path.join(config.PROJECT_PATH, check_file)
         if os.path.exists(check_file_path):
             os.remove(check_file_path)
@@ -109,17 +113,19 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         # network from a template
         template_path = network.net_params.template
         if template_path is None:
-            script_path = osp.join(config.PROJECT_PATH,
-                                   'flow/utils/aimsun/generate.py')
+            script_path = osp.join(config.PROJECT_PATH, "flow/utils/aimsun/generate.py")
         else:
-            script_path = osp.join(config.PROJECT_PATH,
-                                   'flow/utils/aimsun/load.py')
-            file_path = osp.join(config.PROJECT_PATH,
-                                 'flow/utils/aimsun/aimsun_template_path_%s' % self.sim_params.port)
-            with open(file_path, 'w') as f:
+            script_path = osp.join(config.PROJECT_PATH, "flow/utils/aimsun/load.py")
+            file_path = osp.join(
+                config.PROJECT_PATH,
+                "flow/utils/aimsun/aimsun_template_path_%s" % self.sim_params.port,
+            )
+            with open(file_path, "w") as f:
                 f.write("%s_%s" % (template_path, self.sim_params.port))
             # instances must have unique template paths to avoid crashing?
-            os.popen('cp %s %s_%s' % (template_path, template_path, self.sim_params.port))
+            os.popen(
+                "cp %s %s_%s" % (template_path, template_path, self.sim_params.port)
+            )
 
         # start the aimsun process
         aimsun_call = [aimsun_path, "-script", script_path, str(self.sim_params.port)]
@@ -129,9 +135,9 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         if network.net_params.osm_path is None:
             if network.net_params.template is None:
                 for i in range(len(network.edges)):
-                    if 'type' in network.edges[i]:
+                    if "type" in network.edges[i]:
                         for typ in network.types:
-                            if typ['id'] == network.edges[i]['type']:
+                            if typ["id"] == network.edges[i]["type"]:
                                 new_dict = deepcopy(typ)
                                 new_dict.pop("id")
                                 network.edges[i].update(new_dict)
@@ -139,25 +145,31 @@ class AimsunKernelNetwork(BaseKernelNetwork):
 
                 self._edges = {}
                 for edge in deepcopy(network.edges):
-                    edge_name = edge['id']
+                    edge_name = edge["id"]
                     self._edges[edge_name] = {}
-                    del edge['id']
+                    del edge["id"]
                     self._edges[edge_name] = edge
 
                 # list of edges and internal links (junctions)
                 self._edge_list = [
-                    edge_id for edge_id in self._edges.keys()
-                    if edge_id[0] != ':'
+                    edge_id for edge_id in self._edges.keys() if edge_id[0] != ":"
                 ]
                 self._junction_list = list(
-                    set(self._edges.keys()) - set(self._edge_list))
+                    set(self._edges.keys()) - set(self._edge_list)
+                )
 
             else:
                 # load network from template
-                scenar_file = "flow/core/kernel/network/network_data_%s.json" % self.sim_params.port
+                scenar_file = (
+                    "flow/core/kernel/network/network_data_%s.json"
+                    % self.sim_params.port
+                )
                 scenar_path = os.path.join(config.PROJECT_PATH, scenar_file)
 
-                check_file = "flow/core/kernel/network/network_data_check_%s" % self.sim_params.port
+                check_file = (
+                    "flow/core/kernel/network/network_data_check_%s"
+                    % self.sim_params.port
+                )
                 check_path = os.path.join(config.PROJECT_PATH, check_file)
 
                 # a check file is created when all the network data
@@ -172,13 +184,13 @@ class AimsunKernelNetwork(BaseKernelNetwork):
                     content = json.load(f)
                 os.remove(scenar_path)
 
-                self._edges = content['sections']
+                self._edges = content["sections"]
                 self._edge_list = self._edges.keys()
-                self._junction_list = content['turnings']
+                self._junction_list = content["turnings"]
                 # TODO load everything that is in content into the network
 
         else:
-            data_file = 'flow/utils/aimsun/osm_edges_%s.json' % self.sim_params.port
+            data_file = "flow/utils/aimsun/osm_edges_%s.json" % self.sim_params.port
             filepath = os.path.join(config.PROJECT_PATH, data_file)
 
             while not os.path.exists(filepath):
@@ -188,18 +200,15 @@ class AimsunKernelNetwork(BaseKernelNetwork):
                 self._edges = json.load(f)
             # list of edges and internal links (junctions)
             self._edge_list = [
-                edge_id for edge_id in self._edges.keys()
-                if edge_id[0] != ':'
+                edge_id for edge_id in self._edges.keys() if edge_id[0] != ":"
             ]
-            self._junction_list = list(
-                set(self._edges.keys()) - set(self._edge_list))
+            self._junction_list = list(set(self._edges.keys()) - set(self._edge_list))
 
             # delete the file
             os.remove(filepath)
 
         # maximum achievable speed on any edge in the network
-        self.__max_speed = max(
-            self.speed_limit(edge) for edge in self.get_edge_list())
+        self.__max_speed = max(self.speed_limit(edge) for edge in self.get_edge_list())
 
         # length of the network, or the portion of the network in
         # which cars are meant to be distributed
@@ -221,7 +230,7 @@ class AimsunKernelNetwork(BaseKernelNetwork):
                 self.edgestarts.append((edge_id, length))
                 # increment the total length of the network with the length of
                 # the current edge
-                length += self._edges[edge_id]['length']
+                length += self._edges[edge_id]["length"]
 
         # these optional parameters need only be used if "no-internal-links"
         # is set to "false" while calling sumo's netconvert function
@@ -259,12 +268,12 @@ class AimsunKernelNetwork(BaseKernelNetwork):
     def close(self):
         """See parent class."""
         # delete the json file that was used to read the network data
-        cur_dir = os.path.join(config.PROJECT_PATH,
-                               'flow/core/kernel/network')
-        os.remove(os.path.join(cur_dir, 'data_%s.json' % self.sim_params.port))
+        cur_dir = os.path.join(config.PROJECT_PATH, "flow/core/kernel/network")
+        os.remove(os.path.join(cur_dir, "data_%s.json" % self.sim_params.port))
         if self.network.net_params.template is not None:
-            os.remove('%s_%s' % (self.network.net_params.template,
-                                 self.sim_params.port))
+            os.remove(
+                "%s_%s" % (self.network.net_params.template, self.sim_params.port)
+            )
 
     ###########################################################################
     #                        State acquisition methods                        #
@@ -275,38 +284,35 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         try:
             return self._edges[edge_id]["length"]
         except KeyError:
-            print('Error in edge length with key', edge_id)
+            print("Error in edge length with key", edge_id)
             return -1001
 
     def length(self):
         """See parent class."""
-        return sum(self.edge_length(edge_id)
-                   for edge_id in self.get_edge_list())
+        return sum(self.edge_length(edge_id) for edge_id in self.get_edge_list())
 
     def non_internal_length(self):
         """See parent class."""
-        return sum(self.edge_length(edge_id)
-                   for edge_id in self.get_edge_list())
+        return sum(self.edge_length(edge_id) for edge_id in self.get_edge_list())
 
     def speed_limit(self, edge_id):
         """See parent class."""
         try:
             return self._edges[edge_id]["speed"]
         except KeyError:
-            print('Error in speed limit with key', edge_id)
+            print("Error in speed limit with key", edge_id)
             return -1001
 
     def max_speed(self):
         """See parent class."""
-        return max(
-            self.speed_limit(edge) for edge in self.get_edge_list())
+        return max(self.speed_limit(edge) for edge in self.get_edge_list())
 
     def num_lanes(self, edge_id):
         """See parent class."""
         try:
             return self._edges[edge_id]["numLanes"]
         except KeyError:
-            print('Error in num lanes with key', edge_id)
+            print("Error in num lanes with key", edge_id)
             return -1001
 
     def get_edge_list(self):
@@ -319,7 +325,7 @@ class AimsunKernelNetwork(BaseKernelNetwork):
 
     def get_edge(self, x):  # TODO: maybe remove
         """See parent class."""
-        for (edge, start_pos) in reversed(self.total_edgestarts):
+        for edge, start_pos in reversed(self.total_edgestarts):
             if x >= start_pos:
                 return edge, x - start_pos
 
@@ -330,7 +336,7 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         if len(edge) == 0:
             return -1001
 
-        if edge[0] == ":" or '_to_' in edge:
+        if edge[0] == ":" or "_to_" in edge:
             try:
                 return self.internal_edgestarts_dict[edge] + position
             except KeyError:
@@ -363,6 +369,6 @@ class AimsunKernelNetwork(BaseKernelNetwork):
         """Return the edge name in Aimsun."""
         if edge not in self._edge_aimsun2flow:
             # print("aimsun edge unknown: {}".format(edge))
-            return ''
+            return ""
         else:
             return self._edge_aimsun2flow[edge]
