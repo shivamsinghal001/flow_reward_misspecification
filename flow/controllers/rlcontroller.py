@@ -42,6 +42,10 @@ class RLController(BaseController):
         BaseController.__init__(self, veh_id, car_following_params)
 
         if acc_controller is not None:
+            if isinstance(acc_controller, str):
+                from flow import controllers
+
+                acc_controller = getattr(controllers, acc_controller)
             self.acc_controller = acc_controller(
                 veh_id=veh_id,
                 car_following_params=car_following_params,
