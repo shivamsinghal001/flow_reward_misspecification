@@ -18,7 +18,7 @@ from flow.controllers import (
     RLController,
     ContinuousRouter,
     SimLaneChangeController,
-    SimCarFollowingController,
+    IDMController
 )
 from flow.envs import BottleneckDesiredVelocityEnv, BottleneckAccelEnv
 from flow.networks import BottleneckNetwork
@@ -53,7 +53,7 @@ vehicles.add(
     veh_id="followerstopper",
     acceleration_controller=(
         RLController,
-        {"acc_controller": SimCarFollowingController},
+        {"acc_controller": IDMController},
     ),
     lane_change_controller=(SimLaneChangeController, {}),
     routing_controller=(ContinuousRouter, {}),
