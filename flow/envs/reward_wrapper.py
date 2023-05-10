@@ -101,7 +101,6 @@ class ProxyRewardEnv(gym.Wrapper):
 
     def step(self, rl_actions):
         next_observation, reward, done, infos = self.env.step(rl_actions)
-        reward *= self.reward_scale
         if self.use_new_spec:
             if self.reward_fun == "proxy":
                 infos["proxy_reward"] = reward
@@ -120,4 +119,4 @@ class ProxyRewardEnv(gym.Wrapper):
                 infos["true_reward"] = reward
         else:
             infos["proxy_reward"] = infos["true_reward"] = reward
-        return next_observation, reward, done, infos
+        return next_observation, reward * self.reward_scale, done, infos
