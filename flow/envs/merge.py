@@ -270,7 +270,7 @@ class MergePOEnv(Env):
         for veh_id in self.leader + self.follower:
             self.k.vehicle.set_observed(veh_id)
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
         """See parent class.
 
         In addition, a few variables that are specific to this class are
@@ -278,7 +278,7 @@ class MergePOEnv(Env):
         """
         self.leader = []
         self.follower = []
-        return super().reset()
+        return super().reset(seed=seed, options=options)
 
 
 class MergePOEnvAccel(MergePOEnv):
