@@ -46,14 +46,6 @@ class ProxyRewardEnv(gym.Wrapper):
             path=path,
             is_baseline=is_baseline,
         )
-        self.wrapped_env = EnvCompatibility(cls(
-            env_params,
-            sim_params,
-            network,
-            simulator,
-            path=path,
-            is_baseline=is_baseline,
-        ))
 
         super().__init__(self.env)
 
@@ -110,11 +102,8 @@ class ProxyRewardEnv(gym.Wrapper):
     def __getattr__(self, attr):
         return self.env.__getattribute__(attr)
 
-    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None) -> Tuple:
-        return self.wrapped_env.reset()
-
     def step(self, rl_actions):
-        next_observation, reward, done, infos = self.wrapped_env.step(rl_actions)
+        next_observation, reward, done, truncated, infos = self.env.step(rl_actions)
         if self.use_new_spec:
             if self.reward_fun == "proxy":
                 infos["proxy_reward"] = reward
@@ -133,4 +122,4 @@ class ProxyRewardEnv(gym.Wrapper):
                 infos["true_reward"] = reward
         else:
             infos["proxy_reward"] = infos["true_reward"] = reward
-        return next_observation, reward * self.reward_scale, done, terminateds, infos
+        return next_observation, reward * self.reward_scale, done, truncated, infos

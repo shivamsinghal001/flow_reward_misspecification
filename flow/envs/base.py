@@ -444,13 +444,13 @@ class Env(gym.Env, metaclass=ABCMeta):
 
         # test if the environment should terminate due to a collision or the
         # time horizon being met
-        done = (
+        truncated = (
             self.time_counter
             >= self.env_params.sims_per_step
             * (self.env_params.warmup_steps + self.env_params.horizon)
-            or crash
         )
 
+        done = truncated or crash
         infos["crash"] = crash
 
         # compute the reward
@@ -460,13 +460,13 @@ class Env(gym.Env, metaclass=ABCMeta):
         else:
             reward = self.compute_reward(rl_actions, fail=crash)
 
-        return next_observation, reward, done, infos
+        return next_observation, reward, done, truncated, infos
 
     def get_additional_rl_control_info(self):
         """get actions from acc controller for baseline"""
         return None
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
         """Reset the environment.
 
         This method is performed in between rollouts. It resets the state of
@@ -618,7 +618,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         # render a frame
         self.render(reset=True)
 
-        return observation
+        return observation, {}
 
     def additional_command(self):
         """Additional commands that may be performed by the step method."""
