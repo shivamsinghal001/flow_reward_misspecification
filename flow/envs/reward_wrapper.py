@@ -1,3 +1,4 @@
+from typing import Optional, Tuple
 import importlib
 import numpy as np
 import gymnasium as gym
@@ -37,7 +38,15 @@ class ProxyRewardEnv(gym.Wrapper):
         is_baseline=False,
     ):
         cls = getattr(importlib.import_module(module), mod_name)
-        self.env = EnvCompatibility(cls(
+        self.env = cls(
+            env_params,
+            sim_params,
+            network,
+            simulator,
+            path=path,
+            is_baseline=is_baseline,
+        )
+        self.wrapped_env = EnvCompatibility(cls(
             env_params,
             sim_params,
             network,
@@ -101,8 +110,11 @@ class ProxyRewardEnv(gym.Wrapper):
     def __getattr__(self, attr):
         return self.env.__getattribute__(attr)
 
+    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None) -> Tuple:
+        return self.wrapped_env.reset()
+
     def step(self, rl_actions):
-        next_observation, reward, done, terminateds, infos = self.env.step(rl_actions)
+        next_observation, reward, done, infos = self.wrapped_env.step(rl_actions)
         if self.use_new_spec:
             if self.reward_fun == "proxy":
                 infos["proxy_reward"] = reward
