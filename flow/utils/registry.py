@@ -1,16 +1,13 @@
 """Utility method for registering environments with OpenAI gym."""
 
-import importlib
 import numpy as np
 import time
 
-import gymnasium
+import gymnasium as gym
 from gymnasium.envs.registration import register
 
 from copy import deepcopy
 
-import flow.envs
-from flow.envs.reward_wrapper import ProxyRewardEnv
 
 from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
