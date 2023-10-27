@@ -4,8 +4,8 @@ import importlib
 import numpy as np
 import time
 
-import gym
-from gym.envs.registration import register
+import gymnasium
+from gymnasium.envs.registration import register
 
 from copy import deepcopy
 

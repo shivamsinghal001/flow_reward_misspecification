@@ -5,8 +5,8 @@ through an n x m traffic light grid.
 """
 
 import numpy as np
-from gym.spaces.box import Box
-from gym.spaces.discrete import Discrete
+from gymnasium.spaces.box import Box
+from gymnasium.spaces.discrete import Discrete
 
 from flow.core import rewards
 from flow.envs.traffic_light_grid import TrafficLightGridPOEnv

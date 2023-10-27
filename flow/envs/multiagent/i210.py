@@ -1,6 +1,6 @@
 """Environment for training vehicles to reduce congestion in the I210."""
 
-from gym.spaces import Box
+from gymnasium.spaces import Box
 import numpy as np
 
 from flow.core.rewards import average_velocity

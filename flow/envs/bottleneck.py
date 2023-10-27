@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from copy import deepcopy
 
 import numpy as np
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 
 from flow.core import rewards
 from flow.envs.base import Env

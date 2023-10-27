@@ -3,7 +3,7 @@
 from flow.envs.ring.accel import AccelEnv
 from flow.core import rewards
 
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 import numpy as np
 
 ADDITIONAL_ENV_PARAMS = {

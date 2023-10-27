@@ -12,7 +12,7 @@ from flow.core.params import InitialConfig
 from flow.core.params import NetParams
 from flow.envs.base import Env
 
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 
 from copy import deepcopy
 import numpy as np

@@ -2,7 +2,7 @@
 
 from flow.envs.multiagent.base import MultiEnv
 from flow.core.rewards import desired_velocity, local_desired_velocity
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 import numpy as np
 
 

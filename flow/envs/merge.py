@@ -8,7 +8,7 @@ TODO(ak): add paper after it has been published.
 from flow.envs.base import Env
 from flow.core import rewards
 
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 
 import numpy as np
 import collections

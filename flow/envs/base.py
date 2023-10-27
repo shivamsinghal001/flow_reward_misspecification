@@ -14,9 +14,9 @@ import subprocess
 from flow.renderer.pyglet_renderer import PygletRenderer as Renderer
 from flow.utils.flow_warnings import deprecated_attribute
 
-import gym
-from gym.spaces import Box
-from gym.spaces import Tuple
+import gymnasium
+from gymnasium.spaces import Box
+from gymnasium.spaces import Tuple
 from traci.exceptions import FatalTraCIError
 from traci.exceptions import TraCIException
 

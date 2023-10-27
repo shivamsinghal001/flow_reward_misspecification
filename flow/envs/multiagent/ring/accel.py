@@ -1,6 +1,6 @@
 """Environment for training the acceleration behavior of vehicles in a ring."""
 import numpy as np
-from gym.spaces import Box
+from gymnasium.spaces import Box
 
 from flow.core import rewards
 from flow.envs.ring.accel import AccelEnv

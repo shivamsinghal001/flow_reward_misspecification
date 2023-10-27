@@ -5,7 +5,7 @@ from flow.envs import Env
 from flow.networks import RingNetwork
 import os
 import numpy as np
-from gym.spaces import Box
+from gymnasium.spaces import Box
 
 os.environ["TEST_FLAG"] = "True"
 

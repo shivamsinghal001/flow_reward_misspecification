@@ -3,7 +3,7 @@
 from flow.core import rewards
 from flow.envs.base import Env
 
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 
 import numpy as np
 

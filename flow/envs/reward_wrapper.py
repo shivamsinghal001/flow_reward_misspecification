@@ -1,6 +1,6 @@
 import importlib
 import numpy as np
-import gym
+import gymnasium
 
 from flow.core.rewards import REWARD_REGISTRY
 

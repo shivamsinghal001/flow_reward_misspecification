@@ -1,6 +1,6 @@
 """Environment used to train vehicles to improve traffic on a highway."""
 import numpy as np
-from gym.spaces.box import Box
+from gymnasium.spaces.box import Box
 from flow.core import rewards
 from flow.envs.multiagent.base import MultiEnv
 

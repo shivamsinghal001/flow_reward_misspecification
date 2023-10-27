@@ -7,9 +7,9 @@ through an n x m traffic light grid.
 import numpy as np
 import re
 
-from gym.spaces.box import Box
-from gym.spaces.discrete import Discrete
-from gym.spaces import Tuple
+from gymnasium.spaces.box import Box
+from gymnasium.spaces.discrete import Discrete
+from gymnasium.spaces import Tuple
 
 from flow.core import rewards
 from flow.envs.base import Env

@@ -13,8 +13,8 @@ from flow.envs import Env, TestEnv
 
 from tests.setup_scripts import ring_road_exp_setup, highway_exp_setup
 import os
-import gym.spaces as spaces
-from gym.spaces.box import Box
+import gymnasium.spaces as spaces
+from gymnasium.spaces.box import Box
 import numpy as np
 
 os.environ["TEST_FLAG"] = "True"
