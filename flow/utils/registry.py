@@ -1,10 +1,10 @@
-"""Utility method for registering environments with OpenAI gym."""
+"""Utility method for registering environments with gymnasium."""
 
 import numpy as np
 import time
 
 import gymnasium as gym
-from gymnasium.envs.registration import register
+from gymnasium.envs.registration import register, parse_env_id, get_env_id
 
 from copy import deepcopy
 
@@ -92,7 +92,7 @@ def make_create_env(
         base_env_name = params["env_name"].__name__
 
     # deal with multiple environments being created under the same name
-    all_envs = gym.envs.registry.all()
+    all_envs = list(gym.envs.registry.values())
     env_ids = [env_spec.id for env_spec in all_envs]
     while "{}-v{}".format(base_env_name, version) in env_ids:
         version += 1
@@ -148,7 +148,10 @@ def make_create_env(
             },
         )
 
-        return gym.envs.make(env_name)
+        ns, name, version = parse_env_id(env_name)
+        updated_name = get_env_id(ns, name, version)
+
+        return gym.envs.make(updated_name)
 
     return create_env, env_name
 

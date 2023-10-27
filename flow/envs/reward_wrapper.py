@@ -1,6 +1,7 @@
 import importlib
 import numpy as np
 import gymnasium as gym
+from gymnasium.wrappers import EnvCompatibility
 
 from flow.core.rewards import REWARD_REGISTRY
 
@@ -36,14 +37,15 @@ class ProxyRewardEnv(gym.Wrapper):
         is_baseline=False,
     ):
         cls = getattr(importlib.import_module(module), mod_name)
-        self.env = cls(
+        self.env = EnvCompatibility(cls(
             env_params,
             sim_params,
             network,
             simulator,
             path=path,
             is_baseline=is_baseline,
-        )
+        ))
+
         super().__init__(self.env)
 
         self.reward_scale = reward_scale
@@ -100,7 +102,7 @@ class ProxyRewardEnv(gym.Wrapper):
         return self.env.__getattribute__(attr)
 
     def step(self, rl_actions):
-        next_observation, reward, done, infos = self.env.step(rl_actions)
+        next_observation, reward, done, terminateds, infos = self.env.step(rl_actions)
         if self.use_new_spec:
             if self.reward_fun == "proxy":
                 infos["proxy_reward"] = reward
@@ -119,4 +121,4 @@ class ProxyRewardEnv(gym.Wrapper):
                 infos["true_reward"] = reward
         else:
             infos["proxy_reward"] = infos["true_reward"] = reward
-        return next_observation, reward * self.reward_scale, done, infos
+        return next_observation, reward * self.reward_scale, done, terminateds, infos
