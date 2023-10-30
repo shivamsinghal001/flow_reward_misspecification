@@ -99,6 +99,9 @@ def make_create_env(
     env_name = "{}-v{}".format(base_env_name, version)
     np.random.seed(int(time.time() * 100) % (2**31))
     env_name += str(np.random.randint(2**31))
+    
+    ns, name, version = parse_env_id(env_name)
+    updated_name = get_env_id(ns, name, version)
 
     if isinstance(params["network"], str):
         print(
@@ -148,12 +151,9 @@ def make_create_env(
             },
         )
 
-        ns, name, version = parse_env_id(env_name)
-        updated_name = get_env_id(ns, name, version)
-
         return gym.envs.make(updated_name)
 
-    return create_env, env_name
+    return create_env, updated_name
 
 
 def env_constructor(params, version=0, render=None):
