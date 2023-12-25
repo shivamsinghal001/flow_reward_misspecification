@@ -450,7 +450,7 @@ class Env(gym.Env, metaclass=ABCMeta):
             * (self.env_params.warmup_steps + self.env_params.horizon)
         )
 
-        done = truncated or crash
+        terminated = crash
         infos["crash"] = crash
 
         # compute the reward
@@ -460,7 +460,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         else:
             reward = self.compute_reward(rl_actions, fail=crash)
 
-        return next_observation, reward, done, truncated, infos
+        return next_observation, reward, terminated, truncated, infos
 
     def get_additional_rl_control_info(self):
         """get actions from acc controller for baseline"""

@@ -22,6 +22,8 @@ class ProxyRewardEnv(gym.Wrapper):
     *args: environment args
     **kwargs: envrionment kwargs
     """
+    metadata = {'render_modes': ['human', 'rgb_array']}
+
 
     def __init__(
         self,
@@ -103,7 +105,7 @@ class ProxyRewardEnv(gym.Wrapper):
         return self.env.__getattribute__(attr)
 
     def step(self, rl_actions):
-        next_observation, reward, done, truncated, infos = self.env.step(rl_actions)
+        next_observation, reward, terminated, truncated, infos = self.env.step(rl_actions)
         if self.use_new_spec:
             if self.reward_fun == "proxy":
                 infos["proxy_reward"] = reward
@@ -122,4 +124,4 @@ class ProxyRewardEnv(gym.Wrapper):
                 infos["true_reward"] = reward
         else:
             infos["proxy_reward"] = infos["true_reward"] = reward
-        return next_observation, reward * self.reward_scale, done, truncated, infos
+        return next_observation, reward, terminated, truncated, infos 
