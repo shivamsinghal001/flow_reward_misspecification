@@ -201,7 +201,7 @@ class BottleneckEnv(Env):
         network,
         simulator="traci",
         path=None,
-        is_baseline=False,
+        is_safe_policy=False,
     ):
         """Initialize the BottleneckEnv class."""
         for p in ADDITIONAL_ENV_PARAMS.keys():
@@ -214,7 +214,7 @@ class BottleneckEnv(Env):
             network,
             simulator,
             path=path,
-            is_baseline=is_baseline,
+            is_safe_policy=is_safe_policy,
         )
         env_add_params = self.env_params.additional_params
         # tells how scaled the number of lanes are
@@ -549,7 +549,7 @@ class BottleneckAccelEnv(BottleneckEnv):
         network,
         simulator="traci",
         path=None,
-        is_baseline=False,
+        is_safe_policy=False,
     ):
         """Initialize BottleneckAccelEnv."""
         for p in ADDITIONAL_RL_ENV_PARAMS.keys():
@@ -562,7 +562,7 @@ class BottleneckAccelEnv(BottleneckEnv):
             network,
             simulator,
             path=path,
-            is_baseline=is_baseline,
+            is_safe_policy=is_safe_policy,
         )
         self.add_rl_if_exit = env_params.get_additional_param("add_rl_if_exit")
         self.num_rl = deepcopy(self.initial_vehicles.num_rl_vehicles)
@@ -811,7 +811,7 @@ class BottleneckDesiredVelocityEnv(BottleneckEnv):
         network,
         simulator="traci",
         path=None,
-        is_baseline=False,
+        is_safe_policy=False,
     ):
         """Initialize BottleneckDesiredVelocityEnv."""
         super().__init__(
@@ -820,7 +820,7 @@ class BottleneckDesiredVelocityEnv(BottleneckEnv):
             network,
             simulator,
             path=path,
-            is_baseline=is_baseline,
+            is_safe_policy=is_safe_policy,
         )
         for p in ADDITIONAL_VSL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
