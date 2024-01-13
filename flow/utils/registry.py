@@ -18,7 +18,7 @@ def make_create_env(
     reward_specification=None,
     reward_fun="true",
     path=None,
-    is_baseline=False,
+    is_safe_policy=False,
     reward_scale=1,
     version=0,
     render=None,
@@ -63,7 +63,7 @@ def make_create_env(
         specifies whether the proxy reward function or true reward should be used
     path : str, optional
         path for saving rendered video
-    is_baseline : boolean, optional
+    is_safe_policy : boolean, optional
         whether or not to use acc controller actions instead of rl actions
     reward_scale : int, optional
         by how much to scale rewards
@@ -146,7 +146,7 @@ def make_create_env(
                 "reward_specification": reward_specification,
                 "reward_fun": reward_fun,
                 "path": path,
-                "is_baseline": is_baseline,
+                "is_safe_policy": is_safe_policy,
                 "reward_scale": reward_scale,
             },
         )
