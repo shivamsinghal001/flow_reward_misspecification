@@ -112,7 +112,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         simulator="traci",
         scenario=None,
         path=None,
-        is_baseline=False,
+        is_safe_policy=False,
     ):
         """Initialize the environment class.
 
@@ -157,7 +157,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.state = None
         self.obs_var_labels = []
 
-        self.is_baseline = is_baseline
+        self.is_safe_policy = is_safe_policy
 
         # simulation step size
         self.sim_step = sim_params.sim_step
@@ -406,7 +406,7 @@ class Env(gym.Env, metaclass=ABCMeta):
                 )
             infos["acc_controller_actions"] = acc_controller_actions
 
-            if self.is_baseline:
+            if self.is_safe_policy:
                 self.apply_rl_actions(acc_controller_actions)
             else:
                 self.apply_rl_actions(rl_actions)
@@ -463,7 +463,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         return next_observation, reward, terminated, truncated, infos
 
     def get_additional_rl_control_info(self):
-        """get actions from acc controller for baseline"""
+        """get actions from acc controller for safe policy"""
         return None
 
     def reset(self, *, seed=None, options=None):
