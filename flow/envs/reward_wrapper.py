@@ -37,7 +37,7 @@ class ProxyRewardEnv(gym.Wrapper):
         reward_fun,
         path,
         reward_scale=1,
-        is_baseline=False,
+        is_safe_policy=False,
     ):
         cls = getattr(importlib.import_module(module), mod_name)
         self.env = cls(
@@ -46,7 +46,7 @@ class ProxyRewardEnv(gym.Wrapper):
             network,
             simulator,
             path=path,
-            is_baseline=is_baseline,
+            is_safe_policy=is_safe_policy,
         )
 
         super().__init__(self.env)
