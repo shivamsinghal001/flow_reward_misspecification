@@ -77,7 +77,7 @@ class MergePOEnv(Env):
         network,
         simulator="traci",
         path=None,
-        is_safe_policy=False,
+        use_safe_policy_actions=False,
     ):
         for p in ADDITIONAL_ENV_PARAMS.keys():
             if p not in env_params.additional_params:
@@ -107,7 +107,7 @@ class MergePOEnv(Env):
             network,
             simulator,
             path=path,
-            is_safe_policy=is_safe_policy,
+            use_safe_policy_actions=use_safe_policy_actions,
         )
 
     @property

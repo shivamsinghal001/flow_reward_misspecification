@@ -112,7 +112,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         simulator="traci",
         scenario=None,
         path=None,
-        is_safe_policy=False,
+        use_safe_policy_actions=False,
     ):
         """Initialize the environment class.
 
@@ -157,7 +157,7 @@ class Env(gym.Env, metaclass=ABCMeta):
         self.state = None
         self.obs_var_labels = []
 
-        self.is_safe_policy = is_safe_policy
+        self.use_safe_policy_actions = use_safe_policy_actions
 
         # simulation step size
         self.sim_step = sim_params.sim_step
@@ -406,7 +406,7 @@ class Env(gym.Env, metaclass=ABCMeta):
                 )
             infos["acc_controller_actions"] = acc_controller_actions
 
-            if self.is_safe_policy:
+            if self.use_safe_policy_actions:
                 self.apply_rl_actions(acc_controller_actions)
             else:
                 self.apply_rl_actions(rl_actions)
