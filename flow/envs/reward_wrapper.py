@@ -124,4 +124,4 @@ class ProxyRewardEnv(gym.Wrapper):
                 infos["true_reward"] = reward
         else:
             infos["proxy_reward"] = infos["true_reward"] = reward
-        return next_observation, reward, terminated, truncated, infos 
+        return next_observation, reward * self.reward_scale, terminated, truncated, infos 
