@@ -11,7 +11,9 @@ Running
 ```
 pip install -r requirements.txt
 ```
-from our main repository will install this package along with all of its depedencies. 
+from our main repository will install this package along with all of its depedencies.
+
+Additioally, instructions for installing SUMO, which is required for Flow, can be found [here](https://flow.readthedocs.io/en/latest/flow_setup.html).
 
 ## Citing Flow
 
