@@ -1,6 +1,6 @@
 
 # Flow Traffic Environment
-This code was adapted for the ICML 2024 Paper Submission: "Preventing Reward Hacking using Occupancy Measure Regularization". More details about how to run experiments can be found within our main repository and our paper. Support for this environment has stopped, so we have revived the code with some of the latest package versions. Additionally, we edited this environment so that the safe policy actions can be returned to the RL policies we train, and the true and proxy reward functions can be calculated simultaneously. 
+This code was adapted for "Preventing Reward Hacking using Occupancy Measure Regularization". More details about how to run experiments can be found within our main repository and our paper. Support for this environment has stopped, so we have revived the code with some of the latest package versions. Additionally, we edited this environment so that the safe policy actions can be returned to the RL policies we train, and the true and proxy reward functions can be calculated simultaneously. 
 
 This repository is based on the [code](https://github.com/aypan17/reward-misspecification/tree/main/flow) of [Pan et al.](https://arxiv.org/abs/2201.03544). 
 
